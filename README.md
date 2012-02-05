@@ -9,7 +9,7 @@ It also includes converter that could be used to create your own maps for jVecto
       --width 900 \
       --country_name_index 4 \
       --where "ISO = 'USA'" \
-      --codes_file ~/workspace/js/jvectormap-maps/maps/usa/codes-en.csv \
+      --codes_file path/to/codes-en.tsv \
       --insets '[{"codes": ["US-AK"], "width": 200, "left": 10, "top": 370}, {"codes": ["US-HI"], "width": 100, "left": 220, "top": 400}]' \
       --minimal_area 4000000 \
       --buffer_distance -3000 \
