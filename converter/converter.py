@@ -36,6 +36,7 @@ class Converter:
     self.country_name_index = kwargs['country_name_index']
     self.country_code_index = kwargs['country_code_index']
     self.longtitude0 = kwargs['longtitude0']
+    self.inputFileEncoding = kwargs['input_file_encoding']
     if kwargs['viewport']:
       self.viewport = map(lambda s: float(s), kwargs['viewport'].split(' '))
     else:
@@ -81,7 +82,7 @@ class Converter:
         if code == '-99':
           code = '_'+str(nextCode)
           nextCode += 1
-        name = feature.GetFieldAsString(self.country_name_index)
+        name = feature.GetFieldAsString(self.country_name_index).decode(self.inputFileEncoding)
         self.codes[name] = code
       layer.ResetReading()
     
@@ -98,7 +99,7 @@ class Converter:
           shapelyGeometry = shapelyGeometry.buffer(0)
         shapelyGeometry = self.applyFilters(shapelyGeometry)
         if shapelyGeometry:
-          name = feature.GetFieldAsString(self.country_name_index)  
+          name = feature.GetFieldAsString(self.country_name_index).decode(self.inputFileEncoding)
           code = self.codes[name]
           self.features[code] = {"geometry": shapelyGeometry, "name": name, "code": code}
       else:
@@ -212,18 +213,21 @@ parser.add_argument('--viewport', type=str)
 parser.add_argument('--longtitude0', type=str, default='0')
 parser.add_argument('--name', type=str, default='world')
 parser.add_argument('--language', type=str, default='en')
+parser.add_argument('--input_file_encoding', type=str, default='iso-8859-1')
 args = parser.parse_args()
 
 converter = Converter(args.input_file, 
-  where=args.where, 
-  codes_file=args.codes_file, 
-  insets=args.insets, width=args.width, 
-  viewport=args.viewport, 
-  minimal_area=args.minimal_area, 
-  country_name_index=args.country_name_index, 
-  country_code_index=args.country_code_index,
-  longtitude0=args.longtitude0,
-  name=args.name,
-  language=args.language
+  where = args.where, 
+  codes_file = args.codes_file, 
+  insets = args.insets,
+  width = args.width, 
+  viewport = args.viewport, 
+  minimal_area = args.minimal_area, 
+  country_name_index = args.country_name_index, 
+  country_code_index = args.country_code_index,
+  longtitude0 = args.longtitude0,
+  name = args.name,
+  language = args.language,
+  input_file_encoding = args.input_file_encoding
 )
 converter.convert(args.output_file)
