@@ -648,29 +648,45 @@
     latLngToPoint: function(lat, lng) {
       var x,
           y,
-          centralMeridian = -11.5,
+          centralMeridian = WorldMap.maps[this.params.map].projection.centralMeridian,
           width = this.width - this.baseTransX * 2 * this.baseScale,
           height = this.height - this.baseTransY * 2 * this.baseScale,
-          bbox = WorldMap.maps[this.params.map].bbox,
+          inset,
+          bbox,
           scaleFactor = this.scale / this.baseScale;
 
-      bbox = [{x: bbox[0].x, y: -bbox[1].y}, {x: bbox[1].x, y: -bbox[0].y}];
-      if (lng < (-180 - centralMeridian)) {
+      if (lng < (-180 + centralMeridian)) {
         lng += 360;
       }
 
-      x = (lng + centralMeridian) / 360 * WorldMap.circumference,
+      x = (lng - centralMeridian) / 360 * WorldMap.circumference,
       y = (180 / Math.PI * (5 / 4) * Math.log(Math.tan(Math.PI / 4 + (4 / 5) * lat * Math.PI / 360))) / 360 * WorldMap.circumference;
 
-      x = (x - bbox[0].x) / (bbox[1].x - bbox[0].x) * width * scaleFactor;
-      y = (y - bbox[0].y) / (bbox[1].y - bbox[0].y) * height * scaleFactor;
+      inset = this.getInsetForPoint(x, y);
+      bbox = inset.bbox
+
+      x = (x - bbox[0].x) / (bbox[1].x - bbox[0].x) * inset.width * this.scale;
+      y = (y - bbox[0].y) / (bbox[1].y - bbox[0].y) * inset.height * this.scale;
 
       return {
-        x: x + this.transX*this.scale,
-        y: y + this.transY*this.scale
+        x: x + this.transX*this.scale + inset.left*this.scale,
+        y: y + this.transY*this.scale + inset.top*this.scale
       };
+    },
+
+    getInsetForPoint: function(x, y){
+      var insets = WorldMap.maps[this.params.map].insets,
+          i,
+          bbox;
+
+      for (i = 0; i < insets.length; i++) {
+        bbox = insets[i].bbox;
+        if (x > bbox[0].x && x < bbox[1].x && y > bbox[0].y && y < bbox[1].y) {
+          return insets[i];
+        }
+      }
     }
-  }
+  },
 
   WorldMap.xlink = "http://www.w3.org/1999/xlink";
   WorldMap.mapIndex = 1;
