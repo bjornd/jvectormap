@@ -330,7 +330,7 @@
       var path = e.target,
         code = e.target.id.split('_').pop(),
         labelShowEvent = $.Event('labelShow.jvectormap'),
-        regionOverEvent = $.Event('regionOver.jvectormap');;
+        regionOverEvent = $.Event('regionOver.jvectormap');
       
       if (e.type == 'mouseover') {
         $(params.container).trigger(regionOverEvent, [code]);
