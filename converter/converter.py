@@ -10,15 +10,15 @@ import codecs
 class Map:
   width = 0
   height = 0
-  
+
   def __init__(self, name, language):
     self.paths = {}
     self.name = name
     self.language = language
-    
+
   def addPath(self, path, code, name):
     self.paths[code] = {"path": path, "name": name}
-    
+
   def getJSCode(self):
     map = {"paths": self.paths, "width": self.width, "height": self.height}
     return "$.fn.vectorMap('addMap', '"+self.name+"_"+self.language+"',"+anyjson.serialize(map)+');'
@@ -41,23 +41,23 @@ class Converter:
       self.viewport = map(lambda s: float(s), kwargs['viewport'].split(' '))
     else:
       self.viewport = False
-    
+
     # spatial reference to convert to
     self.spatialRef = osr.SpatialReference()
     self.spatialRef.ImportFromProj4('+proj=mill +lat_0=0 +lon_0='+self.longtitude0+' +x_0=0 +y_0=0 +R_A +ellps=WGS84 +datum=WGS84 +units=m +no_defs')
-    
+
     # handle map insets
     if kwargs['insets']:
       self.insets = anyjson.deserialize(kwargs['insets'])
     else:
       self.insets = []
-  
-  
+
+
   def loadData(self):
     source = ogr.Open( self.inputFile )
     layer = source.GetLayer(0)
     layer.SetAttributeFilter( self.where )
-    
+
     if self.viewport:
       layer.SetSpatialFilterRect( *self.viewport )
       transformation = osr.CoordinateTransformation( layer.GetSpatialRef(), self.spatialRef )
@@ -66,9 +66,9 @@ class Converter:
       self.viewportRect = shapely.geometry.box(point1[0], point1[1], point2[0], point2[1])
     else:
       self.viewportRect = False
-    
+
     layer.ResetReading()
-    
+
     # load codes from external tsv file if present or geodata file otherwise
     self.codes = {}
     if self.codes_file:
@@ -85,12 +85,12 @@ class Converter:
         name = feature.GetFieldAsString(self.country_name_index).decode(self.inputFileEncoding)
         self.codes[name] = code
       layer.ResetReading()
-    
+
     # load features
     for feature in layer:
       geometry = feature.GetGeometryRef()
       geometryType = geometry.GetGeometryType()
-      
+
       if geometryType == ogr.wkbPolygon or geometryType == ogr.wkbMultiPolygon:
         geometry.TransformTo( self.spatialRef )
         shapelyGeometry = shapely.wkb.loads( geometry.ExportToWkb() )
@@ -104,11 +104,11 @@ class Converter:
           self.features[code] = {"geometry": shapelyGeometry, "name": name, "code": code}
       else:
         raise Exception, "Wrong geomtry type: "+geometryType
-  
-  
+
+
   def convert(self, outputFile):
     self.loadData()
-    
+
     codes = self.features.keys()
     envelope = []
     for inset in self.insets:
@@ -119,35 +119,37 @@ class Converter:
     size = self.renderMapInset(codes, 0, 0, self.width)
     envelope.append( shapely.geometry.box(0, 0, size[0], size[1]) )
     bbox = shapely.geometry.MultiPolygon( envelope ).bounds
-    
+
     self.map.width = round(bbox[2]-bbox[0], 2)
     self.map.height = round(bbox[3]-bbox[1], 2)
-    
+
     open(outputFile, 'w').write( self.map.getJSCode() )
-  
-  
+
+
   def renderMapInset(self, codes, left, top, width):
     envelope = []
     for code in codes:
       envelope.append( self.features[code]['geometry'].envelope )
-    
+
     bbox = shapely.geometry.MultiPolygon( envelope ).bounds
     bbox = ((bbox[0], bbox[1]), (bbox[2], bbox[3]))
-    
+
     scale = (bbox[1][0]-bbox[0][0]) / width
-  
+
     # generate SVG paths
     for code in codes:
       feature = self.features[code]
       geometry = feature['geometry']
       if args.buffer_distance:
         geometry = geometry.buffer(args.buffer_distance)
+      if geometry.is_empty:
+        continue
       if args.simplify_tolerance:
-        geometry = geometry.simplify(args.simplify_tolerance, preserve_topology=True)     
+        geometry = geometry.simplify(args.simplify_tolerance, preserve_topology=True)
       if isinstance(geometry, shapely.geometry.multipolygon.MultiPolygon):
         polygons = geometry.geoms
-      else: 
-        polygons = [geometry] 
+      else:
+        polygons = [geometry]
       path = ''
       for polygon in polygons:
         rings = []
@@ -164,10 +166,10 @@ class Converter:
               path += ',' + str( round(ring.coords[pointIndex-1][1]/scale - point[1]/scale, 2) )
           path += 'Z'
       self.map.addPath(path, feature['code'], feature['name'])
-        
+
     return ((bbox[1][0]-bbox[0][0])/scale, (bbox[1][1]-bbox[0][1])/scale)
-  
-  
+
+
   def applyFilters(self, geometry):
     if self.viewportRect:
       geometry = self.filterByViewport(geometry)
@@ -178,19 +180,19 @@ class Converter:
       if not geometry:
         return False
     return geometry
-  
-  
+
+
   def filterByViewport(self, geometry):
     try:
       return geometry.intersection(self.viewportRect)
     except shapely.geos.TopologicalError:
       return False
-  
-  
+
+
   def filterByMinimalArea(self, geometry):
     if isinstance(geometry, shapely.geometry.multipolygon.MultiPolygon):
       polygons = geometry.geoms
-    else: 
+    else:
       polygons = [geometry]
     polygons = filter(lambda p: p.area > self.minimal_area, polygons)
     return shapely.geometry.multipolygon.MultiPolygon(polygons)
@@ -216,14 +218,14 @@ parser.add_argument('--language', type=str, default='en')
 parser.add_argument('--input_file_encoding', type=str, default='iso-8859-1')
 args = parser.parse_args()
 
-converter = Converter(args.input_file, 
-  where = args.where, 
-  codes_file = args.codes_file, 
+converter = Converter(args.input_file,
+  where = args.where,
+  codes_file = args.codes_file,
   insets = args.insets,
-  width = args.width, 
-  viewport = args.viewport, 
-  minimal_area = args.minimal_area, 
-  country_name_index = args.country_name_index, 
+  width = args.width,
+  viewport = args.viewport,
+  minimal_area = args.minimal_area,
+  country_name_index = args.country_name_index,
   country_code_index = args.country_code_index,
   longtitude0 = args.longtitude0,
   name = args.name,
