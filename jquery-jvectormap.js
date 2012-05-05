@@ -167,14 +167,24 @@
         node = this.createSvgNode('circle');
         node.setAttribute('cx', config.x);
         node.setAttribute('cy', config.y);
-        node.setAttribute('r', config.radius);
-        node.setAttribute('fill', 'red');
+        node.setAttribute('r', config.r);
+        node.setAttribute('fill', config.fill);
         node.setPosition = function(point){
           node.setAttribute('cx', point.x);
           node.setAttribute('cy', point.y);
         }
       } else {
-
+        node = this.createVmlNode('oval');
+        node.style.width = config.r*2+'px';
+        node.style.height = config.r*2+'px';
+        node.style.left = config.x-config.r+'px';
+        node.style.top = config.y-config.r+'px';
+        node.fillcolor = config.fill;
+        node.stroked = false;
+        node.setPosition = function(point){
+          node.style.left = point.x-config.r+'px';
+          node.style.top = point.y-config.r+'px';
+        }
       }
       return node;
     },
@@ -202,7 +212,7 @@
       if (this.mode == 'svg') {
         this.rootGroup.setAttribute('transform', 'scale('+scale+') translate('+transX+', '+transY+')');
       } else {
-        this.rootGroup.coordorigin = (this.width-transX)+','+(this.height-transY);
+        this.rootGroup.coordorigin = (this.width-transX-this.width/100)+','+(this.height-transY-this.height/100);
         this.rootGroup.coordsize = this.width/scale+','+this.height/scale;
       }
     }
@@ -212,11 +222,7 @@
     var result = '',
       cx = 0, cy = 0, ctrlx, ctrly;
 
-    path = path.replace(/(-?\d+)e(-?\d+)/g, function(s){
-      return 0;
-      //var p = s.split('e');
-      //return p[0]*Math.pow(10, p[1]);
-    });
+    path = path.replace(/(-?\d+)e(-?\d+)/g, '0');
     return path.replace(/([MmLlHhVvCcSs])\s*((?:-?\d*(?:\.\d+)?\s*,?\s*)+)/g, function(segment, letter, coords, index){
       coords = coords.replace(/(\d)-/g, '$1,-').replace(/\s+/g, ',').split(',');
       if (!coords[0]) coords.shift();
@@ -341,12 +347,17 @@
     for(var key in mapData.paths) {
       var path = this.canvas.createPath({path: mapData.paths[key].path});
       path.setFill(this.color);
+      if (this.canvas.mode == 'svg') {
+        path.setAttribute('class', 'jvectormap-region');
+      } else {
+        $(path).addClass('jvectormap-region');
+      }
       path.id = 'jvectormap'+map.index+'_'+key;
       map.countries[key] = path;
       $(this.rootGroup).append(path);
     }
 
-    $(params.container).delegate(this.canvas.mode == 'svg' ? 'path' : 'shape', 'mouseover mouseout', function(e){
+    $(params.container).delegate('.jvectormap-region', 'mouseover mouseout', function(e){
       var path = e.target,
         code = e.target.id.split('_').pop(),
         labelShowEvent = $.Event('labelShow.jvectormap'),
@@ -381,7 +392,7 @@
       }
     });
 
-    $(params.container).delegate(this.canvas.mode == 'svg' ? 'path' : 'shape', 'click', function(e){
+    $(params.container).delegate('.jvectormap-region', 'click', function(e){
       var path = e.target;
       var code = e.target.id.split('_').pop();
       $(params.container).trigger('regionClick.jvectormap', [code]);
@@ -402,6 +413,23 @@
 
     if (params.markers) {
       this.createMarkers(params.markers);
+      $(params.container).delegate('.jvectormap-marker', 'mouseover mouseout', function(e){
+        var marker = e.target,
+            index = marker.getAttribute('data-index'),
+            labelShowEvent = $.Event('markerLabelShow.jvectormap');
+
+        if (e.type == 'mouseover') {
+          $(params.container).trigger(labelShowEvent, [map.label, index]);
+          if (!labelShowEvent.isDefaultPrevented() && map.markers[index].config.name) {
+            map.label.text(map.markers[index].config.name);
+            map.label.show();
+            map.labelWidth = map.label.width();
+            map.labelHeight = map.label.height();
+          }
+        } else {
+          map.label.hide();
+        }
+      });
     }
 
     this.applyTransform();
@@ -621,14 +649,29 @@
       var group = this.canvas.createGroup(),
           i,
           marker,
-          point;
+          point,
+          markerConfig,
+          defaultConfig = {latLng: [0, 0], r: 5, fill: 'red'};
 
       this.markers = [];
 
       for (i = 0; i < markers.length; i++) {
-        point = this.latLngToPoint(markers[i][0], markers[i][1]);
-        marker = this.canvas.createCircle({x: point.x, y: point.y, radius: 5});
-        this.markers.push({element: marker, latLng: markers[i]});
+        markerConfig = markers[i] instanceof Array ? {latLng: markers[i]} : markers[i];
+        markerConfig = $.extend({}, defaultConfig, markerConfig);
+        point = this.latLngToPoint.apply(this, markerConfig.latLng);
+        marker = this.canvas.createCircle({
+          x: point.x,
+          y: point.y,
+          r: markerConfig.r,
+          fill: markerConfig.fill
+        });
+        if (this.canvas.mode == 'svg') {
+          marker.setAttribute('class', 'jvectormap-marker');
+          marker.setAttribute('data-index', i);
+        } else {
+          $(marker).addClass('jvectormap-marker').attr('data-index', i);
+        }
+        this.markers.push({element: marker, config: markerConfig});
         $(group).append(marker);
       }
 
@@ -640,7 +683,7 @@
           point;
 
       for (i = 0; i < this.markers.length; i++) {
-        point = this.latLngToPoint(this.markers[i].latLng[0], this.markers[i].latLng[1]);
+        point = this.latLngToPoint.apply(this, this.markers[i].config.latLng);
         this.markers[i].element.setPosition(point);
       }
     },
@@ -663,7 +706,7 @@
       y = (180 / Math.PI * (5 / 4) * Math.log(Math.tan(Math.PI / 4 + (4 / 5) * lat * Math.PI / 360))) / 360 * WorldMap.circumference;
 
       inset = this.getInsetForPoint(x, y);
-      bbox = inset.bbox
+      bbox = inset.bbox;
 
       x = (x - bbox[0].x) / (bbox[1].x - bbox[0].x) * inset.width * this.scale;
       y = (y - bbox[0].y) / (bbox[1].y - bbox[0].y) * inset.height * this.scale;
