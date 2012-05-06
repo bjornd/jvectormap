@@ -1,7 +1,7 @@
-/*!
- * jVectorMap version 0.1
+/**
+ * jVectorMap version 0.2
  *
- * Copyright 2011, Kirill Lebedev
+ * Copyright 2011-2012, Kirill Lebedev
  * Licensed under the MIT license.
  *
  */
