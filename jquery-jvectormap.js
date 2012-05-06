@@ -17,7 +17,11 @@
         onLabelShow: 'labelShow',
         onRegionOver: 'regionOver',
         onRegionOut: 'regionOut',
-        onRegionClick: 'regionClick'
+        onRegionClick: 'regionClick',
+        onMarkerLabelShow: 'markerLabelShow',
+        onMarkerOver: 'markerOver',
+        onMarkerOut: 'markerOut',
+        onMarkerClick: 'markerClick'
       };
 
   $.fn.vectorMap = function(options) {
@@ -169,6 +173,7 @@
         node.setAttribute('cy', config.y);
         node.setAttribute('r', config.r);
         node.setAttribute('fill', config.fill);
+        node.setAttribute('stroke', config.stroke);
         node.setPosition = function(point){
           node.setAttribute('cx', point.x);
           node.setAttribute('cy', point.y);
@@ -180,7 +185,8 @@
         node.style.left = config.x-config.r+'px';
         node.style.top = config.y-config.r+'px';
         node.fillcolor = config.fill;
-        node.stroked = false;
+        node.stroke = true;
+        node.strokecolor = config.stroke;
         node.setPosition = function(point){
           node.style.left = point.x-config.r+'px';
           node.style.top = point.y-config.r+'px';
@@ -416,19 +422,27 @@
       $(params.container).delegate('.jvectormap-marker', 'mouseover mouseout', function(e){
         var marker = e.target,
             index = marker.getAttribute('data-index'),
-            labelShowEvent = $.Event('markerLabelShow.jvectormap');
+            labelShowEvent = $.Event('markerLabelShow.jvectormap'),
+            markerOverEvent = $.Event('markerOver.jvectormap');
 
         if (e.type == 'mouseover') {
+          $(params.container).trigger(markerOverEvent, [index]);
           $(params.container).trigger(labelShowEvent, [map.label, index]);
-          if (!labelShowEvent.isDefaultPrevented() && map.markers[index].config.name) {
-            map.label.text(map.markers[index].config.name);
+          if (!labelShowEvent.isDefaultPrevented()) {
+            map.label.text(map.markers[index].config.name || '');
             map.label.show();
             map.labelWidth = map.label.width();
             map.labelHeight = map.label.height();
           }
         } else {
           map.label.hide();
+          $(params.container).trigger('markerOut.jvectormap', [index]);
         }
+      });
+      $(params.container).delegate('.jvectormap-marker', 'click', function(e){
+        var marker = e.target;
+        var index = marker.getAttribute('data-index');
+        $(params.container).trigger('markerClick.jvectormap', [index]);
       });
     }
 
@@ -651,20 +665,16 @@
           marker,
           point,
           markerConfig,
-          defaultConfig = {latLng: [0, 0], r: 5, fill: 'red'};
+          defaultConfig = {latLng: [0, 0], r: 5, fill: 'white', stroke: '#505050'};
 
       this.markers = [];
 
       for (i = 0; i < markers.length; i++) {
         markerConfig = markers[i] instanceof Array ? {latLng: markers[i]} : markers[i];
-        markerConfig = $.extend({}, defaultConfig, markerConfig);
+        markerConfig = $.extend({}, defaultConfig, this.params.markerDefaults, markerConfig);
         point = this.latLngToPoint.apply(this, markerConfig.latLng);
-        marker = this.canvas.createCircle({
-          x: point.x,
-          y: point.y,
-          r: markerConfig.r,
-          fill: markerConfig.fill
-        });
+        $.extend(markerConfig, point);
+        marker = this.canvas.createCircle(markerConfig);
         if (this.canvas.mode == 'svg') {
           marker.setAttribute('class', 'jvectormap-marker');
           marker.setAttribute('data-index', i);
