@@ -1,7 +1,7 @@
-/*!
- * jVectorMap version 0.1
+/**
+ * jVectorMap version 0.2
  *
- * Copyright 2011, Kirill Lebedev
+ * Copyright 2011-2012, Kirill Lebedev
  * Licensed under the MIT license.
  *
  */
@@ -17,9 +17,13 @@
         onLabelShow: 'labelShow',
         onRegionOver: 'regionOver',
         onRegionOut: 'regionOut',
-        onRegionClick: 'regionClick'
+        onRegionClick: 'regionClick',
+        onMarkerLabelShow: 'markerLabelShow',
+        onMarkerOver: 'markerOver',
+        onMarkerOut: 'markerOut',
+        onMarkerClick: 'markerClick'
       };
-  
+
   $.fn.vectorMap = function(options) {
     var defaultParams = {
           map: 'world_en',
@@ -28,11 +32,11 @@
           hoverColor: 'black',
           scaleColors: ['#b6d6ff', '#005ace'],
           normalizeFunction: 'linear'
-        }, 
+        },
         map,
         methodName,
         event;
-    
+
     if (options === 'addMap') {
       WorldMap.maps[arguments[1]] = arguments[2];
     } else if (options === 'set' && apiParams[arguments[1]]) {
@@ -54,7 +58,7 @@
       }
     }
   };
-  
+
   var VectorCanvas = function(width, height) {
     this.mode = window.SVGAngle ? 'svg' : 'vml';
     if (this.mode == 'svg') {
@@ -84,14 +88,14 @@
     }
     this.setSize(width, height);
   }
-  
+
   VectorCanvas.prototype = {
     svgns: "http://www.w3.org/2000/svg",
     mode: 'svg',
     width: 0,
     height: 0,
     canvas: null,
-    
+
     setSize: function(width, height) {
       if (this.mode == 'svg') {
         this.canvas.setAttribute('width', width);
@@ -114,9 +118,9 @@
         }
       }
       this.width = width;
-      this.height = height;  
+      this.height = height;
     },
-    
+
     createPath: function(config) {
       var node;
       if (this.mode == 'svg') {
@@ -160,7 +164,37 @@
       }
       return node;
     },
-    
+
+    createCircle: function(config) {
+      var node;
+      if (this.mode == 'svg') {
+        node = this.createSvgNode('circle');
+        node.setAttribute('cx', config.x);
+        node.setAttribute('cy', config.y);
+        node.setAttribute('r', config.r);
+        node.setAttribute('fill', config.fill);
+        node.setAttribute('stroke', config.stroke);
+        node.setPosition = function(point){
+          node.setAttribute('cx', point.x);
+          node.setAttribute('cy', point.y);
+        }
+      } else {
+        node = this.createVmlNode('oval');
+        node.style.width = config.r*2+'px';
+        node.style.height = config.r*2+'px';
+        node.style.left = config.x-config.r+'px';
+        node.style.top = config.y-config.r+'px';
+        node.fillcolor = config.fill;
+        node.stroke = true;
+        node.strokecolor = config.stroke;
+        node.setPosition = function(point){
+          node.style.left = point.x-config.r+'px';
+          node.style.top = point.y-config.r+'px';
+        }
+      }
+      return node;
+    },
+
     createGroup: function(isRoot) {
       var node;
       if (this.mode == 'svg') {
@@ -179,26 +213,22 @@
       }
       return node;
     },
-    
+
     applyTransformParams: function(scale, transX, transY) {
       if (this.mode == 'svg') {
         this.rootGroup.setAttribute('transform', 'scale('+scale+') translate('+transX+', '+transY+')');
       } else {
-        this.rootGroup.coordorigin = (this.width-transX)+','+(this.height-transY);
+        this.rootGroup.coordorigin = (this.width-transX-this.width/100)+','+(this.height-transY-this.height/100);
         this.rootGroup.coordsize = this.width/scale+','+this.height/scale;
       }
     }
   }
-  
+
   VectorCanvas.pathSvgToVml = function(path) {
     var result = '',
       cx = 0, cy = 0, ctrlx, ctrly;
 
-    path = path.replace(/(-?\d+)e(-?\d+)/g, function(s){
-      return 0;
-      //var p = s.split('e');
-      //return p[0]*Math.pow(10, p[1]);
-    });
+    path = path.replace(/(-?\d+)e(-?\d+)/g, '0');
     return path.replace(/([MmLlHhVvCcSs])\s*((?:-?\d*(?:\.\d+)?\s*,?\s*)+)/g, function(segment, letter, coords, index){
       coords = coords.replace(/(\d)-/g, '$1,-').replace(/\s+/g, ',').split(',');
       if (!coords[0]) coords.shift();
@@ -278,24 +308,26 @@
       return '';
     }).replace(/z/g, 'e');
   }
-  
+
   var WorldMap = function(params) {
     params = params || {};
     var map = this;
     var mapData = WorldMap.maps[params.map];
-    
+
+    this.params = params;
+
     this.container = params.container;
-    
+
     this.defaultWidth = mapData.width;
     this.defaultHeight = mapData.height;
-    
+
     this.color = params.color;
     this.hoverColor = params.hoverColor;
     this.setBackgroundColor(params.backgroundColor);
-    
+
     this.width = params.container.width();
     this.height = params.container.height();
-    
+
     this.resize();
 
     $(window).resize(function(){
@@ -305,33 +337,38 @@
       map.canvas.setSize(map.width, map.height);
       map.applyTransform();
     });
-    
+
     this.canvas = new VectorCanvas(this.width, this.height);
     params.container.append(this.canvas.canvas);
-    
+
     this.makeDraggable();
-    
+
     this.rootGroup = this.canvas.createGroup(true);
-    
+
     this.index = WorldMap.mapIndex;
     this.label = $('<div/>').addClass('jvectormap-label').appendTo($('body'));
     $('<div/>').addClass('jvectormap-zoomin').text('+').appendTo(params.container);
     $('<div/>').addClass('jvectormap-zoomout').html('&#x2212;').appendTo(params.container);
-  
+
     for(var key in mapData.paths) {
       var path = this.canvas.createPath({path: mapData.paths[key].path});
       path.setFill(this.color);
+      if (this.canvas.mode == 'svg') {
+        path.setAttribute('class', 'jvectormap-region');
+      } else {
+        $(path).addClass('jvectormap-region');
+      }
       path.id = 'jvectormap'+map.index+'_'+key;
       map.countries[key] = path;
       $(this.rootGroup).append(path);
     }
-    
-    $(params.container).delegate(this.canvas.mode == 'svg' ? 'path' : 'shape', 'mouseover mouseout', function(e){
+
+    $(params.container).delegate('.jvectormap-region', 'mouseover mouseout', function(e){
       var path = e.target,
         code = e.target.id.substr(e.target.id.indexOf('_')+1),
         labelShowEvent = $.Event('labelShow.jvectormap'),
         regionOverEvent = $.Event('regionOver.jvectormap');
-      
+
       if (e.type == 'mouseover') {
         $(params.container).trigger(regionOverEvent, [code]);
         if (!regionOverEvent.isDefaultPrevented()) {
@@ -343,7 +380,7 @@
             path.setFill(params.hoverColor);
           }
         }
-        
+
         map.label.text(mapData.paths[code].name);
         $(params.container).trigger(labelShowEvent, [map.label, code]);
         if (!labelShowEvent.isDefaultPrevented()) {
@@ -360,8 +397,8 @@
         $(params.container).trigger('regionOut.jvectormap', [code]);
       }
     });
-    
-    $(params.container).delegate(this.canvas.mode == 'svg' ? 'path' : 'shape', 'click', function(e){
+
+    $(params.container).delegate('.jvectormap-region', 'click', function(e){
       var path = e.target;
       var code = e.target.id.split('_').pop();
       $(params.container).trigger('regionClick.jvectormap', [code]);
@@ -375,24 +412,53 @@
         })
       }
     });
-    
+
     this.setColors(params.colors);
-    
+
     this.canvas.canvas.appendChild(this.rootGroup);
-    
+
+    if (params.markers) {
+      this.createMarkers(params.markers);
+      $(params.container).delegate('.jvectormap-marker', 'mouseover mouseout', function(e){
+        var marker = e.target,
+            index = marker.getAttribute('data-index'),
+            labelShowEvent = $.Event('markerLabelShow.jvectormap'),
+            markerOverEvent = $.Event('markerOver.jvectormap');
+
+        if (e.type == 'mouseover') {
+          $(params.container).trigger(markerOverEvent, [index]);
+          $(params.container).trigger(labelShowEvent, [map.label, index]);
+          if (!labelShowEvent.isDefaultPrevented()) {
+            map.label.text(map.markers[index].config.name || '');
+            map.label.show();
+            map.labelWidth = map.label.width();
+            map.labelHeight = map.label.height();
+          }
+        } else {
+          map.label.hide();
+          $(params.container).trigger('markerOut.jvectormap', [index]);
+        }
+      });
+      $(params.container).delegate('.jvectormap-marker', 'click', function(e){
+        var marker = e.target;
+        var index = marker.getAttribute('data-index');
+        $(params.container).trigger('markerClick.jvectormap', [index]);
+      });
+    }
+
     this.applyTransform();
-    
+
     this.colorScale = new ColorScale(params.scaleColors, params.normalizeFunction, params.valueMin, params.valueMax);
     if (params.values) {
       this.values = params.values;
       this.setValues(params.values);
     }
-    
+
     this.bindZoomButtons();
-    
+
     WorldMap.mapIndex++;
   }
-  
+
   WorldMap.prototype = {
     transX: 0,
     transY: 0,
@@ -400,7 +466,7 @@
     baseTransX: 0,
     baseTransY: 0,
     baseScale: 1,
-    
+
     width: 0,
     height: 0,
     countries: {},
@@ -409,7 +475,7 @@
     zoomStep: 1.4,
     zoomMaxStep: 4,
     zoomCurStep: 1,
-    
+
     setColors: function(key, color) {
       if (typeof key == 'string') {
         this.countries[key].setFill(color);
@@ -417,17 +483,17 @@
         var colors = key;
         for (var code in colors) {
           if (this.countries[code]) {
-            this.countries[code].setFill(colors[code]);  
+            this.countries[code].setFill(colors[code]);
           }
         }
       }
     },
-    
+
     setValues: function(values) {
       var max = 0,
         min = Number.MAX_VALUE,
         val;
-        
+
       for (var cc in values) {
         val = parseFloat(values[cc]);
         if (val > max) max = values[cc];
@@ -435,7 +501,7 @@
       }
       this.colorScale.setMin(min);
       this.colorScale.setMax(max);
-      
+
       var colors = {};
       for (cc in values) {
         val = parseFloat(values[cc]);
@@ -448,25 +514,25 @@
       this.setColors(colors);
       this.values = values;
     },
-    
+
     setBackgroundColor: function(backgroundColor) {
       this.container.css('background-color', backgroundColor);
     },
-    
+
     setScaleColors: function(colors) {
       this.colorScale.setColors(colors);
       if (this.values) {
-        this.setValues(this.values);  
+        this.setValues(this.values);
       }
     },
-    
+
     setNormalizeFunction: function(f) {
       this.colorScale.setNormalizeFunction(f);
       if (this.values) {
-        this.setValues(this.values);  
+        this.setValues(this.values);
       }
     },
-    
+
     resize: function() {
       var curBaseScale = this.baseScale;
       if (this.width / this.height > this.defaultWidth / this.defaultHeight) {
@@ -480,7 +546,7 @@
       this.transX *= this.baseScale / curBaseScale;
       this.transY *= this.baseScale / curBaseScale;
     },
-    
+
     reset: function() {
       this.countryTitle.reset();
       for(var key in this.countries) {
@@ -491,7 +557,7 @@
       this.transY = this.baseTransY;
       this.applyTransform();
     },
-    
+
     applyTransform: function() {
       var maxTransX, maxTransY, minTransX, maxTransY;
       if (this.defaultWidth * this.scale <= this.width) {
@@ -501,7 +567,7 @@
         maxTransX = 0;
         minTransX = (this.width - this.defaultWidth * this.scale) / this.scale;
       }
-      
+
       if (this.defaultHeight * this.scale <= this.height) {
         maxTransY = (this.height - this.defaultHeight * this.scale) / (2 * this.scale);
         minTransY = (this.height - this.defaultHeight * this.scale) / (2 * this.scale);
@@ -509,7 +575,7 @@
         maxTransY = 0;
         minTransY = (this.height - this.defaultHeight * this.scale) / this.scale;
       }
-      
+
       if (this.transY > maxTransY) {
         this.transY = maxTransY;
       } else if (this.transY < minTransY) {
@@ -520,10 +586,12 @@
       } else if (this.transX < minTransX) {
         this.transX = minTransX;
       }
-      
+
       this.canvas.applyTransformParams(this.scale, this.transX, this.transY);
+
+      this.repositionMarkers();
     },
-    
+
     makeDraggable: function(){
       var mouseDown = false;
       var oldPageX, oldPageY;
@@ -532,12 +600,12 @@
         if (mouseDown) {
           var curTransX = self.transX;
           var curTransY = self.transY;
-          
+
           self.transX -= (oldPageX - e.pageX) / self.scale;
           self.transY -= (oldPageY - e.pageY) / self.scale;
-          
+
           self.applyTransform();
-          
+
           oldPageX = e.pageX;
           oldPageY = e.pageY;
         }
@@ -550,9 +618,9 @@
       }).mouseup(function(){
         mouseDown = false;
         return false;
-      });  
+      });
     },
-    
+
     bindZoomButtons: function() {
       var map = this;
       var sliderDelta = ($('#zoom').innerHeight() - 6*2 - 15*2 - 3*2 - 7 - 6) / (this.zoomMaxStep - this.zoomCurStep);
@@ -581,56 +649,138 @@
         }
       });
     },
-    
+
     setScale: function(scale) {
       this.scale = scale;
       this.applyTransform();
     },
-    
+
     getCountryPath: function(cc) {
       return $('#'+cc)[0];
-    }  
-  }
-  
+    },
+
+    createMarkers: function(markers) {
+      var group = this.canvas.createGroup(),
+          i,
+          marker,
+          point,
+          markerConfig,
+          defaultConfig = {latLng: [0, 0], r: 5, fill: 'white', stroke: '#505050'};
+
+      this.markers = [];
+
+      for (i = 0; i < markers.length; i++) {
+        markerConfig = markers[i] instanceof Array ? {latLng: markers[i]} : markers[i];
+        markerConfig = $.extend({}, defaultConfig, this.params.markerDefaults, markerConfig);
+        point = this.latLngToPoint.apply(this, markerConfig.latLng);
+        $.extend(markerConfig, point);
+        marker = this.canvas.createCircle(markerConfig);
+        if (this.canvas.mode == 'svg') {
+          marker.setAttribute('class', 'jvectormap-marker');
+          marker.setAttribute('data-index', i);
+        } else {
+          $(marker).addClass('jvectormap-marker').attr('data-index', i);
+        }
+        this.markers.push({element: marker, config: markerConfig});
+        $(group).append(marker);
+      }
+
+      this.canvas.canvas.appendChild(group);
+    },
+
+    repositionMarkers: function() {
+      var i,
+          point;
+
+      for (i = 0; i < this.markers.length; i++) {
+        point = this.latLngToPoint.apply(this, this.markers[i].config.latLng);
+        this.markers[i].element.setPosition(point);
+      }
+    },
+
+    latLngToPoint: function(lat, lng) {
+      var x,
+          y,
+          centralMeridian = WorldMap.maps[this.params.map].projection.centralMeridian,
+          width = this.width - this.baseTransX * 2 * this.baseScale,
+          height = this.height - this.baseTransY * 2 * this.baseScale,
+          inset,
+          bbox,
+          scaleFactor = this.scale / this.baseScale;
+
+      if (lng < (-180 + centralMeridian)) {
+        lng += 360;
+      }
+
+      x = (lng - centralMeridian) / 360 * WorldMap.circumference,
+      y = (180 / Math.PI * (5 / 4) * Math.log(Math.tan(Math.PI / 4 + (4 / 5) * lat * Math.PI / 360))) / 360 * WorldMap.circumference;
+
+      inset = this.getInsetForPoint(x, y);
+      bbox = inset.bbox;
+
+      x = (x - bbox[0].x) / (bbox[1].x - bbox[0].x) * inset.width * this.scale;
+      y = (y - bbox[0].y) / (bbox[1].y - bbox[0].y) * inset.height * this.scale;
+
+      return {
+        x: x + this.transX*this.scale + inset.left*this.scale,
+        y: y + this.transY*this.scale + inset.top*this.scale
+      };
+    },
+
+    getInsetForPoint: function(x, y){
+      var insets = WorldMap.maps[this.params.map].insets,
+          i,
+          bbox;
+
+      for (i = 0; i < insets.length; i++) {
+        bbox = insets[i].bbox;
+        if (x > bbox[0].x && x < bbox[1].x && y > bbox[0].y && y < bbox[1].y) {
+          return insets[i];
+        }
+      }
+    }
+  },
+
   WorldMap.xlink = "http://www.w3.org/1999/xlink";
   WorldMap.mapIndex = 1;
   WorldMap.maps = {};
-  
+  WorldMap.circumference = 40075017;
+
   var ColorScale = function(colors, normalizeFunction, minValue, maxValue) {
     if (colors) this.setColors(colors);
     if (normalizeFunction) this.setNormalizeFunction(normalizeFunction);
     if (minValue) this.setMin(minValue);
     if (minValue) this.setMax(maxValue);
   }
-  
+
   ColorScale.prototype = {
     colors: [],
-    
+
     setMin: function(min) {
       this.clearMinValue = min;
       if (typeof this.normalize === 'function') {
         this.minValue = this.normalize(min);
       } else {
-        this.minValue = min;  
+        this.minValue = min;
       }
     },
-    
+
     setMax: function(max) {
       this.clearMaxValue = max;
       if (typeof this.normalize === 'function') {
         this.maxValue = this.normalize(max);
       } else {
-        this.maxValue = max;  
+        this.maxValue = max;
       }
     },
-    
+
     setColors: function(colors) {
       for (var i=0; i<colors.length; i++) {
         colors[i] = ColorScale.rgbToArray(colors[i]);
       }
       this.colors = colors;
     },
-    
+
     setNormalizeFunction: function(f) {
       if (f === 'polynomial') {
         this.normalize = function(value) {
@@ -644,10 +794,10 @@
       this.setMin(this.clearMinValue);
       this.setMax(this.clearMaxValue);
     },
-    
+
     getColor: function(value) {
       if (typeof this.normalize === 'function') {
-        value = this.normalize(value);  
+        value = this.normalize(value);
       }
       var lengthes = [];
       var fullLength = 0;
@@ -682,13 +832,13 @@
           )
         ).toString(16);
       }
-      
+
       while (color.length < 6) {
         color = '0' + color;
       }
       return '#'+color;
     },
-    
+
     vectorToNum: function(vector) {
       var num = 0;
       for (var i=0; i<vector.length; i++) {
@@ -696,7 +846,7 @@
       }
       return num;
     },
-    
+
     vectorSubtract: function(vector1, vector2) {
       var vector = [];
       for (var i=0; i<vector1.length; i++) {
@@ -704,7 +854,7 @@
       }
       return vector;
     },
-    
+
     vectorAdd: function(vector1, vector2) {
       var vector = [];
       for (var i=0; i<vector1.length; i++) {
@@ -712,7 +862,7 @@
       }
       return vector;
     },
-    
+
     vectorMult: function(vector, num) {
       var result = [];
       for (var i=0; i<vector.length; i++) {
@@ -720,7 +870,7 @@
       }
       return result;
     },
-    
+
     vectorLength: function(vector) {
       var result = 0;
       for (var i=0; i<vector.length; i++) {
@@ -729,7 +879,7 @@
       return Math.sqrt(result);
     }
   }
-  
+
   ColorScale.arrayToRgb = function(ar) {
     var rgb = '#';
     var d;
@@ -739,7 +889,7 @@
     }
     return rgb;
   }
-  
+
   ColorScale.rgbToArray = function(rgb) {
     rgb = rgb.substr(1);
     return [parseInt(rgb.substr(0, 2), 16), parseInt(rgb.substr(2, 2), 16), parseInt(rgb.substr(4, 2), 16)];
