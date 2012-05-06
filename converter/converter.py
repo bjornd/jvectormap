@@ -10,6 +10,7 @@ import codecs
 class Map:
   width = 0
   height = 0
+  bbox = []
 
   def __init__(self, name, language):
     self.paths = {}
@@ -20,7 +21,7 @@ class Map:
     self.paths[code] = {"path": path, "name": name}
 
   def getJSCode(self):
-    map = {"paths": self.paths, "width": self.width, "height": self.height}
+    map = {"paths": self.paths, "width": self.width, "height": self.height, "insets": self.insets, "projection": self.projection}
     return "$.fn.vectorMap('addMap', '"+self.name+"_"+self.language+"',"+anyjson.serialize(map)+');'
 
 
@@ -110,18 +111,42 @@ class Converter:
     self.loadData()
 
     codes = self.features.keys()
+    self.map.insets = []
     envelope = []
     for inset in self.insets:
-      size = self.renderMapInset(inset['codes'], inset['left'], inset['top'], inset['width'])
-      envelope.append( shapely.geometry.box(inset['left'], inset['top'], inset['left']+size[0], inset['top']+size[1]) )
+      insetBbox = self.renderMapInset(inset['codes'], inset['left'], inset['top'], inset['width'])
+      insetHeight = (insetBbox[3] - insetBbox[1]) * (inset['width'] / (insetBbox[2] - insetBbox[0]))
+      self.map.insets.append({
+        "bbox": [{"x": insetBbox[0], "y": -insetBbox[3]}, {"x": insetBbox[2], "y": -insetBbox[1]}],
+        "left": inset['left'],
+        "top": inset['top'],
+        "width": inset['width'],
+        "height": insetHeight
+      })
+      envelope.append(
+        shapely.geometry.box(
+          inset['left'], inset['top'], inset['left'] + inset['width'], inset['top'] + insetHeight
+        )
+      )
       for code in inset['codes']:
         codes.remove(code)
-    size = self.renderMapInset(codes, 0, 0, self.width)
-    envelope.append( shapely.geometry.box(0, 0, size[0], size[1]) )
-    bbox = shapely.geometry.MultiPolygon( envelope ).bounds
 
-    self.map.width = round(bbox[2]-bbox[0], 2)
-    self.map.height = round(bbox[3]-bbox[1], 2)
+    insetBbox = self.renderMapInset(codes, 0, 0, self.width)
+    insetHeight = (insetBbox[3] - insetBbox[1]) * (self.width / (insetBbox[2] - insetBbox[0]))
+
+    envelope.append( shapely.geometry.box( 0, 0, self.width, insetHeight ) )
+    mapBbox = shapely.geometry.MultiPolygon( envelope ).bounds
+
+    self.map.width = mapBbox[2] - mapBbox[0]
+    self.map.height = mapBbox[3] - mapBbox[1]
+    self.map.insets.append({
+      "bbox": [{"x": insetBbox[0], "y": -insetBbox[3]}, {"x": insetBbox[2], "y": -insetBbox[1]}],
+      "left": 0,
+      "top": 0,
+      "width": self.width,
+      "height": insetHeight
+    })
+    self.map.projection = {"type": 'miller', "centralMeridian": self.longtitude0}
 
     open(outputFile, 'w').write( self.map.getJSCode() )
 
@@ -132,9 +157,8 @@ class Converter:
       envelope.append( self.features[code]['geometry'].envelope )
 
     bbox = shapely.geometry.MultiPolygon( envelope ).bounds
-    bbox = ((bbox[0], bbox[1]), (bbox[2], bbox[3]))
 
-    scale = (bbox[1][0]-bbox[0][0]) / width
+    scale = (bbox[2]-bbox[0]) / width
 
     # generate SVG paths
     for code in codes:
@@ -159,15 +183,14 @@ class Converter:
           for pointIndex in range( len(ring.coords) ):
             point = ring.coords[pointIndex]
             if pointIndex == 0:
-              path += 'M'+str( round( (point[0]-bbox[0][0]) / scale + left, 2) )
-              path += ','+str( round( (bbox[1][1] - point[1]) / scale + top, 2) )
+              path += 'M'+str( round( (point[0]-bbox[0]) / scale + left, 2) )
+              path += ','+str( round( (bbox[3] - point[1]) / scale + top, 2) )
             else:
               path += 'l' + str( round(point[0]/scale - ring.coords[pointIndex-1][0]/scale, 2) )
               path += ',' + str( round(ring.coords[pointIndex-1][1]/scale - point[1]/scale, 2) )
           path += 'Z'
       self.map.addPath(path, feature['code'], feature['name'])
-
-    return ((bbox[1][0]-bbox[0][0])/scale, (bbox[1][1]-bbox[0][1])/scale)
+    return bbox
 
 
   def applyFilters(self, geometry):
