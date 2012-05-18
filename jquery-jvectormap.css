@@ -2,7 +2,9 @@
     position: absolute;
     display: none;
     border: solid 1px #CDCDCD;
+    -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
+    border-radius: 3px;
     background: #292929;
     color: white;
     font-family: sans-serif, Verdana;
@@ -12,7 +14,10 @@
 
 .jvectormap-zoomin, .jvectormap-zoomout {
     position: absolute;
+    left: 10px;
+    -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
+    border-radius: 3px;
     background: #292929;
     padding: 3px;
     color: white;
@@ -24,11 +29,9 @@
 }
 
 .jvectormap-zoomin {
-    left: 10px;
     top: 10px;
 }
 
 .jvectormap-zoomout {
-    left: 10px;
     top: 30px;
 }

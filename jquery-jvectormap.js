@@ -1,5 +1,5 @@
 /**
- * jVectorMap version 0.2
+ * jVectorMap version 0.2.1
  *
  * Copyright 2011-2012, Kirill Lebedev
  * Licensed under the MIT license.
@@ -367,7 +367,7 @@
       var path = e.target,
         code = e.target.id.substr(e.target.id.indexOf('_')+1),
         labelShowEvent = $.Event('labelShow.jvectormap'),
-        regionOverEvent = $.Event('regionOver.jvectormap');;
+        regionOverEvent = $.Event('regionOver.jvectormap');
 
       if (e.type == 'mouseover') {
         $(params.container).trigger(regionOverEvent, [code]);
@@ -589,7 +589,9 @@
 
       this.canvas.applyTransformParams(this.scale, this.transX, this.transY);
 
-      this.repositionMarkers();
+      if (this.markers) {
+        this.repositionMarkers();
+      }
     },
 
     makeDraggable: function(){
