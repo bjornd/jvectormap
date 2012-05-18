@@ -1,5 +1,5 @@
 /**
- * jVectorMap version 0.2
+ * jVectorMap version 0.2.1
  *
  * Copyright 2011-2012, Kirill Lebedev
  * Licensed under the MIT license.
@@ -589,7 +589,9 @@
 
       this.canvas.applyTransformParams(this.scale, this.transX, this.transY);
 
-      this.repositionMarkers();
+      if (this.markers) {
+        this.repositionMarkers();
+      }
     },
 
     makeDraggable: function(){
