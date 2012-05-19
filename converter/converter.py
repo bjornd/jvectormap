@@ -1,5 +1,5 @@
 #
-# jVectorMap version 0.2.1
+# jVectorMap version 0.2.2
 #
 # Copyright 2011-2012, Kirill Lebedev
 # Licensed under the MIT license.
@@ -153,7 +153,7 @@ class Converter:
       "width": self.width,
       "height": insetHeight
     })
-    self.map.projection = {"type": 'miller', "centralMeridian": self.longtitude0}
+    self.map.projection = {"type": 'miller', "centralMeridian": float(self.longtitude0)}
 
     open(outputFile, 'w').write( self.map.getJSCode() )
 
