@@ -153,7 +153,7 @@ class Converter:
       "width": self.width,
       "height": insetHeight
     })
-    self.map.projection = {"type": 'miller', "centralMeridian": self.longtitude0}
+    self.map.projection = {"type": 'miller', "centralMeridian": float(self.longtitude0)}
 
     open(outputFile, 'w').write( self.map.getJSCode() )
 
