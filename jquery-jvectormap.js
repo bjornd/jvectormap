@@ -1,5 +1,5 @@
 /**
- * jVectorMap version 0.2.1
+ * jVectorMap version 0.2.2
  *
  * Copyright 2011-2012, Kirill Lebedev
  * Licensed under the MIT license.
@@ -718,15 +718,19 @@
       y = (180 / Math.PI * (5 / 4) * Math.log(Math.tan(Math.PI / 4 + (4 / 5) * lat * Math.PI / 360))) / 360 * WorldMap.circumference;
 
       inset = this.getInsetForPoint(x, y);
-      bbox = inset.bbox;
+      if (inset) {
+        bbox = inset.bbox;
 
-      x = (x - bbox[0].x) / (bbox[1].x - bbox[0].x) * inset.width * this.scale;
-      y = (y - bbox[0].y) / (bbox[1].y - bbox[0].y) * inset.height * this.scale;
+        x = (x - bbox[0].x) / (bbox[1].x - bbox[0].x) * inset.width * this.scale;
+        y = (y - bbox[0].y) / (bbox[1].y - bbox[0].y) * inset.height * this.scale;
 
-      return {
-        x: x + this.transX*this.scale + inset.left*this.scale,
-        y: y + this.transY*this.scale + inset.top*this.scale
-      };
+        return {
+          x: x + this.transX*this.scale + inset.left*this.scale,
+          y: y + this.transY*this.scale + inset.top*this.scale
+        };
+      } else {
+        return {x: 0, y: 0};
+      }
     },
 
     getInsetForPoint: function(x, y){
@@ -740,6 +744,7 @@
           return insets[i];
         }
       }
+      return false;
     }
   },
 
