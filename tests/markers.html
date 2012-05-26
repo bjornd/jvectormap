@@ -6,23 +6,59 @@
   <link rel="stylesheet" media="all" href="../jquery-jvectormap.css"/>
   <script src="assets/jquery-1.7.2.min.js"></script>
   <script src="../jquery-jvectormap.js"></script>
-  <script src="assets/jquery-jvectormap-world-en.js"></script>
+
+  <script src="../lib/jvectormap.js"></script>
+
+  <script src="../lib/abstract-element.js"></script>
+  <script src="../lib/abstract-canvas-element.js"></script>
+  <script src="../lib/abstract-shape-element.js"></script>
+
+  <script src="../lib/svg-element.js"></script>
+  <script src="../lib/svg-group-element.js"></script>
+  <script src="../lib/svg-canvas-element.js"></script>
+  <script src="../lib/svg-shape-element.js"></script>
+  <script src="../lib/svg-path-element.js"></script>
+  <script src="../lib/svg-circle-element.js"></script>
+
+  <script src="../lib/vml-element.js"></script>
+  <script src="../lib/vml-group-element.js"></script>
+  <script src="../lib/vml-canvas-element.js"></script>
+  <script src="../lib/vml-shape-element.js"></script>
+  <script src="../lib/vml-path-element.js"></script>
+  <script src="../lib/vml-circle-element.js"></script>
+
+  <script src="../lib/vector-canvas.js"></script>
+  <script src="../lib/color-scale.js"></script>
+  <script src="../lib/world-map.js"></script>
+
+  <script src="assets/jquery-jvectormap-us-en.js"></script>
   <script>
     $(function(){
       $('.map').vectorMap({
-        map: 'world_en',
+        map: 'us_en',
         markers: [
-          [0, 0],
-          [-48.51, 2.21],
-          [33.51, 151.12],
-          {latLng: [-1.3, 103.8], name: 'Singapore'},
-          {latLng: [-22.2, 114.1], name: 'Hong Kong'}
-        ]
+          [-61.18, -149.53],
+          [-21.18, -157.49],
+          {latLng: [-40.39, -73.56], name: 'New York City', r: 8, fill: 'yellow'},
+          {latLng: [-41.52, -87.37], fill: 'red', r: 10}
+        ],
+        onMarkerLabelShow: function(event, label, index){
+          console.log('label-show', label, index);
+        },
+        onMarkerOver: function(event, index){
+          console.log('marker-over', index);
+        },
+        onMarkerOut: function(event, index){
+          console.log('marker-out', index);
+        },
+        onMarkerClick: function(event, index){
+          console.log('marker-click', index);
+        }
       });
     });
   </script>
 </head>
 <body>
-  <div class="map" style="width: 1000px; height: 400px"></div>
+  <div class="map" style="width: 800px; height: 600px"></div>
 </body>
 </html>
