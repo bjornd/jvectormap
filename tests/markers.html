@@ -42,8 +42,9 @@
           {latLng: [-40.39, -73.56], name: 'New York City', r: 8, fill: 'yellow'},
           {latLng: [-41.52, -87.37], fill: 'red', r: 10}
         ],
+
         onMarkerLabelShow: function(event, label, index){
-          console.log('label-show', label, index);
+          label.html(label.html()+' (modified marker)');
         },
         onMarkerOver: function(event, index){
           console.log('marker-over', index);
@@ -53,6 +54,19 @@
         },
         onMarkerClick: function(event, index){
           console.log('marker-click', index);
+        },
+
+        onRegionLabelShow: function(event, label, code){
+          label.html(label.html()+' (modified)');
+        },
+        onRegionOver: function(event, code){
+          console.log('region-over', code);
+        },
+        onRegionOut: function(event, code){
+          console.log('region-out', code);
+        },
+        onRegionClick: function(event, code){
+          console.log('region-click', code);
         }
       });
     });
