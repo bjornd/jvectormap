@@ -14,7 +14,7 @@
         normalizeFunction: 1
       },
       apiEvents = {
-        onLabelShow: 'labelShow',
+        onRegionLabelShow: 'regionLabelShow',
         onRegionOver: 'regionOver',
         onRegionOut: 'regionOut',
         onRegionClick: 'regionClick',
