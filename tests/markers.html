@@ -39,9 +39,11 @@
         markers: [
           [-61.18, -149.53],
           [-21.18, -157.49],
-          {latLng: [-40.39, -73.56], name: 'New York City', r: 8, fill: 'yellow'},
-          {latLng: [-41.52, -87.37], fill: 'red', r: 10}
+          {latLng: [-40.39, -73.56], name: 'New York City', style: {r: 8, fill: 'yellow'}},
+          {latLng: [-41.52, -87.37], style: {fill: 'red', r: 10}}
         ],
+        regionsSelectable: true,
+        markersSelectable: true,
 
         onMarkerLabelShow: function(event, label, index){
           label.html(label.html()+' (modified marker)');
@@ -55,6 +57,12 @@
         onMarkerClick: function(event, index){
           console.log('marker-click', index);
         },
+        onMarkerSelect: function(event, index, selectedMarkers){
+          console.log('marker-select', index, selectedMarkers);
+        },
+        onMarkerDeselect: function(event, index, selectedMarkers){
+          console.log('marker-deselect', index, selectedMarkers);
+        },
 
         onRegionLabelShow: function(event, label, code){
           label.html(label.html()+' (modified)');
@@ -67,6 +75,12 @@
         },
         onRegionClick: function(event, code){
           console.log('region-click', code);
+        },
+        onRegionSelect: function(event, code, selectedRegions){
+          console.log('region-select', code, selectedRegions);
+        },
+        onRegionDeselect: function(event, code, selectedRegions){
+          console.log('region-deselect', code, selectedRegions);
         }
       });
     });
