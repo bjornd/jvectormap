@@ -1,5 +1,5 @@
 /**
- * jVectorMap version 0.2.2
+ * jVectorMap version 0.2.3
  *
  * Copyright 2011-2012, Kirill Lebedev
  * Licensed under the MIT license.
@@ -715,7 +715,7 @@
       }
 
       x = (lng - centralMeridian) / 360 * WorldMap.circumference,
-      y = (180 / Math.PI * (5 / 4) * Math.log(Math.tan(Math.PI / 4 + (4 / 5) * lat * Math.PI / 360))) / 360 * WorldMap.circumference;
+      y = (180 / Math.PI * (5 / 4) * Math.log(Math.tan(Math.PI / 4 + (4 / 5) * -lat * Math.PI / 360))) / 360 * WorldMap.circumference;
 
       inset = this.getInsetForPoint(x, y);
       if (inset) {
