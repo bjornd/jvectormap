@@ -40,6 +40,7 @@
           backgroundColor: '#505050',
           scaleColors: ['#b6d6ff', '#005ace'],
           normalizeFunction: 'linear',
+          mouseWheelZoom: true,
           regionsSelectable: false,
           markersSelectable: false,
           regionStyle: {
