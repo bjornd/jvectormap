@@ -29,7 +29,9 @@
   <script src="../lib/vml-circle-element.js"></script>
 
   <script src="../lib/vector-canvas.js"></script>
+  <script src="../lib/numeric-scale.js"></script>
   <script src="../lib/color-scale.js"></script>
+  <script src="../lib/data-series.js"></script>
   <script src="../lib/world-map.js"></script>
 
   <script src="assets/jquery-jvectormap-us-en.js"></script>
@@ -43,6 +45,29 @@
           {latLng: [40.39, -73.56], name: 'New York City', style: {r: 8, fill: 'yellow'}},
           {latLng: [41.52, -87.37], style: {fill: 'red', r: 10}}
         ],
+        series: [{
+          scale: ['#C8EEFF', '#0071A4'],
+          attribute: 'fill',
+          normalizeFunction: 'polynomial',
+          values: {
+            "US-KS": 1,
+            "US-MO": 2,
+            "US-IA": 3,
+            "US-NE": 4
+          }
+        },{
+          type: 'markers',
+          attribute: 'fill',
+          scale: ['#C8EEFF', '#0071A4'],
+          normalizeFunction: 'polynomial',
+          values: [1, 2, 3, 4]
+        },{
+          type: 'markers',
+          attribute: 'r',
+          scale: [5, 20],
+          normalizeFunction: 'polynomial',
+          values: [1, 2, 3, 4]
+        }],
         regionsSelectable: true,
         markersSelectable: true,
 
