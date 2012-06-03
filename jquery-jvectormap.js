@@ -12,7 +12,8 @@
           values: 1,
           backgroundColor: 1,
           scaleColors: 1,
-          normalizeFunction: 1
+          normalizeFunction: 1,
+          focus: 1
         },
         get: {
           selectedRegions: 1,

@@ -34,6 +34,9 @@
   <script src="assets/jquery-jvectormap-world-en.js"></script>
   <script>
     $(function(){
+      $('#focus').click(function(){
+        $('#map').vectorMap('set', 'focus', 'AU');
+      });
       $('#map').vectorMap({
         map: 'world_en',
         scaleColors: ['#C8EEFF', '#0071A4'],
@@ -228,5 +231,6 @@
 </head>
 <body>
   <div id="map" style="width: 600px; height: 400px"></div>
+  <button id="focus">Focus</button>
 </body>
 </html>
