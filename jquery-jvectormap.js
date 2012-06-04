@@ -37,7 +37,7 @@
 
   $.fn.vectorMap = function(options) {
     var defaultParams = {
-          map: 'world_en',
+          map: 'world_mill_en',
           backgroundColor: '#505050',
           scaleColors: ['#b6d6ff', '#005ace'],
           normalizeFunction: 'linear',

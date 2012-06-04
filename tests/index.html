@@ -33,14 +33,14 @@
   <script src="../lib/data-series.js"></script>
   <script src="../lib/world-map.js"></script>
 
-  <script src="assets/jquery-jvectormap-world-en.js"></script>
+  <script src="assets/jquery-jvectormap-world-mill-en.js"></script>
   <script>
     $(function(){
       $('#focus').click(function(){
         $('#map').vectorMap('set', 'focus', 'AU');
       });
       $('#map').vectorMap({
-        map: 'world_en',
+        map: 'world_mill_en',
         series: [{
           normalizeFunction: 'polynomial',
           values: {
