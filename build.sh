@@ -21,5 +21,6 @@ java -jar ../compiler-latest/compiler.jar \
 --js=lib/numeric-scale.js \
 --js=lib/color-scale.js \
 --js=lib/data-series.js \
+--js=lib/proj.js \
 --js=lib/world-map.js \
 --js_output_file=jquery-jvectormap.min.js
