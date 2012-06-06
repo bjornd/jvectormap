@@ -29,6 +29,7 @@
           map: 'world_en',
           backgroundColor: '#505050',
           color: '#ffffff',
+          strokeColor: '#f8f8f8',
           hoverColor: 'black',
           scaleColors: ['#b6d6ff', '#005ace'],
           normalizeFunction: 'linear'
@@ -132,6 +133,12 @@
         };
         node.getFill = function(color) {
           return this.getAttribute("fill");
+        };
+        node.setStroke = function(color) {
+          this.setAttribute("stroke", color);
+        };
+        node.getStroke = function(color) {
+          return this.getAttribute("stroke");
         };
         node.setOpacity = function(opacity) {
           this.setAttribute('fill-opacity', opacity);
@@ -414,6 +421,7 @@
     });
 
     this.setColors(params.colors);
+    this.setStrokeColor(params.strokeColor);
 
     this.canvas.canvas.appendChild(this.rootGroup);
 
@@ -475,6 +483,11 @@
     zoomStep: 1.4,
     zoomMaxStep: 4,
     zoomCurStep: 1,
+
+    setStrokeColor: function(strokeColor) {
+      for(var i in this.countries)
+        this.countries[i].setStroke(strokeColor);
+    },
 
     setColors: function(key, color) {
       if (typeof key == 'string') {
