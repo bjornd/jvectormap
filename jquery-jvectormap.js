@@ -17,7 +17,8 @@
         },
         get: {
           selectedRegions: 1,
-          selectedMarkers: 1
+          selectedMarkers: 1,
+          mapObject: 1
         }
       },
       apiEvents = {
@@ -56,8 +57,7 @@
               "stroke-opacity": 1
             },
             hover: {
-              stroke: 'black',
-              "stroke-width": 2
+              "fill-opacity": 0.8
             },
             selected: {
               fill: 'yellow'
