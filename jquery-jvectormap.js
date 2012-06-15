@@ -385,17 +385,19 @@
         map.label.text(mapData.paths[code].name);
         $(params.container).trigger(labelShowEvent, [map.label, code]);
         if (!labelShowEvent.isDefaultPrevented()) {
-          map.label.show();
           map.labelWidth = map.label.width();
           map.labelHeight = map.label.height();
+                    map.label.stop().animate({opacity:'100'});
+                    map.label.show();
         }
       } else {
         path.setOpacity(1);
         if (path.currentFillColor) {
           path.setFill(path.currentFillColor);
         }
-        map.label.hide();
-        $(params.container).trigger('regionOut.jvectormap', [code]);
+                map.label.stop();
+				map.label.fadeOut(200);     // Fade out quickly (200ms)
+				$(params.container).trigger('regionMouseOut.jvectormap', [code]);
       }
     });
 
