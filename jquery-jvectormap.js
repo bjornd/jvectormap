@@ -56,6 +56,15 @@
           this.bind(apiEvents[event]+'.jvectormap', defaultParams[event]);
         }
       }
+     this.mousewheel(function(event, delta) {
+
+        //alert(delta);
+        if (delta < 0)
+            map.zoomOut(map);
+        else 
+            map.zoomIn(map); 
+        return false;
+    });
     }
   };
 
@@ -105,6 +114,7 @@
         this.canvas.style.height = height + "px";
         this.canvas.coordsize = width+' '+height;
         this.canvas.coordorigin = "0 0";
+                this.canvas.style.left = '0px';
         if (this.rootGroup) {
           var paths = this.rootGroup.getElementsByTagName('shape');
           for(var i=0, l=paths.length; i<l; i++) {
@@ -384,17 +394,19 @@
         map.label.text(mapData.paths[code].name);
         $(params.container).trigger(labelShowEvent, [map.label, code]);
         if (!labelShowEvent.isDefaultPrevented()) {
-          map.label.show();
           map.labelWidth = map.label.width();
           map.labelHeight = map.label.height();
+                    map.label.stop().animate({opacity:'100'});
+                    map.label.show();
         }
       } else {
         path.setOpacity(1);
         if (path.currentFillColor) {
           path.setFill(path.currentFillColor);
         }
-        map.label.hide();
-        $(params.container).trigger('regionOut.jvectormap', [code]);
+                map.label.stop();
+				map.label.fadeOut(200);     // Fade out quickly (200ms)
+				$(params.container).trigger('regionMouseOut.jvectormap', [code]);
       }
     });
 
@@ -616,18 +628,29 @@
         mouseDown = true;
         oldPageX = e.pageX;
         oldPageY = e.pageY;
+                self.container.addClass('dragging');
         return false;
       }).mouseup(function(){
         mouseDown = false;
+                self.container.removeClass('dragging');
         return false;
       });
     },
 
     bindZoomButtons: function() {
       var map = this;
-      var sliderDelta = ($('#zoom').innerHeight() - 6*2 - 15*2 - 3*2 - 7 - 6) / (this.zoomMaxStep - this.zoomCurStep);
+      
       this.container.find('.jvectormap-zoomin').click(function(){
+                map.zoomIn(map);
+            });
+            this.container.find('.jvectormap-zoomout').click(function(){
+                map.zoomOut(map);
+            });
+        },
+        
+        zoomIn: function(map) {
         if (map.zoomCurStep < map.zoomMaxStep) {
+                var sliderDelta = ($('#zoom').innerHeight() - 6*2 - 15*2 - 3*2 - 7 - 6) / (this.zoomMaxStep - this.zoomCurStep);
           var curTransX = map.transX;
           var curTransY = map.transY;
           var curScale = map.scale;
@@ -637,9 +660,10 @@
           map.zoomCurStep++;
           $('#zoomSlider').css('top', parseInt($('#zoomSlider').css('top')) - sliderDelta);
         }
-      });
-      this.container.find('.jvectormap-zoomout').click(function(){
+        },
+        zoomOut: function(map) {
         if (map.zoomCurStep > 1) {
+                var sliderDelta = ($('#zoom').innerHeight() - 6*2 - 15*2 - 3*2 - 7 - 6) / (this.zoomMaxStep - this.zoomCurStep);
           var curTransX = map.transX;
           var curTransY = map.transY;
           var curScale = map.scale;
@@ -649,7 +673,6 @@
           map.zoomCurStep--;
           $('#zoomSlider').css('top', parseInt($('#zoomSlider').css('top')) + sliderDelta);
         }
-      });
     },
 
     setScale: function(scale) {
