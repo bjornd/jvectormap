@@ -105,6 +105,7 @@
         this.canvas.style.height = height + "px";
         this.canvas.coordsize = width+' '+height;
         this.canvas.coordorigin = "0 0";
+                this.canvas.style.left = '0px';
         if (this.rootGroup) {
           var paths = this.rootGroup.getElementsByTagName('shape');
           for(var i=0, l=paths.length; i<l; i++) {
