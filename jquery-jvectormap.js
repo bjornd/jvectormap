@@ -619,9 +619,11 @@
         mouseDown = true;
         oldPageX = e.pageX;
         oldPageY = e.pageY;
+                self.container.addClass('dragging');
         return false;
       }).mouseup(function(){
         mouseDown = false;
+                self.container.removeClass('dragging');
         return false;
       });
     },

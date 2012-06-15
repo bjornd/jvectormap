@@ -35,3 +35,8 @@
 .jvectormap-zoomout {
     top: 30px;
 }
+
+.dragging {
+	cursor: move;
+	cursor: -moz-grabbing;
+}
