@@ -4,6 +4,13 @@
   <meta charset="utf-8"/>
   <title>Maps</title>
   <link rel="stylesheet" media="all" href="../jquery-jvectormap.css"/>
+  <style>
+    ul {
+      padding: 0;
+      list-style: none;
+    }
+  </style>
+
   <script src="assets/jquery-1.7.2.min.js"></script>
   <script src="../jquery-jvectormap.js"></script>
   <script src="../jquery-mousewheel.js"></script>
@@ -36,17 +43,18 @@
   <script src="../lib/world-map.js"></script>
 
   <script src="assets/jquery-jvectormap-us-aea-en.js"></script>
-  <script src="assets/jquery-jvectormap-us-mill-en.js"></script>
   <script>
     $(function(){
+      var markers = [
+        [61.18, -149.53],
+        [21.18, -157.49],
+        {latLng: [40.39, -73.56], name: 'New York City', style: {r: 8, fill: 'yellow'}},
+        {latLng: [41.52, -87.37], style: {fill: 'red', r: 10}}
+      ];
+
       $('.map').vectorMap({
         map: 'us_aea_en',
-        markers: [
-          [61.18, -149.53],
-          [21.18, -157.49],
-          {latLng: [40.39, -73.56], name: 'New York City', style: {r: 8, fill: 'yellow'}},
-          {latLng: [41.52, -87.37], style: {fill: 'red', r: 10}}
-        ],
+        markers: markers,
         series: [{
           scale: ['#C8EEFF', '#0071A4'],
           attribute: 'fill',
@@ -116,5 +124,13 @@
 </head>
 <body>
   <div class="map" style="width: 800px; height: 600px"></div>
+  <ul>
+    <li data-marker-index="0"><label><input checked type="checkbox"/> Marker 1</label></li>
+    <li data-marker-index="1"><label><input checked type="checkbox"/> Marker 2</label></li>
+    <li data-marker-index="2"><label><input checked type="checkbox"/> Marker 3</label></li>
+    <li data-marker-index="3"><label><input checked type="checkbox"/> Marker 4</label></li>
+  </ul>
+  <input type="button" value="Add all" class="add-all-button"/>
+  <input type="button" value="Remove all" class="remove-all-button"/>
 </body>
 </html>
