@@ -46,38 +46,42 @@
   <script>
     $(function(){
       var markers = [
-        [61.18, -149.53],
-        [21.18, -157.49],
-        {latLng: [40.39, -73.56], name: 'New York City', style: {r: 8, fill: 'yellow'}},
-        {latLng: [41.52, -87.37], style: {fill: 'red', r: 10}}
-      ];
+            [61.18, -149.53],
+            [21.18, -157.49],
+            {latLng: [40.39, -73.56], name: 'New York City', style: {r: 8, fill: 'yellow'}},
+            {latLng: [41.52, -87.37], style: {fill: 'red', r: 10}}
+          ],
+          values1 = [1, 2, 3, 4],
+          values2 = [1, 2, 3, 4];
 
-      $('.map').vectorMap({
+      var map = new jvm.WorldMap({
+        container: $('.map'),
         map: 'us_aea_en',
         markers: markers,
-        series: [{
-          scale: ['#C8EEFF', '#0071A4'],
-          attribute: 'fill',
-          normalizeFunction: 'polynomial',
-          values: {
-            "US-KS": 1,
-            "US-MO": 2,
-            "US-IA": 3,
-            "US-NE": 4
-          }
-        },{
-          type: 'markers',
-          attribute: 'fill',
-          scale: ['#C8EEFF', '#0071A4'],
-          normalizeFunction: 'polynomial',
-          values: [1, 2, 3, 4]
-        },{
-          type: 'markers',
-          attribute: 'r',
-          scale: [5, 20],
-          normalizeFunction: 'polynomial',
-          values: [1, 2, 3, 4]
-        }],
+        series: {
+          markers: [{
+            attribute: 'fill',
+            scale: ['#C8EEFF', '#0071A4'],
+            normalizeFunction: 'polynomial',
+            values: values1
+          },{
+            attribute: 'r',
+            scale: [5, 20],
+            normalizeFunction: 'polynomial',
+            values: values2
+          }],
+          regions: [{
+            scale: ['#C8EEFF', '#0071A4'],
+            attribute: 'fill',
+            normalizeFunction: 'polynomial',
+            values: {
+              "US-KS": 1,
+              "US-MO": 2,
+              "US-IA": 3,
+              "US-NE": 4
+            }
+          }]
+        },
         regionsSelectable: true,
         markersSelectable: true,
 
@@ -119,18 +123,36 @@
           console.log('region-deselect', code, selectedRegions);
         }
       });
+
+      $('.list-markers :checkbox').change(function(){
+        var index = $(this).closest('li').attr('data-marker-index');
+
+        if ($(this).prop('checked')) {
+          map.addMarker( index, markers[index], [values1[index], values2[index]] );
+        } else {
+          map.removeMarkers( [index] );
+        }
+      });
+      $('.button-add-all').click(function(){
+        $('.list-markers :checkbox').prop('checked', true);
+        map.addMarkers(markers, [values1, values2]);
+      });
+      $('.button-remove-all').click(function(){
+        $('.list-markers :checkbox').prop('checked', false);
+        map.clearMarkers();
+      });
     });
   </script>
 </head>
 <body>
   <div class="map" style="width: 800px; height: 600px"></div>
-  <ul>
+  <ul class="list-markers">
     <li data-marker-index="0"><label><input checked type="checkbox"/> Marker 1</label></li>
     <li data-marker-index="1"><label><input checked type="checkbox"/> Marker 2</label></li>
     <li data-marker-index="2"><label><input checked type="checkbox"/> Marker 3</label></li>
     <li data-marker-index="3"><label><input checked type="checkbox"/> Marker 4</label></li>
   </ul>
-  <input type="button" value="Add all" class="add-all-button"/>
-  <input type="button" value="Remove all" class="remove-all-button"/>
+  <input type="button" value="Add all" class="button-add-all"/>
+  <input type="button" value="Remove all" class="button-remove-all"/>
 </body>
 </html>
