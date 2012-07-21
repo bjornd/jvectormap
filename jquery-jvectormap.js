@@ -20,20 +20,6 @@
           selectedMarkers: 1,
           mapObject: 1
         }
-      },
-      apiEvents = {
-        onRegionLabelShow: 'regionLabelShow',
-        onRegionOver: 'regionOver',
-        onRegionOut: 'regionOut',
-        onRegionClick: 'regionClick',
-        onRegionSelect: 'regionSelect',
-        onRegionDeselect: 'regionDeselect',
-        onMarkerLabelShow: 'markerLabelShow',
-        onMarkerOver: 'markerOver',
-        onMarkerOut: 'markerOut',
-        onMarkerClick: 'markerClick',
-        onMarkerSelect: 'markerSelect',
-        onMarkerDeselect: 'markerDeselect'
       };
 
   $.fn.vectorMap = function(options) {
@@ -48,17 +34,8 @@
       return this.data('mapObject')[options+methodName].apply(this.data('mapObject'), Array.prototype.slice.call(arguments, 2));
     } else {
       options.container = this;
-      this.css({
-        position: 'relative',
-        overflow: 'hidden'
-      });
       map = new jvm.WorldMap(options);
       this.data('mapObject', map);
-      for (event in apiEvents) {
-        if (defaultParams[event]) {
-          this.bind(apiEvents[event]+'.jvectormap', defaultParams[event]);
-        }
-      }
     }
   };
 })( jQuery );

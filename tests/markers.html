@@ -97,11 +97,8 @@
         onMarkerClick: function(event, index){
           console.log('marker-click', index);
         },
-        onMarkerSelect: function(event, index, selectedMarkers){
-          console.log('marker-select', index, selectedMarkers);
-        },
-        onMarkerDeselect: function(event, index, selectedMarkers){
-          console.log('marker-deselect', index, selectedMarkers);
+        onMarkerSelected: function(event, index, isSelected, selectedMarkers){
+          console.log('marker-select', index, isSelected, selectedMarkers);
         },
 
         onRegionLabelShow: function(event, label, code){
@@ -116,11 +113,8 @@
         onRegionClick: function(event, code){
           console.log('region-click', code);
         },
-        onRegionSelect: function(event, code, selectedRegions){
-          console.log('region-select', code, selectedRegions);
-        },
-        onRegionDeselect: function(event, code, selectedRegions){
-          console.log('region-deselect', code, selectedRegions);
+        onRegionSelected: function(event, code, isSelected, selectedRegions){
+          console.log('region-select', code, isSelected, selectedRegions);
         }
       });
 
