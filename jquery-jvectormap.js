@@ -559,7 +559,7 @@
     },
 
     applyTransform: function() {
-      var maxTransX, maxTransY, minTransX, maxTransY;
+      var maxTransX, maxTransY, minTransX, minTransY;
       if (this.defaultWidth * this.scale <= this.width) {
         maxTransX = (this.width - this.defaultWidth * this.scale) / (2 * this.scale);
         minTransX = (this.width - this.defaultWidth * this.scale) / (2 * this.scale);
