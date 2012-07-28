@@ -1,26 +1,30 @@
-java -jar ../compiler-latest/compiler.jar \
---js=jquery-jvectormap.js \
---js=jquery-mousewheel.js \
---js=lib/jvectormap.js \
---js=lib/abstract-element.js \
---js=lib/abstract-canvas-element.js \
---js=lib/abstract-shape-element.js \
---js=lib/svg-element.js \
---js=lib/svg-group-element.js \
---js=lib/svg-canvas-element.js \
---js=lib/svg-shape-element.js \
---js=lib/svg-path-element.js \
---js=lib/svg-circle-element.js \
---js=lib/vml-element.js \
---js=lib/vml-group-element.js \
---js=lib/vml-canvas-element.js \
---js=lib/vml-shape-element.js \
---js=lib/vml-path-element.js \
---js=lib/vml-circle-element.js \
---js=lib/vector-canvas.js \
---js=lib/numeric-scale.js \
---js=lib/color-scale.js \
---js=lib/data-series.js \
---js=lib/proj.js \
---js=lib/world-map.js \
---js_output_file=jquery-jvectormap.min.js
+#!/bin/bash
+args=("$@")
+rm ${args[0]}
+cat \
+jquery-jvectormap.js \
+jquery-mousewheel.js \
+lib/jvectormap.js \
+lib/abstract-element.js \
+lib/abstract-canvas-element.js \
+lib/abstract-shape-element.js \
+lib/svg-element.js \
+lib/svg-group-element.js \
+lib/svg-canvas-element.js \
+lib/svg-shape-element.js \
+lib/svg-path-element.js \
+lib/svg-circle-element.js \
+lib/vml-element.js \
+lib/vml-group-element.js \
+lib/vml-canvas-element.js \
+lib/vml-shape-element.js \
+lib/vml-path-element.js \
+lib/vml-circle-element.js \
+lib/vector-canvas.js \
+lib/numeric-scale.js \
+lib/color-scale.js \
+lib/data-series.js \
+lib/proj.js \
+lib/world-map.js \
+>> ${args[0]}
+uglifyjs --overwrite ${args[0]}
