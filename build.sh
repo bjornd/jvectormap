@@ -1,6 +1,14 @@
 #!/bin/bash
-args=("$@")
-rm ${args[0]}
+if [ -z "$1" ]
+  then
+    minified=jquery-jvectormap.min.js
+  else
+    minified=$1
+fi
+if [ -a $minified ]
+  then
+    rm $minified
+fi
 cat \
 jquery-jvectormap.js \
 jquery-mousewheel.js \
@@ -26,5 +34,5 @@ lib/color-scale.js \
 lib/data-series.js \
 lib/proj.js \
 lib/world-map.js \
->> ${args[0]}
-uglifyjs --overwrite ${args[0]}
+>> $minified
+uglifyjs --overwrite $minified
