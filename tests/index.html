@@ -42,6 +42,11 @@
       });
       $('#map1').vectorMap({
         map: 'world_mill_en',
+        focusOn: {
+          x: 0.5,
+          y: 0.5,
+          scale: 2
+        },
         series: {
           regions: [{
             normalizeFunction: 'polynomial',
