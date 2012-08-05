@@ -173,7 +173,7 @@ class Converter:
       feature = self.features[code]
       geometry = feature['geometry']
       if args.buffer_distance:
-        geometry = geometry.buffer(args.buffer_distance)
+        geometry = geometry.buffer(args.buffer_distance*scale)
       if geometry.is_empty:
         continue
       if args.simplify_tolerance:
@@ -240,7 +240,7 @@ parser.add_argument('--where', default='', type=str)
 parser.add_argument('--width', type=float)
 parser.add_argument('--insets', type=str)
 parser.add_argument('--minimal_area', type=float)
-parser.add_argument('--buffer_distance', type=float)
+parser.add_argument('--buffer_distance', type=float, default=-1)
 parser.add_argument('--simplify_tolerance', type=float)
 parser.add_argument('--viewport', type=str)
 parser.add_argument('--longtitude0', type=str, default='0')
