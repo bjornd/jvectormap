@@ -105,7 +105,7 @@ class Converter:
         shapelyGeometry = shapely.wkb.loads( geometry.ExportToWkb() )
         if not shapelyGeometry.is_valid:
           #buffer to fix selfcrosses
-          shapelyGeometry = shapelyGeometry.buffer(0)
+          shapelyGeometry = shapelyGeometry.buffer(0, 1)
         shapelyGeometry = self.applyFilters(shapelyGeometry)
         if shapelyGeometry:
           name = feature.GetFieldAsString(self.country_name_index).decode(self.inputFileEncoding)
@@ -173,7 +173,7 @@ class Converter:
       feature = self.features[code]
       geometry = feature['geometry']
       if args.buffer_distance:
-        geometry = geometry.buffer(args.buffer_distance*scale)
+        geometry = geometry.buffer(args.buffer_distance*scale, 1)
       if geometry.is_empty:
         continue
       if args.simplify_tolerance:
@@ -240,7 +240,7 @@ parser.add_argument('--where', default='', type=str)
 parser.add_argument('--width', type=float)
 parser.add_argument('--insets', type=str)
 parser.add_argument('--minimal_area', type=float)
-parser.add_argument('--buffer_distance', type=float, default=-1)
+parser.add_argument('--buffer_distance', type=float, default=-0.4)
 parser.add_argument('--simplify_tolerance', type=float)
 parser.add_argument('--viewport', type=str)
 parser.add_argument('--longtitude0', type=str, default='0')
