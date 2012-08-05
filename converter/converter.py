@@ -46,6 +46,7 @@ class Converter:
     self.longtitude0 = kwargs['longtitude0']
     self.inputFileEncoding = kwargs['input_file_encoding']
     self.projection = kwargs['projection']
+    self.precision = kwargs['precision']
     if kwargs['viewport']:
       self.viewport = map(lambda s: float(s), kwargs['viewport'].split(' '))
     else:
@@ -191,11 +192,11 @@ class Converter:
           for pointIndex in range( len(ring.coords) ):
             point = ring.coords[pointIndex]
             if pointIndex == 0:
-              path += 'M'+str( round( (point[0]-bbox[0]) / scale + left, 2) )
-              path += ','+str( round( (bbox[3] - point[1]) / scale + top, 2) )
+              path += 'M'+str( round( (point[0]-bbox[0]) / scale + left, self.precision) )
+              path += ','+str( round( (bbox[3] - point[1]) / scale + top, self.precision) )
             else:
-              path += 'l' + str( round(point[0]/scale - ring.coords[pointIndex-1][0]/scale, 2) )
-              path += ',' + str( round(ring.coords[pointIndex-1][1]/scale - point[1]/scale, 2) )
+              path += 'l' + str( round(point[0]/scale - ring.coords[pointIndex-1][0]/scale, self.precision) )
+              path += ',' + str( round(ring.coords[pointIndex-1][1]/scale - point[1]/scale, self.precision) )
           path += 'Z'
       self.map.addPath(path, feature['code'], feature['name'])
     return bbox
@@ -248,6 +249,7 @@ parser.add_argument('--projection', type=str, default='mill')
 parser.add_argument('--name', type=str, default='world')
 parser.add_argument('--language', type=str, default='en')
 parser.add_argument('--input_file_encoding', type=str, default='iso-8859-1')
+parser.add_argument('--precision', type=int, default=2)
 args = parser.parse_args()
 
 converter = Converter(args.input_file,
@@ -263,6 +265,7 @@ converter = Converter(args.input_file,
   projection = args.projection,
   name = args.name,
   language = args.language,
-  input_file_encoding = args.input_file_encoding
+  input_file_encoding = args.input_file_encoding,
+  precision = args.precision
 )
 converter.convert(args.output_file)
