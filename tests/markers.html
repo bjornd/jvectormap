@@ -105,7 +105,7 @@
           label.html(label.html()+' (modified)');
         },
         onRegionOver: function(event, code){
-          console.log('region-over', code);
+          console.log('region-over', code, map.getRegionName(code));
         },
         onRegionOut: function(event, code){
           console.log('region-out', code);

@@ -18,7 +18,8 @@
         get: {
           selectedRegions: 1,
           selectedMarkers: 1,
-          mapObject: 1
+          mapObject: 1,
+          regionName: 1
         }
       };
 
