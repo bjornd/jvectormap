@@ -4,27 +4,149 @@
   <meta charset="utf-8"/>
   <title>Maps</title>
   <link rel="stylesheet" media="all" href="../jquery-jvectormap.css"/>
+  <style>
+    ul {
+      padding: 0;
+      list-style: none;
+    }
+  </style>
+
   <script src="assets/jquery-1.7.2.min.js"></script>
   <script src="../jquery-jvectormap.js"></script>
-  <script src="assets/jquery-jvectormap-world-en.js"></script>
+  <script src="../jquery-mousewheel.js"></script>
+
+  <script src="../lib/jvectormap.js"></script>
+
+  <script src="../lib/abstract-element.js"></script>
+  <script src="../lib/abstract-canvas-element.js"></script>
+  <script src="../lib/abstract-shape-element.js"></script>
+
+  <script src="../lib/svg-element.js"></script>
+  <script src="../lib/svg-group-element.js"></script>
+  <script src="../lib/svg-canvas-element.js"></script>
+  <script src="../lib/svg-shape-element.js"></script>
+  <script src="../lib/svg-path-element.js"></script>
+  <script src="../lib/svg-circle-element.js"></script>
+
+  <script src="../lib/vml-element.js"></script>
+  <script src="../lib/vml-group-element.js"></script>
+  <script src="../lib/vml-canvas-element.js"></script>
+  <script src="../lib/vml-shape-element.js"></script>
+  <script src="../lib/vml-path-element.js"></script>
+  <script src="../lib/vml-circle-element.js"></script>
+
+  <script src="../lib/vector-canvas.js"></script>
+  <script src="../lib/numeric-scale.js"></script>
+  <script src="../lib/color-scale.js"></script>
+  <script src="../lib/data-series.js"></script>
+  <script src="../lib/proj.js"></script>
+  <script src="../lib/world-map.js"></script>
+
+  <script src="assets/jquery-jvectormap-us-aea-en.js"></script>
   <script>
     $(function(){
-      $('.map').vectorMap({
-        map: 'world_en',
-        markers: [
-          [0, 0],
-          [48.51, 2.21],
-          [-33.51, 151.12],
-          [64.623877,56.25],
-          {latLng: [-21.13, -175.2], name: 'Tonga'},
-          {latLng: [1.3, 103.8], name: 'Singapore'},
-          {latLng: [22.2, 114.1], name: 'Hong Kong'}
-        ]
+      var markers = [
+            [61.18, -149.53],
+            [21.18, -157.49],
+            {latLng: [40.39, -73.56], name: 'New York City', style: {r: 8, fill: 'yellow'}},
+            {latLng: [41.52, -87.37], style: {fill: 'red', r: 10}}
+          ],
+          values1 = [1, 2, 3, 4],
+          values2 = [1, 2, 3, 4];
+
+      var map = new jvm.WorldMap({
+        container: $('.map'),
+        map: 'us_aea_en',
+        markers: markers,
+        series: {
+          markers: [{
+            attribute: 'fill',
+            scale: ['#C8EEFF', '#0071A4'],
+            normalizeFunction: 'polynomial',
+            values: values1
+          },{
+            attribute: 'r',
+            scale: [5, 20],
+            normalizeFunction: 'polynomial',
+            values: values2
+          }],
+          regions: [{
+            scale: ['#C8EEFF', '#0071A4'],
+            attribute: 'fill',
+            normalizeFunction: 'polynomial',
+            values: {
+              "US-KS": 1,
+              "US-MO": 2,
+              "US-IA": 3,
+              "US-NE": 4
+            }
+          }]
+        },
+        regionsSelectable: true,
+        markersSelectable: true,
+
+        onMarkerLabelShow: function(event, label, index){
+          label.html(label.html()+' (modified marker)');
+        },
+        onMarkerOver: function(event, index){
+          console.log('marker-over', index);
+        },
+        onMarkerOut: function(event, index){
+          console.log('marker-out', index);
+        },
+        onMarkerClick: function(event, index){
+          console.log('marker-click', index);
+        },
+        onMarkerSelected: function(event, index, isSelected, selectedMarkers){
+          console.log('marker-select', index, isSelected, selectedMarkers);
+        },
+
+        onRegionLabelShow: function(event, label, code){
+          label.html(label.html()+' (modified)');
+        },
+        onRegionOver: function(event, code){
+          console.log('region-over', code, map.getRegionName(code));
+        },
+        onRegionOut: function(event, code){
+          console.log('region-out', code);
+        },
+        onRegionClick: function(event, code){
+          console.log('region-click', code);
+        },
+        onRegionSelected: function(event, code, isSelected, selectedRegions){
+          console.log('region-select', code, isSelected, selectedRegions);
+        }
+      });
+
+      $('.list-markers :checkbox').change(function(){
+        var index = $(this).closest('li').attr('data-marker-index');
+
+        if ($(this).prop('checked')) {
+          map.addMarker( index, markers[index], [values1[index], values2[index]] );
+        } else {
+          map.removeMarkers( [index] );
+        }
+      });
+      $('.button-add-all').click(function(){
+        $('.list-markers :checkbox').prop('checked', true);
+        map.addMarkers(markers, [values1, values2]);
+      });
+      $('.button-remove-all').click(function(){
+        $('.list-markers :checkbox').prop('checked', false);
+        map.clearMarkers();
       });
     });
   </script>
 </head>
 <body>
-  <div class="map" style="width: 1000px; height: 400px"></div>
+  <div class="map" style="width: 800px; height: 600px"></div>
+  <ul class="list-markers">
+    <li data-marker-index="0"><label><input checked type="checkbox"/> Marker 1</label></li>
+    <li data-marker-index="1"><label><input checked type="checkbox"/> Marker 2</label></li>
+    <li data-marker-index="2"><label><input checked type="checkbox"/> Marker 3</label></li>
+    <li data-marker-index="3"><label><input checked type="checkbox"/> Marker 4</label></li>
+  </ul>
+  <input type="button" value="Add all" class="button-add-all"/>
+  <input type="button" value="Remove all" class="button-remove-all"/>
 </body>
 </html>

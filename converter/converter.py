@@ -1,5 +1,5 @@
 #
-# jVectorMap version 0.2.3
+# jVectorMap version 1.0
 #
 # Copyright 2011-2012, Kirill Lebedev
 # Licensed under the MIT license.
@@ -29,7 +29,7 @@ class Map:
 
   def getJSCode(self):
     map = {"paths": self.paths, "width": self.width, "height": self.height, "insets": self.insets, "projection": self.projection}
-    return "$.fn.vectorMap('addMap', '"+self.name+"_"+self.language+"',"+anyjson.serialize(map)+');'
+    return "$.fn.vectorMap('addMap', '"+self.name+"_"+self.projection['type']+"_"+self.language+"',"+anyjson.serialize(map)+');'
 
 
 class Converter:
@@ -45,6 +45,8 @@ class Converter:
     self.country_code_index = kwargs['country_code_index']
     self.longtitude0 = kwargs['longtitude0']
     self.inputFileEncoding = kwargs['input_file_encoding']
+    self.projection = kwargs['projection']
+    self.precision = kwargs['precision']
     if kwargs['viewport']:
       self.viewport = map(lambda s: float(s), kwargs['viewport'].split(' '))
     else:
@@ -52,7 +54,7 @@ class Converter:
 
     # spatial reference to convert to
     self.spatialRef = osr.SpatialReference()
-    self.spatialRef.ImportFromProj4('+proj=mill +lat_0=0 +lon_0='+self.longtitude0+' +x_0=0 +y_0=0 +R_A +ellps=WGS84 +datum=WGS84 +units=m +no_defs')
+    self.spatialRef.ImportFromProj4('+proj='+self.projection+' +lat_0=0 +lon_0='+self.longtitude0)
 
     # handle map insets
     if kwargs['insets']:
@@ -104,7 +106,7 @@ class Converter:
         shapelyGeometry = shapely.wkb.loads( geometry.ExportToWkb() )
         if not shapelyGeometry.is_valid:
           #buffer to fix selfcrosses
-          shapelyGeometry = shapelyGeometry.buffer(0)
+          shapelyGeometry = shapelyGeometry.buffer(0, 1)
         shapelyGeometry = self.applyFilters(shapelyGeometry)
         if shapelyGeometry:
           name = feature.GetFieldAsString(self.country_name_index).decode(self.inputFileEncoding)
@@ -153,7 +155,7 @@ class Converter:
       "width": self.width,
       "height": insetHeight
     })
-    self.map.projection = {"type": 'miller', "centralMeridian": float(self.longtitude0)}
+    self.map.projection = {"type": self.projection, "centralMeridian": float(self.longtitude0)}
 
     open(outputFile, 'w').write( self.map.getJSCode() )
 
@@ -172,7 +174,7 @@ class Converter:
       feature = self.features[code]
       geometry = feature['geometry']
       if args.buffer_distance:
-        geometry = geometry.buffer(args.buffer_distance)
+        geometry = geometry.buffer(args.buffer_distance*scale, 1)
       if geometry.is_empty:
         continue
       if args.simplify_tolerance:
@@ -190,11 +192,11 @@ class Converter:
           for pointIndex in range( len(ring.coords) ):
             point = ring.coords[pointIndex]
             if pointIndex == 0:
-              path += 'M'+str( round( (point[0]-bbox[0]) / scale + left, 2) )
-              path += ','+str( round( (bbox[3] - point[1]) / scale + top, 2) )
+              path += 'M'+str( round( (point[0]-bbox[0]) / scale + left, self.precision) )
+              path += ','+str( round( (bbox[3] - point[1]) / scale + top, self.precision) )
             else:
-              path += 'l' + str( round(point[0]/scale - ring.coords[pointIndex-1][0]/scale, 2) )
-              path += ',' + str( round(ring.coords[pointIndex-1][1]/scale - point[1]/scale, 2) )
+              path += 'l' + str( round(point[0]/scale - ring.coords[pointIndex-1][0]/scale, self.precision) )
+              path += ',' + str( round(ring.coords[pointIndex-1][1]/scale - point[1]/scale, self.precision) )
           path += 'Z'
       self.map.addPath(path, feature['code'], feature['name'])
     return bbox
@@ -239,13 +241,15 @@ parser.add_argument('--where', default='', type=str)
 parser.add_argument('--width', type=float)
 parser.add_argument('--insets', type=str)
 parser.add_argument('--minimal_area', type=float)
-parser.add_argument('--buffer_distance', type=float)
+parser.add_argument('--buffer_distance', type=float, default=-0.4)
 parser.add_argument('--simplify_tolerance', type=float)
 parser.add_argument('--viewport', type=str)
 parser.add_argument('--longtitude0', type=str, default='0')
+parser.add_argument('--projection', type=str, default='mill')
 parser.add_argument('--name', type=str, default='world')
 parser.add_argument('--language', type=str, default='en')
 parser.add_argument('--input_file_encoding', type=str, default='iso-8859-1')
+parser.add_argument('--precision', type=int, default=2)
 args = parser.parse_args()
 
 converter = Converter(args.input_file,
@@ -258,8 +262,10 @@ converter = Converter(args.input_file,
   country_name_index = args.country_name_index,
   country_code_index = args.country_code_index,
   longtitude0 = args.longtitude0,
+  projection = args.projection,
   name = args.name,
   language = args.language,
-  input_file_encoding = args.input_file_encoding
+  input_file_encoding = args.input_file_encoding,
+  precision = args.precision
 )
 converter.convert(args.output_file)
