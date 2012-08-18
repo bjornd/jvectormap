@@ -99,6 +99,12 @@
         },
         onMarkerSelected: function(event, index, isSelected, selectedMarkers){
           console.log('marker-select', index, isSelected, selectedMarkers);
+          if (window.localStorage) {
+            window.localStorage.setItem(
+              'jvectormap-selected-markers',
+              JSON.stringify(selectedMarkers)
+            );
+          }
         },
 
         onRegionLabelShow: function(event, label, code){
@@ -115,8 +121,17 @@
         },
         onRegionSelected: function(event, code, isSelected, selectedRegions){
           console.log('region-select', code, isSelected, selectedRegions);
+          if (window.localStorage) {
+            window.localStorage.setItem(
+              'jvectormap-selected-regions',
+              JSON.stringify(selectedRegions)
+            );
+          }
         }
       });
+
+      map.setSelectedRegions( JSON.parse( window.localStorage.getItem('jvectormap-selected-regions') || '[]' ) );
+      map.setSelectedMarkers( JSON.parse( window.localStorage.getItem('jvectormap-selected-markers') || '[]' ) );
 
       $('.list-markers :checkbox').change(function(){
         var index = $(this).closest('li').attr('data-marker-index');
@@ -135,6 +150,12 @@
         $('.list-markers :checkbox').prop('checked', false);
         map.clearMarkers();
       });
+      $('.button-clear-selected-regions').click(function(){
+        map.clearSelectedRegions();
+      });
+      $('.button-clear-selected-markers').click(function(){
+        map.clearSelectedMarkers();
+      });
     });
   </script>
 </head>
@@ -148,5 +169,8 @@
   </ul>
   <input type="button" value="Add all" class="button-add-all"/>
   <input type="button" value="Remove all" class="button-remove-all"/>
+  &nbsp;&nbsp;&nbsp;
+  <input type="button" value="Clear selected regions" class="button-clear-selected-regions"/>
+  <input type="button" value="Clear selected markers" class="button-clear-selected-markers"/>
 </body>
 </html>

@@ -37,7 +37,6 @@
       options = options || {};
       options.container = this;
       map = new jvm.WorldMap(options);
-      this.data('mapObject', map);
     }
   };
 })( jQuery );
