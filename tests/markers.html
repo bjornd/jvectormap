@@ -148,7 +148,7 @@
       });
       $('.button-remove-all').click(function(){
         $('.list-markers :checkbox').prop('checked', false);
-        map.clearMarkers();
+        map.removeAllMarkers();
       });
       $('.button-clear-selected-regions').click(function(){
         map.clearSelectedRegions();
