@@ -54,7 +54,7 @@ class Converter:
 
     # spatial reference to convert to
     self.spatialRef = osr.SpatialReference()
-    self.spatialRef.ImportFromProj4('+proj='+self.projection+' +lat_0=0 +lon_0='+self.longtitude0)
+    self.spatialRef.ImportFromProj4('+proj='+self.projection+' +a=6381372 +b=6381372 +lat_0=0 +lon_0='+self.longtitude0)
 
     # handle map insets
     if kwargs['insets']:
