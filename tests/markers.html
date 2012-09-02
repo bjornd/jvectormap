@@ -36,6 +36,7 @@
   <script src="../lib/vml-circle-element.js"></script>
 
   <script src="../lib/vector-canvas.js"></script>
+  <script src="../lib/ordinal-scale.js"></script>
   <script src="../lib/numeric-scale.js"></script>
   <script src="../lib/color-scale.js"></script>
   <script src="../lib/data-series.js"></script>
@@ -71,14 +72,17 @@
             values: values2
           }],
           regions: [{
-            scale: ['#C8EEFF', '#0071A4'],
+            scale: {
+              red: '#ff0000',
+              blue: '#00ff00'
+            },
             attribute: 'fill',
             normalizeFunction: 'polynomial',
             values: {
-              "US-KS": 1,
-              "US-MO": 2,
-              "US-IA": 3,
-              "US-NE": 4
+              "US-KS": 'red',
+              "US-MO": 'red',
+              "US-IA": 'blue',
+              "US-NE": 'blue'
             }
           }]
         },
