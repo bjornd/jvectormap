@@ -88,6 +88,8 @@
         },
         regionsSelectable: true,
         markersSelectable: true,
+        selectedRegions: JSON.parse( window.localStorage.getItem('jvectormap-selected-regions') || '[]' ),
+        selectedMarkers: JSON.parse( window.localStorage.getItem('jvectormap-selected-markers') || '[]' ),
 
         onMarkerLabelShow: function(event, label, index){
           label.html(label.html()+' (modified marker)');
@@ -133,9 +135,6 @@
           }
         }
       });
-
-      map.setSelectedRegions( JSON.parse( window.localStorage.getItem('jvectormap-selected-regions') || '[]' ) );
-      map.setSelectedMarkers( JSON.parse( window.localStorage.getItem('jvectormap-selected-markers') || '[]' ) );
 
       $('.list-markers :checkbox').change(function(){
         var index = $(this).closest('li').attr('data-marker-index');
