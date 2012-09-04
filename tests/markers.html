@@ -159,6 +159,9 @@
       $('.button-clear-selected-markers').click(function(){
         map.clearSelectedMarkers();
       });
+      $('.button-remove-map').click(function(){
+        map.remove();
+      });
     });
   </script>
 </head>
@@ -175,5 +178,7 @@
   &nbsp;&nbsp;&nbsp;
   <input type="button" value="Clear selected regions" class="button-clear-selected-regions"/>
   <input type="button" value="Clear selected markers" class="button-clear-selected-markers"/>
+  &nbsp;&nbsp;&nbsp;
+  <input type="button" value="Remove map" class="button-remove-map"/>
 </body>
 </html>
