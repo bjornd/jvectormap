@@ -37,7 +37,10 @@
 
   <script src="assets/jquery-jvectormap-world-mill-en.js"></script>
   <script>
-    $(function(){
+    jQuery.noConflict();
+    jQuery(function(){
+      var $ = jQuery;
+
       $('#focus').click(function(){
         $('#map1').vectorMap('set', 'focus', 'AU');
       });

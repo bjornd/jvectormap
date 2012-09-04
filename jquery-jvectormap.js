@@ -26,13 +26,14 @@
   $.fn.vectorMap = function(options) {
     var map,
         methodName,
-        event;
+        event,
+        map = this.children('.jvectormap-container').data('mapObject');
 
     if (options === 'addMap') {
       jvm.WorldMap.maps[arguments[1]] = arguments[2];
     } else if ((options === 'set' || options === 'get') && apiParams[options][arguments[1]]) {
       methodName = arguments[1].charAt(0).toUpperCase()+arguments[1].substr(1);
-      return this.data('mapObject')[options+methodName].apply(this.data('mapObject'), Array.prototype.slice.call(arguments, 2));
+      return map[options+methodName].apply(map, Array.prototype.slice.call(arguments, 2));
     } else {
       options = options || {};
       options.container = this;
