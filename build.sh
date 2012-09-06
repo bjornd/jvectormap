@@ -20,6 +20,7 @@ files=( \
   lib/vml-path-element.js \
   lib/vml-circle-element.js \
   lib/vector-canvas.js \
+  lib/ordinal-scale.js \
   lib/numeric-scale.js \
   lib/color-scale.js \
   lib/data-series.js \
