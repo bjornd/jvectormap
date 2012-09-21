@@ -134,6 +134,9 @@
               JSON.stringify(selectedRegions)
             );
           }
+        },
+        onZoom: function(e, scale){
+            console.log('viewportChange', scale);
         }
       });
 
