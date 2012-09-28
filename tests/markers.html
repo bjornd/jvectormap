@@ -87,7 +87,8 @@
             }
           },{
             values: {
-              "US-NY": '#000000'
+              "US-NY": 'blue',
+              "US-FL": 'blue'
             },
             attribute: 'fill'
           }]
@@ -172,6 +173,13 @@
       $('.button-remove-map').click(function(){
         map.remove();
       });
+      $('.button-change-values').click(function(){
+        map.series.regions[1].clear();
+        map.series.regions[1].setValues({
+          "US-TX": "black",
+          "US-CA": "black"
+        });
+      });
     });
   </script>
 </head>
@@ -190,5 +198,7 @@
   <input type="button" value="Clear selected markers" class="button-clear-selected-markers"/>
   &nbsp;&nbsp;&nbsp;
   <input type="button" value="Remove map" class="button-remove-map"/>
+  &nbsp;&nbsp;&nbsp;
+  <input type="button" value="Change values" class="button-change-values"/>
 </body>
 </html>
