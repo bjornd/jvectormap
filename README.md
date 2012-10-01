@@ -14,7 +14,7 @@ It also includes converter that could be used to create your own maps for jVecto
       --codes_file path/to/codes-en.tsv \
       --insets '[{"codes": ["US-AK"], "width": 200, "left": 10, "top": 370}, {"codes": ["US-HI"], "width": 100, "left": 220, "top": 400}]' \
       --minimal_area 4000000 \
-      --buffer_distance -3000 \
+      --buffer_distance -0.5 \
       --simplify_tolerance 1000 \
-      --longtitude0 10w \
+      --longitude0 10w \
       --name us
