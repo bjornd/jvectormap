@@ -3,7 +3,7 @@
 <head>
   <title>jVectorMap demo</title>
   <link rel="stylesheet" media="all" href="../jquery-jvectormap.css"/>
-  <script src="assets/jquery-1.7.2.min.js"></script>
+  <script src="assets/jquery-1.8.2.js"></script>
   <script src="../jquery-jvectormap.js"></script>
   <script src="../jquery-mousewheel.js"></script>
 
@@ -28,7 +28,9 @@
   <script src="../lib/vml-circle-element.js"></script>
 
   <script src="../lib/vector-canvas.js"></script>
+  <script src="../lib/simple-scale.js"></script>
   <script src="../lib/numeric-scale.js"></script>
+  <script src="../lib/ordinal-scale.js"></script>
   <script src="../lib/color-scale.js"></script>
   <script src="../lib/data-series.js"></script>
   <script src="../lib/proj.js"></script>
@@ -36,7 +38,10 @@
 
   <script src="assets/jquery-jvectormap-world-mill-en.js"></script>
   <script>
-    $(function(){
+    jQuery.noConflict();
+    jQuery(function(){
+      var $ = jQuery;
+
       $('#focus').click(function(){
         $('#map1').vectorMap('set', 'focus', 'AU');
       });
@@ -49,6 +54,7 @@
         },
         series: {
           regions: [{
+            scale: ['#C8EEFF', '#0071A4'],
             normalizeFunction: 'polynomial',
             values: {
               "AF": 16.63,

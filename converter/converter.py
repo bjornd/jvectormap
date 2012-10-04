@@ -1,5 +1,5 @@
 #
-# jVectorMap version 1.0
+# jVectorMap version 1.1
 #
 # Copyright 2011-2012, Kirill Lebedev
 # Licensed under the MIT license.
@@ -43,7 +43,7 @@ class Converter:
     self.minimal_area = kwargs['minimal_area']
     self.country_name_index = kwargs['country_name_index']
     self.country_code_index = kwargs['country_code_index']
-    self.longtitude0 = kwargs['longtitude0']
+    self.longitude0 = kwargs['longitude0']
     self.inputFileEncoding = kwargs['input_file_encoding']
     self.projection = kwargs['projection']
     self.precision = kwargs['precision']
@@ -54,7 +54,7 @@ class Converter:
 
     # spatial reference to convert to
     self.spatialRef = osr.SpatialReference()
-    self.spatialRef.ImportFromProj4('+proj='+self.projection+' +lat_0=0 +lon_0='+self.longtitude0)
+    self.spatialRef.ImportFromProj4('+proj='+self.projection+' +a=6381372 +b=6381372 +lat_0=0 +lon_0='+self.longitude0)
 
     # handle map insets
     if kwargs['insets']:
@@ -155,7 +155,7 @@ class Converter:
       "width": self.width,
       "height": insetHeight
     })
-    self.map.projection = {"type": self.projection, "centralMeridian": float(self.longtitude0)}
+    self.map.projection = {"type": self.projection, "centralMeridian": float(self.longitude0)}
 
     open(outputFile, 'w').write( self.map.getJSCode() )
 
@@ -244,7 +244,7 @@ parser.add_argument('--minimal_area', type=float)
 parser.add_argument('--buffer_distance', type=float, default=-0.4)
 parser.add_argument('--simplify_tolerance', type=float)
 parser.add_argument('--viewport', type=str)
-parser.add_argument('--longtitude0', type=str, default='0')
+parser.add_argument('--longitude0', type=str, default='0')
 parser.add_argument('--projection', type=str, default='mill')
 parser.add_argument('--name', type=str, default='world')
 parser.add_argument('--language', type=str, default='en')
@@ -261,7 +261,7 @@ converter = Converter(args.input_file,
   minimal_area = args.minimal_area,
   country_name_index = args.country_name_index,
   country_code_index = args.country_code_index,
-  longtitude0 = args.longtitude0,
+  longitude0 = args.longitude0,
   projection = args.projection,
   name = args.name,
   language = args.language,

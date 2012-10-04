@@ -11,7 +11,7 @@
     }
   </style>
 
-  <script src="assets/jquery-1.7.2.min.js"></script>
+  <script src="assets/jquery-1.8.2.js"></script>
   <script src="../jquery-jvectormap.js"></script>
   <script src="../jquery-mousewheel.js"></script>
 
@@ -36,6 +36,8 @@
   <script src="../lib/vml-circle-element.js"></script>
 
   <script src="../lib/vector-canvas.js"></script>
+  <script src="../lib/simple-scale.js"></script>
+  <script src="../lib/ordinal-scale.js"></script>
   <script src="../lib/numeric-scale.js"></script>
   <script src="../lib/color-scale.js"></script>
   <script src="../lib/data-series.js"></script>
@@ -48,7 +50,7 @@
       var markers = [
             [61.18, -149.53],
             [21.18, -157.49],
-            {latLng: [40.39, -73.56], name: 'New York City', style: {r: 8, fill: 'yellow'}},
+            {latLng: [40.66, -73.56], name: 'New York City', style: {r: 8, fill: 'yellow'}},
             {latLng: [41.52, -87.37], style: {fill: 'red', r: 10}}
           ],
           values1 = [1, 2, 3, 4],
@@ -71,19 +73,31 @@
             values: values2
           }],
           regions: [{
-            scale: ['#C8EEFF', '#0071A4'],
+            scale: {
+              red: '#ff0000',
+              blue: '#00ff00'
+            },
             attribute: 'fill',
             normalizeFunction: 'polynomial',
             values: {
-              "US-KS": 1,
-              "US-MO": 2,
-              "US-IA": 3,
-              "US-NE": 4
+              "US-KS": 'red',
+              "US-MO": 'red',
+              "US-IA": 'blue',
+              "US-NE": 'blue'
             }
+          },{
+            values: {
+              "US-NY": 'blue',
+              "US-FL": 'blue'
+            },
+            attribute: 'fill'
           }]
         },
         regionsSelectable: true,
         markersSelectable: true,
+        markersSelectableOne: true,
+        selectedRegions: JSON.parse( window.localStorage.getItem('jvectormap-selected-regions') || '[]' ),
+        selectedMarkers: JSON.parse( window.localStorage.getItem('jvectormap-selected-markers') || '[]' ),
 
         onMarkerLabelShow: function(event, label, index){
           label.html(label.html()+' (modified marker)');
@@ -99,6 +113,12 @@
         },
         onMarkerSelected: function(event, index, isSelected, selectedMarkers){
           console.log('marker-select', index, isSelected, selectedMarkers);
+          if (window.localStorage) {
+            window.localStorage.setItem(
+              'jvectormap-selected-markers',
+              JSON.stringify(selectedMarkers)
+            );
+          }
         },
 
         onRegionLabelShow: function(event, label, code){
@@ -115,6 +135,15 @@
         },
         onRegionSelected: function(event, code, isSelected, selectedRegions){
           console.log('region-select', code, isSelected, selectedRegions);
+          if (window.localStorage) {
+            window.localStorage.setItem(
+              'jvectormap-selected-regions',
+              JSON.stringify(selectedRegions)
+            );
+          }
+        },
+        onZoom: function(e, scale){
+            console.log('viewportChange', scale);
         }
       });
 
@@ -133,13 +162,32 @@
       });
       $('.button-remove-all').click(function(){
         $('.list-markers :checkbox').prop('checked', false);
-        map.clearMarkers();
+        map.removeAllMarkers();
+      });
+      $('.button-clear-selected-regions').click(function(){
+        map.clearSelectedRegions();
+      });
+      $('.button-clear-selected-markers').click(function(){
+        map.clearSelectedMarkers();
+      });
+      $('.button-remove-map').click(function(){
+        map.remove();
+      });
+      $('.button-change-values').click(function(){
+        map.series.regions[1].clear();
+        map.series.regions[1].setValues({
+          "US-TX": "black",
+          "US-CA": "black"
+        });
+      });
+      $('.button-reset-map').click(function(){
+        map.reset();
       });
     });
   </script>
 </head>
 <body>
-  <div class="map" style="width: 800px; height: 600px"></div>
+  <div class="map" style="width: 800px; height: 500px"></div>
   <ul class="list-markers">
     <li data-marker-index="0"><label><input checked type="checkbox"/> Marker 1</label></li>
     <li data-marker-index="1"><label><input checked type="checkbox"/> Marker 2</label></li>
@@ -148,5 +196,14 @@
   </ul>
   <input type="button" value="Add all" class="button-add-all"/>
   <input type="button" value="Remove all" class="button-remove-all"/>
+  &nbsp;&nbsp;&nbsp;
+  <input type="button" value="Clear selected regions" class="button-clear-selected-regions"/>
+  <input type="button" value="Clear selected markers" class="button-clear-selected-markers"/>
+  &nbsp;&nbsp;&nbsp;
+  <input type="button" value="Remove map" class="button-remove-map"/>
+  &nbsp;&nbsp;&nbsp;
+  <input type="button" value="Change values" class="button-change-values"/>
+  &nbsp;&nbsp;&nbsp;
+  <input type="button" value="Reset map" class="button-reset-map"/>
 </body>
 </html>
