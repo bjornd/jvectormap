@@ -113,7 +113,7 @@ class Converter:
           code = self.codes[name]
           self.features[code] = {"geometry": shapelyGeometry, "name": name, "code": code}
       else:
-        raise Exception, "Wrong geomtry type: "+geometryType
+        raise Exception, "Wrong geometry type: "+geometryType
 
 
   def convert(self, outputFile):
