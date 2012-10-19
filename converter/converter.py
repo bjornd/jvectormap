@@ -233,7 +233,6 @@ class Converter:
 parser = argparse.ArgumentParser(conflict_handler='resolve')
 parser.add_argument('input_file')
 parser.add_argument('output_file')
-parser.add_argument('--scale', type=float)
 parser.add_argument('--country_code_index', default=0, type=int)
 parser.add_argument('--country_name_index', default=1, type=int)
 parser.add_argument('--codes_file', default='', type=str)
