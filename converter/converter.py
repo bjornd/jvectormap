@@ -54,7 +54,7 @@ class Converter:
 
     # spatial reference to convert to
     self.spatialRef = osr.SpatialReference()
-    self.spatialRef.ImportFromProj4('+proj='+self.projection+' +a=6381372 +b=6381372 +lat_0=0 +lon_0='+self.longitude0)
+    self.spatialRef.ImportFromProj4('+proj='+self.projection+' +a=6378137 +b=6378137 +lat_0=0 +lon_0='+self.longitude0)
 
     # handle map insets
     if kwargs['insets']:
@@ -113,7 +113,7 @@ class Converter:
           code = self.codes[name]
           self.features[code] = {"geometry": shapelyGeometry, "name": name, "code": code}
       else:
-        raise Exception, "Wrong geomtry type: "+geometryType
+        raise Exception, "Wrong geometry type: "+geometryType
 
 
   def convert(self, outputFile):
@@ -233,7 +233,6 @@ class Converter:
 parser = argparse.ArgumentParser(conflict_handler='resolve')
 parser.add_argument('input_file')
 parser.add_argument('output_file')
-parser.add_argument('--scale', type=float)
 parser.add_argument('--country_code_index', default=0, type=int)
 parser.add_argument('--country_name_index', default=1, type=int)
 parser.add_argument('--codes_file', default='', type=str)
