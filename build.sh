@@ -39,7 +39,7 @@ done
 
 if [ -z "$1" ]
   then
-    minified=jquery-jvectormap.min.js
+    minified=jquery.jvectormap.min.js
   else
     minified=$1
 fi
