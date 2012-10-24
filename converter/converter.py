@@ -15,14 +15,13 @@ import codecs
 
 
 class Map:
-  width = 0
-  height = 0
-  bbox = []
-
   def __init__(self, name, language):
     self.paths = {}
     self.name = name
     self.language = language
+    self.width = 0
+    self.heoght = 0
+    self.bbox = []
 
   def addPath(self, path, code, name):
     self.paths[code] = {"path": path, "name": name}
