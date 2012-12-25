@@ -56,7 +56,7 @@ class Converter:
 
     for index in range(len(self.sources)):
       for key in default_source:
-        if default_source.get(key) and self.sources[index].get(key) is None:
+        if self.sources[index].get(key) is None:
           self.sources[index][key] = default_source[key]
 
     self.features = {}
