@@ -142,8 +142,8 @@
             );
           }
         },
-        onZoom: function(e, scale){
-            console.log('viewportChange', scale);
+        onViewportChange: function(e, scale, transX, transY){
+            console.log('viewportChange', scale, transX, transY);
         }
       });
 
