@@ -9,7 +9,7 @@
     "usa",
     "choropleth"
   ],
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": {
     "name": "Kirill Lebedev",
     "email" : "echo.bjornd@gmail.com"
@@ -21,8 +21,8 @@
     }
   ],
   "bugs": "https://github.com/bjornd/jvectormap/issues",
-  "homepage": "https://jvectormap.com",
-  "docs": "https://http://jvectormap.com/documentation/",
+  "homepage": "http://jvectormap.com",
+  "docs": "http://jvectormap.com/documentation/",
   "download": "http://jvectormap.com/download/",
   "dependencies": {
     "jquery": ">=1.5"
