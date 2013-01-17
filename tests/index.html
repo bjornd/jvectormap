@@ -48,6 +48,9 @@
       $('#focus-multiple').click(function(){
         $('#map1').vectorMap('set', 'focus', ['AU', 'JP']);
       });
+      $('#focus-init').click(function(){
+        $('#map1').vectorMap('set', 'focus', 1, 0, 0);
+      });
       $('#map1').vectorMap({
         map: 'world_mill_en',
         focusOn: {
@@ -253,5 +256,6 @@
   <div id="map1" style="width: 600px; height: 400px"></div>
   <button id="focus-single">Focus on Australia</button>
   <button id="focus-multiple">Focus on Australia and Japan</button>
+  <button id="focus-init">Return to the initial state</button>
 </body>
 </html>
