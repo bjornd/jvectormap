@@ -19,7 +19,7 @@ class Map:
     self.name = name
     self.language = language
     self.width = 0
-    self.heoght = 0
+    self.height = 0
     self.bbox = []
 
   def addPath(self, path, code, name):
