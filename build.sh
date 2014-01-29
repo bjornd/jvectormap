@@ -1,8 +1,12 @@
 #!/bin/bash
-
-files=( \
+skipJQueryArg="--skip-jquery"
+skipJQuery=0
+jQueryFiles=(\
   jquery-jvectormap.js \
   jquery-mousewheel.js \
+)
+
+files=( \
   lib/jvectormap.js \
   lib/abstract-element.js \
   lib/abstract-canvas-element.js \
@@ -32,6 +36,12 @@ files=( \
 baseDir=`dirname $0`
 
 counter=0
+while [ $counter -lt ${#jQueryFiles[@]} ]; do
+  jQueryFiles[$counter]="$baseDir/${jQueryFiles[$counter]}"
+  let counter=counter+1
+done
+
+counter=0
 while [ $counter -lt ${#files[@]} ]; do
   files[$counter]="$baseDir/${files[$counter]}"
   let counter=counter+1
@@ -47,6 +57,19 @@ fi
 if [ -a $minified ]
   then
     rm $minified
+fi
+
+for arg in "$@"
+do
+  if [ $arg = $skipJQueryArg ];
+  then
+    skipJQuery=1
+  fi
+done
+
+if [ $skipJQuery -eq 0 ];
+then
+  cat ${jQueryFiles[*]} >> $minified  
 fi
 
 cat ${files[*]} >> $minified
