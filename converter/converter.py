@@ -11,6 +11,7 @@ from osgeo import ogr
 from osgeo import osr
 import json
 import shapely.geometry
+import shapely.wkb
 import codecs
 
 class Map:
@@ -94,7 +95,7 @@ class Converter:
     self.viewportRect = False
 
     if self.viewport:
-      layer.SetSpatialFilterRect( *sourceConfig.get('viewport') )
+      layer.SetSpatialFilterRect( *self.viewport )
       transformation = osr.CoordinateTransformation( layer.GetSpatialRef(), self.spatialRef )
       point1 = transformation.TransformPoint(self.viewport[0], self.viewport[1])
       point2 = transformation.TransformPoint(self.viewport[2], self.viewport[3])
