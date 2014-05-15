@@ -11,6 +11,7 @@ from osgeo import ogr
 from osgeo import osr
 import json
 import shapely.geometry
+import shapely.wkb
 import codecs
 
 class Map:
