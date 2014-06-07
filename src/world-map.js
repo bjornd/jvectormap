@@ -102,7 +102,7 @@ jvm.WorldMap = function(params) {
   this.setBackgroundColor(this.params.backgroundColor);
 
   this.onResize = function(){
-    map.setSize();
+    map.updateSize();
   }
   jvm.$(window).resize(this.onResize);
 
@@ -129,7 +129,7 @@ jvm.WorldMap = function(params) {
   this.createRegions();
   this.createMarkers(this.params.markers || {});
 
-  this.setSize();
+  this.updateSize();
 
   if (this.params.focusOn) {
     if (typeof this.params.focusOn === 'object') {
@@ -187,7 +187,7 @@ jvm.WorldMap.prototype = {
   /**
    * Synchronize the size of the map with the size of the container. Suitable in situations where the size of the container is changed programmatically or container is shown after it became visible.
    */
-  setSize: function(){
+  updateSize: function(){
     this.width = this.container.width();
     this.height = this.container.height();
     this.resize();
