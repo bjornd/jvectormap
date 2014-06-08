@@ -280,9 +280,10 @@ jvm.WorldMap.prototype = {
       return false;
     });
 
-    jvm.$('body').mouseup(function(){
+    this.onMouseup = function(){
       mouseDown = false;
-    });
+    };
+    jvm.$('body').mouseup(this.onMouseup);
 
     if (this.params.zoomOnScroll) {
       this.container.mousewheel(function(event, delta, deltaX, deltaY) {
@@ -921,6 +922,7 @@ jvm.WorldMap.prototype = {
     this.label.remove();
     this.container.remove();
     jvm.$(window).unbind('resize', this.onResize);
+    jvm.$('body').unbind('mouseup', this.onMouseup);
   }
 };
 
