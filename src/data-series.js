@@ -66,7 +66,7 @@ jvm.DataSeries.prototype = {
 
     if (!(this.scale instanceof jvm.OrdinalScale) && !(this.scale instanceof jvm.SimpleScale)) {
       // we have a color scale as an array
-      if (this.params.min === undefined || this.params.max === undefined) {
+      if (typeof this.params.min === 'undefined' || typeof this.params.max === 'undefined') {
         // min and/or max are not defined, so calculate them
         for (cc in values) {
           val = parseFloat(values[cc]);
@@ -75,14 +75,14 @@ jvm.DataSeries.prototype = {
         }
       }
       
-      if (this.params.min === undefined) {
+      if (typeof this.params.min === 'undefined') {
         this.scale.setMin(min);
         this.params.min = min;
       } else {
         this.scale.setMin(this.params.min);
       }
     
-      if (this.params.max === undefined) {
+      if (typeof this.params.max === 'undefined') {
         this.scale.setMax(max);
         this.params.max = max;
       } else {

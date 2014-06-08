@@ -5,8 +5,8 @@ jvm.NumericScale = function(scale, normalizeFunction, minValue, maxValue) {
 
   if (scale) this.setScale(scale);
   if (normalizeFunction) this.setNormalizeFunction(normalizeFunction);
-  if (this.minValue !== undefined ) this.setMin(minValue);
-  if (this.maxValue !== undefined ) this.setMin(maxValue);
+  if (typeof this.minValue !== 'undefined' ) this.setMin(minValue);
+  if (typeof this.maxValue !== 'undefined' ) this.setMin(maxValue);
 };
 
 jvm.NumericScale.prototype = {
