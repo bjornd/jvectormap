@@ -61,10 +61,12 @@
       });
 
       $('#map').click(function(e){
-          var latLng = map.pointToLatLng(e.offsetX, e.offsetY),
+          var x = e.pageX - map.container.offset().left,
+              y = e.pageY - map.container.offset().top,
+              latLng = map.pointToLatLng(x, y),
               targetCls = $(e.target).attr('class');
 
-          if (latLng && (!targetCls || (targetCls && $(e.target).attr('class').indexOf('jvectormap-marker') === -1))) {
+          if (latLng && (!targetCls || targetCls.indexOf('jvectormap-marker') === -1)) {
             markersCoords[markerIndex] = latLng;
             map.addMarker(markerIndex, {latLng: [latLng.lat, latLng.lng]});
             markerIndex += 1;
