@@ -51,4 +51,4 @@ fi
 
 cat ${files[*]} >> $minified
 
-uglifyjs --overwrite $minified
+uglifyjs $minified -o $minified -c
