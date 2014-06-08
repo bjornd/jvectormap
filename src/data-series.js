@@ -58,28 +58,37 @@ jvm.DataSeries.prototype = {
    * @param {Object} values Object which maps codes of regions or markers to values.
    */
   setValues: function(values) {
-    var max = Number.MIN_VALUE,
+    var max = -Number.MAX_VALUE,
         min = Number.MAX_VALUE,
         val,
         cc,
         attrs = {};
 
     if (!(this.scale instanceof jvm.OrdinalScale) && !(this.scale instanceof jvm.SimpleScale)) {
-      if (!this.params.min || !this.params.max) {
+      // we have a color scale as an array
+      if (this.params.min === undefined || this.params.max === undefined) {
+        // min and/or max are not defined, so calculate them
         for (cc in values) {
           val = parseFloat(values[cc]);
-          if (val > max) max = values[cc];
+          if (val > max) max = val;
           if (val < min) min = val;
         }
-        if (!this.params.min) {
-          this.scale.setMin(min);
-        }
-        if (!this.params.max) {
-          this.scale.setMax(max);
-        }
-        this.params.min = min;
-        this.params.max = max;
       }
+      
+      if (this.params.min === undefined) {
+        this.scale.setMin(min);
+        this.params.min = min;
+      } else {
+        this.scale.setMin(this.params.min);
+      }
+    
+      if (this.params.max === undefined) {
+        this.scale.setMax(max);
+        this.params.max = max;
+      } else {
+        this.scale.setMax(this.params.max);
+      }
+
       for (cc in values) {
         val = parseFloat(values[cc]);
         if (!isNaN(val)) {
