@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <title>Maps</title>
   <link rel="stylesheet" media="all" href="../jquery-jvectormap.css"/>
-  
+
   <script src="assets/jquery-1.8.2.js"></script>
   <script src="../jquery-jvectormap.js"></script>
   <script src="../lib/jquery-mousewheel.js"></script>
@@ -36,12 +36,12 @@
   <script src="../src/color-scale.js"></script>
   <script src="../src/data-series.js"></script>
   <script src="../src/proj.js"></script>
-  <script src="../src/world-map.js"></script>
+  <script src="../src/map.js"></script>
 
   <script src="assets/jquery-jvectormap-us-aea-en.js"></script>
   <script>
     $(function(){
-      var map = new jvm.WorldMap({
+      var map = new jvm.Map({
         container: $('.map'),
         map: 'us_aea_en'
       });

@@ -73,17 +73,17 @@
  * @param {Function} params.onMarkerSelected <code>(Event e, String code, Boolean isSelected, Array selectedMarkers)</code> Will be called when marker is (de)selected. <code>isSelected</code> parameter of the callback indicates whether marker is selected or not. <code>selectedMarkers</code> contains codes of all currently selected markers.
  * @param {Function} params.onViewportChange <code>(Event e, Number scale)</code> Triggered when the map's viewport is changed (map was panned or zoomed).
  */
-jvm.WorldMap = function(params) {
+jvm.Map = function(params) {
   var map = this,
       e;
 
-  this.params = jvm.$.extend(true, {}, jvm.WorldMap.defaultParams, params);
+  this.params = jvm.$.extend(true, {}, jvm.Map.defaultParams, params);
 
-  if (!jvm.WorldMap.maps[this.params.map]) {
+  if (!jvm.Map.maps[this.params.map]) {
     throw new Error('Attempt to use map which was not loaded: '+this.params.map);
   }
 
-  this.mapData = jvm.WorldMap.maps[this.params.map];
+  this.mapData = jvm.Map.maps[this.params.map];
   this.markers = {};
   this.regions = {};
   this.regionsColors = {};
@@ -107,9 +107,9 @@ jvm.WorldMap = function(params) {
   }
   jvm.$(window).resize(this.onResize);
 
-  for (e in jvm.WorldMap.apiEvents) {
+  for (e in jvm.Map.apiEvents) {
     if (this.params[e]) {
-      this.container.bind(jvm.WorldMap.apiEvents[e]+'.jvectormap', this.params[e]);
+      this.container.bind(jvm.Map.apiEvents[e]+'.jvectormap', this.params[e]);
     }
   }
 
@@ -152,7 +152,7 @@ jvm.WorldMap = function(params) {
   }
 };
 
-jvm.WorldMap.prototype = {
+jvm.Map.prototype = {
   transX: 0,
   transY: 0,
   scale: 1,
@@ -649,8 +649,8 @@ jvm.WorldMap.prototype = {
   },
 
   /**
-   * Return the instance of WorldMap. Useful when instantiated as a jQuery plug-in.
-   * @returns {WorldMap}
+   * Return the instance of Map. Useful when instantiated as a jQuery plug-in.
+   * @returns {Map}
    */
   getMapObject: function(){
     return this;
@@ -738,7 +738,7 @@ jvm.WorldMap.prototype = {
   },
 
   getMarkerPosition: function(markerConfig) {
-    if (jvm.WorldMap.maps[this.params.map].projection) {
+    if (jvm.Map.maps[this.params.map].projection) {
       return this.latLngToPoint.apply(this, markerConfig.latLng || [0, 0]);
     } else {
       return {
@@ -820,7 +820,7 @@ jvm.WorldMap.prototype = {
    */
   latLngToPoint: function(lat, lng) {
     var point,
-        proj = jvm.WorldMap.maps[this.params.map].projection,
+        proj = jvm.Map.maps[this.params.map].projection,
         centralMeridian = proj.centralMeridian,
         width = this.width - this.baseTransX * 2 * this.baseScale,
         height = this.height - this.baseTransY * 2 * this.baseScale,
@@ -856,9 +856,9 @@ jvm.WorldMap.prototype = {
    * @param {Number} y Y-axis of point on map in pixels.
    */
   pointToLatLng: function(x, y) {
-    var proj = jvm.WorldMap.maps[this.params.map].projection,
+    var proj = jvm.Map.maps[this.params.map].projection,
         centralMeridian = proj.centralMeridian,
-        insets = jvm.WorldMap.maps[this.params.map].insets,
+        insets = jvm.Map.maps[this.params.map].insets,
         i,
         inset,
         bbox,
@@ -884,7 +884,7 @@ jvm.WorldMap.prototype = {
   },
 
   getInsetForPoint: function(x, y){
-    var insets = jvm.WorldMap.maps[this.params.map].insets,
+    var insets = jvm.Map.maps[this.params.map].insets,
         i,
         bbox;
 
@@ -926,8 +926,8 @@ jvm.WorldMap.prototype = {
   }
 };
 
-jvm.WorldMap.maps = {};
-jvm.WorldMap.defaultParams = {
+jvm.Map.maps = {};
+jvm.Map.defaultParams = {
   map: 'world_mill_en',
   backgroundColor: '#505050',
   zoomButtons: true,
@@ -976,7 +976,7 @@ jvm.WorldMap.defaultParams = {
     }
   }
 };
-jvm.WorldMap.apiEvents = {
+jvm.Map.apiEvents = {
   onRegionLabelShow: 'regionLabelShow',
   onRegionOver: 'regionOver',
   onRegionOut: 'regionOut',

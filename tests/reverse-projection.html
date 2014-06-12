@@ -34,7 +34,7 @@
   <script src="../src/color-scale.js"></script>
   <script src="../src/data-series.js"></script>
   <script src="../src/proj.js"></script>
-  <script src="../src/world-map.js"></script>
+  <script src="../src/map.js"></script>
 
   <script src="assets/jquery-jvectormap-us-lcc-en.js"></script>
   <script>
@@ -43,7 +43,7 @@
           markerIndex = 0,
           markersCoords = {};
 
-      map = new jvm.WorldMap({
+      map = new jvm.Map({
           map: 'us_lcc_en',
           markerStyle: {
             initial: {
