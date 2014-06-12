@@ -26,7 +26,7 @@ files=( \
   src/color-scale.js \
   src/data-series.js \
   src/proj.js \
-  src/world-map.js \
+  src/map.js \
 )
 
 baseDir=`dirname $0`
