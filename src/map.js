@@ -89,13 +89,11 @@ jvm.Map = function(params) {
   this.regionsColors = {};
   this.regionsData = {};
 
-  this.container = jvm.$('<div>').css({width: '100%', height: '100%'}).addClass('jvectormap-container');
-  this.params.container.append( this.container );
+  this.container = jvm.$('<div>').addClass('jvectormap-container');
+  if (this.params.container) {
+    this.params.container.append( this.container );
+  }
   this.container.data('mapObject', this);
-  this.container.css({
-    position: 'relative',
-    overflow: 'hidden'
-  });
 
   this.defaultWidth = this.mapData.width;
   this.defaultHeight = this.mapData.height;
