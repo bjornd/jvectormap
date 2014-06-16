@@ -9,6 +9,7 @@
  * @param {Number} params.zoomMax Indicates the maximum zoom ratio which could be reached zooming the map. Default value is <code>8</code>.
  * @param {Number} params.zoomMin Indicates the minimum zoom ratio which could be reached zooming the map. Default value is <code>1</code>.
  * @param {Number} params.zoomStep Indicates the multiplier used to zoom map with +/- buttons. Default value is <code>1.6</code>.
+ * @param {Boolean} params.zoomAnimate Indicates whether or not to animate changing of map zoom with zoom buttons.
  * @param {Boolean} params.regionsSelectable When set to true regions of the map could be selected. Default value is <code>false</code>.
  * @param {Boolean} params.regionsSelectableOne Allow only one region to be selected at the moment. Default value is <code>false</code>.
  * @param {Boolean} params.markersSelectable When set to true markers on the map could be selected. Default value is <code>false</code>.
@@ -131,10 +132,10 @@ jvm.Map = function(params) {
   this.updateSize();
 
   if (this.params.focusOn) {
-    if (typeof this.params.focusOn === 'object') {
-      this.setFocus.call(this, this.params.focusOn.scale, this.params.focusOn.x, this.params.focusOn.y);
+    if (this.params.focusOn.region || this.params.focusOn.regions) {
+      this.setFocus.call(this, this.params.focusOn.region || this.params.focusOn.regions, this.params.focusOn.animate);
     } else {
-      this.setFocus.call(this, this.params.focusOn);
+      this.setFocus.call(this, this.params.focusOn.scale, this.params.focusOn.x, this.params.focusOn.y, this.params.focusOn.animate);
     }
   }
 
@@ -451,10 +452,10 @@ jvm.Map.prototype = {
     jvm.$('<div/>').addClass('jvectormap-zoomout').html('&#x2212;').appendTo(this.container);
 
     this.container.find('.jvectormap-zoomin').click(function(){
-      map.setScale(map.scale * map.params.zoomStep, map.width / 2, map.height / 2);
+      map.setScale(map.scale * map.params.zoomStep, map.width / 2, map.height / 2, false, map.params.zoomAnimate);
     });
     this.container.find('.jvectormap-zoomout').click(function(){
-      map.setScale(map.scale / map.params.zoomStep, map.width / 2, map.height / 2);
+      map.setScale(map.scale / map.params.zoomStep, map.width / 2, map.height / 2, false, map.params.zoomAnimate);
     });
   },
 
@@ -483,9 +484,20 @@ jvm.Map.prototype = {
     });
   },
 
-  setScale: function(scale, anchorX, anchorY, isCentered) {
-    var zoomStep,
-        viewportChangeEvent = jvm.$.Event('zoom.jvectormap');
+  setScale: function(scale, anchorX, anchorY, isCentered, animate) {
+    var viewportChangeEvent = jvm.$.Event('zoom.jvectormap'),
+        interval,
+        that = this,
+        i = 0,
+        count = Math.abs(Math.round((scale - this.scale) * 60 / Math.max(scale, this.scale))),
+        scaleStart,
+        scaleDiff,
+        transXStart,
+        transXDiff,
+        transYStart,
+        transYDiff,
+        transX,
+        transY;
 
     if (scale > this.params.zoomMax * this.baseScale) {
       scale = this.params.zoomMax * this.baseScale;
@@ -496,17 +508,39 @@ jvm.Map.prototype = {
     if (typeof anchorX != 'undefined' && typeof anchorY != 'undefined') {
       zoomStep = scale / this.scale;
       if (isCentered) {
-        this.transX = anchorX + this.defaultWidth * (this.width / (this.defaultWidth * scale)) / 2;
-        this.transY = anchorY + this.defaultHeight * (this.height / (this.defaultHeight * scale)) / 2;
+        transX = anchorX + this.defaultWidth * (this.width / (this.defaultWidth * scale)) / 2;
+        transY = anchorY + this.defaultHeight * (this.height / (this.defaultHeight * scale)) / 2;
       } else {
-        this.transX -= (zoomStep - 1) / scale * anchorX;
-        this.transY -= (zoomStep - 1) / scale * anchorY;
+        transX = this.transX - (zoomStep - 1) / scale * anchorX;
+        transY = this.transY - (zoomStep - 1) / scale * anchorY;
       }
     }
 
-    this.scale = scale;
-    this.applyTransform();
-    this.container.trigger(viewportChangeEvent, [scale/this.baseScale]);
+    if (animate) {
+      scaleStart = this.scale;
+      scaleDiff = (scale - scaleStart) / count;
+      transXStart = this.transX * this.scale;
+      transYStart = this.transY * this.scale;
+      transXDiff = (transX * scale - transXStart) / count;
+      transYDiff = (transY * scale - transYStart) / count;
+      interval = setInterval(function(){
+        i += 1;
+        that.scale = scaleStart + scaleDiff * i;
+        that.transX = (transXStart + transXDiff * i) / that.scale;
+        that.transY = (transYStart + transYDiff * i) / that.scale;
+        that.applyTransform();
+        if (i == count) {
+          clearInterval(interval);
+          that.container.trigger(viewportChangeEvent, [scale/that.baseScale]);
+        }
+      }, 10);
+    } else {
+      this.transX = transX;
+      this.transY = transY;
+      this.scale = scale;
+      this.applyTransform();
+      this.container.trigger(viewportChangeEvent, [scale/this.baseScale]);
+    }
   },
 
   /**
@@ -514,8 +548,9 @@ jvm.Map.prototype = {
    * @param {Number|String|Array} scale|regionCode|regionCodes If the first parameter of this method is a string or array of strings and there are regions with the these codes, the viewport will be set to show all these regions. Otherwise if the first parameter is a number, the viewport will be set to show the map with provided scale.
    * @param {Number} centerX Number from 0 to 1 specifying the horizontal coordinate of the central point of the viewport.
    * @param {Number} centerY Number from 0 to 1 specifying the vertical coordinate of the central point of the viewport.
+   * @param {Boolean} animate Indicates whether or not to animate the scale change and transition.
    */
-  setFocus: function(scale, centerX, centerY){
+  setFocus: function(scale, centerX, centerY, animate){
     var bbox,
         itemBbox,
         newBbox,
@@ -550,11 +585,12 @@ jvm.Map.prototype = {
         Math.min(this.width / bbox.width, this.height / bbox.height),
         - (bbox.x + bbox.width / 2),
         - (bbox.y + bbox.height / 2),
-        true
+        true,
+        centerX
       );
     } else {
       scale = scale * this.baseScale;
-      this.setScale(scale, - centerX * this.defaultWidth, - centerY * this.defaultHeight, true);
+      this.setScale(scale, - centerX * this.defaultWidth, - centerY * this.defaultHeight, true, animate);
     }
   },
 
@@ -934,6 +970,7 @@ jvm.Map.defaultParams = {
   zoomMax: 8,
   zoomMin: 1,
   zoomStep: 1.6,
+  zoomAnimate: true,
   regionsSelectable: false,
   markersSelectable: false,
   bindTouchEvents: true,

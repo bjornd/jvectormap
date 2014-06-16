@@ -43,13 +43,13 @@
       var $ = jQuery;
 
       $('#focus-single').click(function(){
-        $('#map1').vectorMap('set', 'focus', 'AU');
+        $('#map1').vectorMap('set', 'focus', 'AU', true);
       });
       $('#focus-multiple').click(function(){
-        $('#map1').vectorMap('set', 'focus', ['AU', 'JP']);
+        $('#map1').vectorMap('set', 'focus', ['AU', 'JP'], true);
       });
       $('#focus-init').click(function(){
-        $('#map1').vectorMap('set', 'focus', 1, 0, 0);
+        $('#map1').vectorMap('set', 'focus', 1, 0.5, 0.5, true);
       });
       $('#map1').vectorMap({
         map: 'world_mill_en',
@@ -57,7 +57,8 @@
         focusOn: {
           x: 0.5,
           y: 0.5,
-          scale: 2
+          scale: 2,
+          animate: true
         },
         series: {
           regions: [{
