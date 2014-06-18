@@ -9,8 +9,6 @@
     position: absolute;
     display: none;
     border: solid 1px #CDCDCD;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
     border-radius: 3px;
     background: #292929;
     color: white;
@@ -19,20 +17,21 @@
     padding: 3px;
 }
 
-.jvectormap-zoomin, .jvectormap-zoomout {
+.jvectormap-zoomin, .jvectormap-zoomout, .jvectormap-goback {
     position: absolute;
     left: 10px;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
     border-radius: 3px;
     background: #292929;
     padding: 3px;
     color: white;
-    width: 10px;
-    height: 10px;
     cursor: pointer;
     line-height: 10px;
     text-align: center;
+}
+
+.jvectormap-zoomin, .jvectormap-zoomout {
+    width: 10px;
+    height: 10px;
 }
 
 .jvectormap-zoomin {
@@ -41,4 +40,9 @@
 
 .jvectormap-zoomout {
     top: 30px;
+}
+
+.jvectormap-goback {
+    bottom: 10px;
+    z-index: 1000;
 }

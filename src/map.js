@@ -497,7 +497,8 @@ jvm.Map.prototype = {
         transYStart,
         transYDiff,
         transX,
-        transY;
+        transY,
+        deferred = new jvm.$.Deferred();
 
     if (scale > this.params.zoomMax * this.baseScale) {
       scale = this.params.zoomMax * this.baseScale;
@@ -516,7 +517,7 @@ jvm.Map.prototype = {
       }
     }
 
-    if (animate) {
+    if (animate && count > 0)  {
       scaleStart = this.scale;
       scaleDiff = (scale - scaleStart) / count;
       transXStart = this.transX * this.scale;
@@ -532,6 +533,7 @@ jvm.Map.prototype = {
         if (i == count) {
           clearInterval(interval);
           that.container.trigger(viewportChangeEvent, [scale/that.baseScale]);
+          deferred.resolve();
         }
       }, 10);
     } else {
@@ -540,7 +542,10 @@ jvm.Map.prototype = {
       this.scale = scale;
       this.applyTransform();
       this.container.trigger(viewportChangeEvent, [scale/this.baseScale]);
+      deferred.resolve();
     }
+
+    return deferred;
   },
 
   /**
@@ -581,7 +586,7 @@ jvm.Map.prototype = {
           }
         }
       }
-      this.setScale(
+      return this.setScale(
         Math.min(this.width / bbox.width, this.height / bbox.height),
         - (bbox.x + bbox.width / 2),
         - (bbox.y + bbox.height / 2),
@@ -590,7 +595,7 @@ jvm.Map.prototype = {
       );
     } else {
       scale = scale * this.baseScale;
-      this.setScale(scale, - centerX * this.defaultWidth, - centerY * this.defaultHeight, true, animate);
+      return this.setScale(scale, - centerX * this.defaultWidth, - centerY * this.defaultHeight, true, animate);
     }
   },
 
