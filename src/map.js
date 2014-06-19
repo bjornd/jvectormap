@@ -118,9 +118,8 @@ jvm.Map = function(params) {
     if (this.params.bindTouchEvents) {
       this.bindContainerTouchEvents();
     }
-  } else {
-    this.bindContainerEvents();
   }
+  this.bindContainerEvents();
   this.bindElementEvents();
   this.createLabel();
   if (this.params.zoomButtons) {
