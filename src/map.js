@@ -145,6 +145,11 @@ jvm.Map = function(params) {
     this.setSelectedMarkers(this.params.selectedMarkers);
   }
 
+  this.legendCntHorizontal = $('<div/>').addClass('jvectormap-legend-cnt jvectormap-legend-cnt-h');
+  this.legendCntVertical = $('<div/>').addClass('jvectormap-legend-cnt jvectormap-legend-cnt-v');
+  this.container.append(this.legendCntHorizontal);
+  this.container.append(this.legendCntVertical);
+
   if (this.params.series) {
     this.createSeries();
   }
@@ -947,7 +952,8 @@ jvm.Map.prototype = {
       for (i = 0; i < this.params.series[key].length; i++) {
         this.series[key][i] = new jvm.DataSeries(
           this.params.series[key][i],
-          this[key]
+          this[key],
+          this
         );
       }
     }

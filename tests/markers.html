@@ -40,6 +40,7 @@
   <script src="../src/ordinal-scale.js"></script>
   <script src="../src/numeric-scale.js"></script>
   <script src="../src/color-scale.js"></script>
+  <script src="../src/legend.js"></script>
   <script src="../src/data-series.js"></script>
   <script src="../src/proj.js"></script>
   <script src="../src/map.js"></script>
@@ -53,7 +54,7 @@
             {latLng: [40.66, -73.56], name: 'New York City', style: {r: 8, fill: 'yellow'}},
             {latLng: [41.52, -87.37], style: {fill: 'red', r: 10}}
           ],
-          values1 = [1, 2, 3, 4],
+          values1 = [408, 512, 550, 781],
           values2 = [1, 2, 3, 4];
 
       var map = new jvm.Map({
@@ -65,7 +66,10 @@
             attribute: 'fill',
             scale: ['#C8EEFF', '#0071A4'],
             normalizeFunction: 'polynomial',
-            values: values1
+            values: values1,
+            legend: {
+              vertical: true
+            }
           },{
             attribute: 'r',
             scale: [5, 20],

@@ -9,7 +9,7 @@
  * @param {Number} params.min Minimum value of the data set. Could be calculated automatically if not provided.
  * @param {Number} params.min Maximum value of the data set. Could be calculated automatically if not provided.
  */
-jvm.DataSeries = function(params, elements) {
+jvm.DataSeries = function(params, elements, map) {
   var scaleConstructor;
 
   params = params || {};
@@ -17,6 +17,7 @@ jvm.DataSeries = function(params, elements) {
 
   this.elements = elements;
   this.params = params;
+  this.map = map;
 
   if (params.attributes) {
     this.setAttributes(params.attributes);
@@ -33,6 +34,13 @@ jvm.DataSeries = function(params, elements) {
 
   this.values = params.values || {};
   this.setValues(this.values);
+
+  if (this.params.legend) {
+    this.legend = new jvm.Legend($.extend({
+      map: this.map,
+      series: this
+    }, this.params.legend))
+  }
 };
 
 jvm.DataSeries.prototype = {
@@ -74,14 +82,14 @@ jvm.DataSeries.prototype = {
           if (val < min) min = val;
         }
       }
-      
+
       if (typeof this.params.min === 'undefined') {
         this.scale.setMin(min);
         this.params.min = min;
       } else {
         this.scale.setMin(this.params.min);
       }
-    
+
       if (typeof this.params.max === 'undefined') {
         this.scale.setMax(max);
         this.params.max = max;
