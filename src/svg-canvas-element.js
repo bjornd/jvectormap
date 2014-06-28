@@ -1,6 +1,10 @@
 jvm.SVGCanvasElement = function(container, width, height){
   this.classPrefix = 'SVG';
   jvm.SVGCanvasElement.parentClass.call(this, 'svg');
+
+  this.defsElement = new jvm.SVGElement('defs');
+  this.node.appendChild( this.defsElement.node );
+
   jvm.AbstractCanvasElement.apply(this, arguments);
 }
 

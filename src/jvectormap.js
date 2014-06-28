@@ -93,6 +93,20 @@ var jvm = {
       }
     }
     return values;
+  },
+
+  whenImageLoaded: function(url){
+    var deferred = new jvm.$.Deferred(),
+        img = $('<img/>');
+
+    img.error(function(){
+      deferred.reject();
+    }).load(function(){
+      deferred.resolve(img);
+    });
+    img.attr('src', url);
+
+    return deferred;
   }
 };
 
