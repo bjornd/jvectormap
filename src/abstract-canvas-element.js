@@ -51,6 +51,19 @@ jvm.AbstractCanvasElement.prototype.addCircle = function(config, style, group){
 };
 
 /**
+ * Create circle and add it to the canvas.
+ * @param {Object} config Parameters of path to create.
+ * @param {Object} style Styles of the path to create.
+ * @param {HTMLElement} group Group to add circle into.
+ */
+jvm.AbstractCanvasElement.prototype.addImage = function(config, style, group){
+  var el = new jvm[this.classPrefix+'ImageElement'](config, style);
+
+  this.add(el, group);
+  return el;
+};
+
+/**
  * Add group to the another group inside of the canvas.
  * @param {HTMLElement} group Group to add circle into or root group if not provided.
  */

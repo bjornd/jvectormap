@@ -13,6 +13,7 @@ files=( \
   src/svg-shape-element.js \
   src/svg-path-element.js \
   src/svg-circle-element.js \
+  src/svg-image-element.js \
   src/vml-element.js \
   src/vml-group-element.js \
   src/vml-canvas-element.js \

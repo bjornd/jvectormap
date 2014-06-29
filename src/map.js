@@ -734,6 +734,8 @@ jvm.Map.prototype = {
         point,
         markerConfig,
         markersArray,
+        addMethod,
+        markerStyle,
         map = this;
 
     this.markersGroup = this.markersGroup || this.canvas.addGroup();
@@ -751,11 +753,13 @@ jvm.Map.prototype = {
       point = this.getMarkerPosition( markerConfig );
 
       if (point !== false) {
-        marker = this.canvas.addCircle({
+        markerStyle = jvm.$.extend(true, {}, this.params.markerStyle, {initial: markerConfig.style || {}});
+        addMethod = markerStyle.initial['image'] ? 'addImage' : 'addCircle';
+        marker = this.canvas[addMethod]({
           "data-index": i,
           cx: point.x,
           cy: point.y
-        }, jvm.$.extend(true, {}, this.params.markerStyle, {initial: markerConfig.style || {}}), this.markersGroup);
+        }, markerStyle, this.markersGroup);
         marker.addClass('jvectormap-marker jvectormap-element');
         jvm.$(marker.node).bind('selected', function(e, isSelected){
           map.container.trigger('markerSelected.jvectormap', [jvm.$(this).attr('data-index'), isSelected, map.getSelectedMarkers()]);
