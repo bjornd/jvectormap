@@ -113,8 +113,8 @@
         selectedRegions: JSON.parse( window.localStorage.getItem('jvectormap-selected-regions') || '[]' ),
         selectedMarkers: JSON.parse( window.localStorage.getItem('jvectormap-selected-markers') || '[]' ),
 
-        onMarkerLabelShow: function(event, label, index){
-          label.html(label.html()+' (modified marker)');
+        onMarkerTipShow: function(event, tip, index){
+          tip.html(tip.html()+' (modified marker)');
         },
         onMarkerOver: function(event, index){
           console.log('marker-over', index);
@@ -135,8 +135,8 @@
           }
         },
 
-        onRegionLabelShow: function(event, label, code){
-          label.html(label.html()+' (modified)');
+        onRegionTipShow: function(event, tip, code){
+          tip.html(tip.html()+' (modified)');
         },
         onRegionOver: function(event, code){
           console.log('region-over', code, map.getRegionName(code));

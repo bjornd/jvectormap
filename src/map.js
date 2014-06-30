@@ -52,7 +52,7 @@
   selectedHover: {
   }
 }</pre>
- * @param {Object|Array} params.markers Set of markers to add to the map during initialization. In case of array is provided, codes of markers will be set as string representations of array indexes. Each marker is represented by <code>latLng</code> (array of two numeric values), <code>name</code> (string which will be show on marker's label) and any marker styles.
+ * @param {Object|Array} params.markers Set of markers to add to the map during initialization. In case of array is provided, codes of markers will be set as string representations of array indexes. Each marker is represented by <code>latLng</code> (array of two numeric values), <code>name</code> (string which will be show on marker's tip) and any marker styles.
  * @param {Object} params.series Object with two keys: <code>markers</code> and <code>regions</code>. Each of which is an array of series configs to be applied to the respective map elements. See <a href="jvm.DataSeries.html">DataSeries</a> description for a list of parameters available.
  * @param {Object|String} params.focusOn This parameter sets the initial position and scale of the map viewport. It could be expressed as a string representing region which should be in focus or an object representing coordinates and scale to set. For example to focus on the center of the map at the double scale you can provide the following value:
 <pre>{
@@ -62,12 +62,12 @@
 }</pre>
  * @param {Array|Object|String} params.selectedRegions Set initially selected regions.
  * @param {Array|Object|String} params.selectedMarkers Set initially selected markers.
- * @param {Function} params.onRegionLabelShow <code>(Event e, Object label, String code)</code> Will be called right before the region label is going to be shown.
+ * @param {Function} params.onRegionTipShow <code>(Event e, Object tip, String code)</code> Will be called right before the region tip is going to be shown.
  * @param {Function} params.onRegionOver <code>(Event e, String code)</code> Will be called on region mouse over event.
  * @param {Function} params.onRegionOut <code>(Event e, String code)</code> Will be called on region mouse out event.
  * @param {Function} params.onRegionClick <code>(Event e, String code)</code> Will be called on region click event.
  * @param {Function} params.onRegionSelected <code>(Event e, String code, Boolean isSelected, Array selectedRegions)</code> Will be called when region is (de)selected. <code>isSelected</code> parameter of the callback indicates whether region is selected or not. <code>selectedRegions</code> contains codes of all currently selected regions.
- * @param {Function} params.onMarkerLabelShow <code>(Event e, Object label, String code)</code> Will be called right before the marker label is going to be shown.
+ * @param {Function} params.onMarkerTipShow <code>(Event e, Object tip, String code)</code> Will be called right before the marker tip is going to be shown.
  * @param {Function} params.onMarkerOver <code>(Event e, String code)</code> Will be called on marker mouse over event.
  * @param {Function} params.onMarkerOut <code>(Event e, String code)</code> Will be called on marker mouse out event.
  * @param {Function} params.onMarkerClick <code>(Event e, String code)</code> Will be called on marker click event.
@@ -121,7 +121,7 @@ jvm.Map = function(params) {
   }
   this.bindContainerEvents();
   this.bindElementEvents();
-  this.createLabel();
+  this.createTip();
   if (this.params.zoomButtons) {
     this.bindZoomButtons();
   }
@@ -295,7 +295,7 @@ jvm.Map.prototype = {
             centerY = event.pageY - offset.top,
             zoomStep = Math.pow(1.003, event.deltaY);
 
-        map.label.hide();
+        map.tip.hide();
 
         map.setScale(map.scale * zoomStep, centerX, centerY);
         event.preventDefault();
@@ -330,7 +330,7 @@ jvm.Map.prototype = {
               map.transX -= (touchX - touches[0].pageX) / map.scale;
               map.transY -= (touchY - touches[0].pageY) / map.scale;
               map.applyTransform();
-              map.label.hide();
+              map.tip.hide();
               if (transXOld != map.transX || transYOld != map.transY) {
                 e.preventDefault();
               }
@@ -348,7 +348,7 @@ jvm.Map.prototype = {
                 centerTouchX,
                 centerTouchY
               )
-              map.label.hide();
+              map.tip.hide();
               e.preventDefault();
             } else {
               offset = jvm.$(map.container).offset();
@@ -395,8 +395,8 @@ jvm.Map.prototype = {
           type = baseVal.indexOf('jvectormap-region') === -1 ? 'marker' : 'region',
           code = type == 'region' ? jvm.$(this).attr('data-code') : jvm.$(this).attr('data-index'),
           element = type == 'region' ? map.regions[code].element : map.markers[code].element,
-          labelText = type == 'region' ? map.mapData.paths[code].name : (map.markers[code].config.name || ''),
-          labelShowEvent = jvm.$.Event(type+'LabelShow.jvectormap'),
+          tipText = type == 'region' ? map.mapData.paths[code].name : (map.markers[code].config.name || ''),
+          tipShowEvent = jvm.$.Event(type+'TipShow.jvectormap'),
           overEvent = jvm.$.Event(type+'Over.jvectormap');
 
       if (e.type == 'mouseover') {
@@ -405,16 +405,16 @@ jvm.Map.prototype = {
           element.setHovered(true);
         }
 
-        map.label.text(labelText);
-        map.container.trigger(labelShowEvent, [map.label, code]);
-        if (!labelShowEvent.isDefaultPrevented()) {
-          map.label.show();
-          map.labelWidth = map.label.width();
-          map.labelHeight = map.label.height();
+        map.tip.text(tipText);
+        map.container.trigger(tipShowEvent, [map.tip, code]);
+        if (!tipShowEvent.isDefaultPrevented()) {
+          map.tip.show();
+          map.tipWidth = map.tip.width();
+          map.tipHeight = map.tip.height();
         }
       } else {
         element.setHovered(false);
-        map.label.hide();
+        map.tip.hide();
         map.container.trigger(type+'Out.jvectormap', [code]);
       }
     });
@@ -463,14 +463,14 @@ jvm.Map.prototype = {
     });
   },
 
-  createLabel: function(){
+  createTip: function(){
     var map = this;
 
-    this.label = jvm.$('<div/>').addClass('jvectormap-label').appendTo(jvm.$('body'));
+    this.tip = jvm.$('<div/>').addClass('jvectormap-tip').appendTo(jvm.$('body'));
 
     this.container.mousemove(function(e){
-      var left = e.pageX-15-map.labelWidth,
-          top = e.pageY-15-map.labelHeight;
+      var left = e.pageX-15-map.tipWidth,
+          top = e.pageY-15-map.tipHeight;
 
       if (left < 5) {
         left = e.pageX + 15;
@@ -479,8 +479,8 @@ jvm.Map.prototype = {
         top = e.pageY + 15;
       }
 
-      if (map.label.is(':visible')) {
-        map.label.css({
+      if (map.tip.is(':visible')) {
+        map.tip.css({
           left: left,
           top: top
         })
@@ -967,7 +967,7 @@ jvm.Map.prototype = {
    * Gracefully remove the map and and all its accessories, unbind event handlers.
    */
   remove: function(){
-    this.label.remove();
+    this.tip.remove();
     this.container.remove();
     jvm.$(window).unbind('resize', this.onResize);
     jvm.$('body').unbind('mouseup', this.onMouseup);
@@ -1026,12 +1026,12 @@ jvm.Map.defaultParams = {
   }
 };
 jvm.Map.apiEvents = {
-  onRegionLabelShow: 'regionLabelShow',
+  onRegionTipShow: 'regionTipShow',
   onRegionOver: 'regionOver',
   onRegionOut: 'regionOut',
   onRegionClick: 'regionClick',
   onRegionSelected: 'regionSelected',
-  onMarkerLabelShow: 'markerLabelShow',
+  onMarkerTipShow: 'markerTipShow',
   onMarkerOver: 'markerOver',
   onMarkerOut: 'markerOut',
   onMarkerClick: 'markerClick',

@@ -5,7 +5,7 @@
     overflow: hidden;
 }
 
-.jvectormap-label {
+.jvectormap-tip {
     position: absolute;
     display: none;
     border: solid 1px #CDCDCD;
