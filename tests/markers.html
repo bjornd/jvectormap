@@ -36,6 +36,10 @@
   <script src="../src/vml-path-element.js"></script>
   <script src="../src/vml-circle-element.js"></script>
 
+  <script src="../src/map-object.js"></script>
+  <script src="../src/region.js"></script>
+  <script src="../src/marker.js"></script>
+
   <script src="../src/vector-canvas.js"></script>
   <script src="../src/simple-scale.js"></script>
   <script src="../src/ordinal-scale.js"></script>
@@ -63,6 +67,13 @@
       var map = new jvm.Map({
         container: $('.map'),
         map: 'us_aea_en',
+        labels: {
+          regions: {
+            render: function(code){
+              return code.split('-')[1];
+            }
+          }
+        },
         markers: markers,
         series: {
           markers: [{

@@ -391,7 +391,7 @@ jvm.Map.prototype = {
        SVG handling, use with caution. */
     this.container.delegate("[class~='jvectormap-element']", 'mouseover mouseout', function(e){
       var path = this,
-          baseVal = jvm.$(this).attr('class').baseVal ? jvm.$(this).attr('class').baseVal : jvm.$(this).attr('class'),
+          baseVal = jvm.$(this).attr('class').baseVal || jvm.$(this).attr('class'),
           type = baseVal.indexOf('jvectormap-region') === -1 ? 'marker' : 'region',
           code = type == 'region' ? jvm.$(this).attr('data-code') : jvm.$(this).attr('data-index'),
           element = type == 'region' ? map.regions[code].element : map.markers[code].element,
@@ -713,14 +713,16 @@ jvm.Map.prototype = {
         map = this;
 
     for (key in this.mapData.paths) {
-      region = this.canvas.addPath({
-        d: this.mapData.paths[key].path,
-        "data-code": key
-      }, jvm.$.extend(true, {}, this.params.regionStyle));
-      jvm.$(region.node).bind('selected', function(e, isSelected){
-        map.container.trigger('regionSelected.jvectormap', [jvm.$(this).attr('data-code'), isSelected, map.getSelectedRegions()]);
+      region = new jvm.Region({
+        path: this.mapData.paths[key].path,
+        code: key,
+        style: jvm.$.extend(true, {}, this.params.regionStyle),
+        canvas: this.canvas
       });
-      region.addClass('jvectormap-region jvectormap-element');
+
+      jvm.$(region.element).bind('selected', function(e, isSelected){
+        map.container.trigger('regionSelected.jvectormap', [jvm.$(this.node).attr('data-code'), isSelected, map.getSelectedRegions()]);
+      });
       this.regions[key] = {
         element: region,
         config: this.mapData.paths[key]
@@ -753,16 +755,17 @@ jvm.Map.prototype = {
       point = this.getMarkerPosition( markerConfig );
 
       if (point !== false) {
-        markerStyle = jvm.$.extend(true, {}, this.params.markerStyle, {initial: markerConfig.style || {}});
-        addMethod = markerStyle.initial['image'] ? 'addImage' : 'addCircle';
-        marker = this.canvas[addMethod]({
-          "data-index": i,
+        marker = new jvm.Marker({
+          style: jvm.$.extend(true, {}, this.params.markerStyle, {initial: markerConfig.style || {}}),
+          index: i,
           cx: point.x,
-          cy: point.y
-        }, markerStyle, this.markersGroup);
-        marker.addClass('jvectormap-marker jvectormap-element');
-        jvm.$(marker.node).bind('selected', function(e, isSelected){
-          map.container.trigger('markerSelected.jvectormap', [jvm.$(this).attr('data-index'), isSelected, map.getSelectedMarkers()]);
+          cy: point.y,
+          group: this.markersGroup,
+          canvas: this.canvas
+        });
+
+        jvm.$(marker.element).bind('selected', function(e, isSelected){
+          map.container.trigger('markerSelected.jvectormap', [jvm.$(this.node).attr('data-index'), isSelected, map.getSelectedMarkers()]);
         });
         if (this.markers[i]) {
           this.removeMarkers([i]);

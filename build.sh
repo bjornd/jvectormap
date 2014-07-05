@@ -28,6 +28,9 @@ files=( \
   src/legend.js \
   src/data-series.js \
   src/proj.js \
+  src/map-object.js \
+  src/region.js \
+  src/marker.js \
   src/map.js \
 )
 
