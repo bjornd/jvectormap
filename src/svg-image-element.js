@@ -22,6 +22,8 @@ jvm.SVGImageElement.prototype.applyAttr = function(attr, value){
 
         that.applyAttr('x', that.cx - that.width / 2);
         that.applyAttr('y', that.cy - that.height / 2);
+
+        jvm.$(that.node).trigger('imageloaded', [img]);
       });
     }
   } else if(attr == 'cx') {

@@ -21,7 +21,7 @@ jvm.MapObject.prototype.setSelected = function(isSelected){
     this.isSelected = isSelected;
     this.shape.isSelected = isSelected;
     this.shape.updateStyle();
-    jvm.$(this.element).trigger('selected', [isSelected]);
+    jvm.$(this.shape).trigger('selected', [isSelected]);
   }
 };
 

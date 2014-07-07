@@ -125,6 +125,7 @@ jvm.Map = function(params) {
   if (this.params.zoomButtons) {
     this.bindZoomButtons();
   }
+
   this.createRegions();
   this.createMarkers(this.params.markers || {});
 
@@ -255,6 +256,8 @@ jvm.Map.prototype = {
     if (this.markers) {
       this.repositionMarkers();
     }
+
+    this.repositionLabels();
 
     this.container.trigger('viewportChange', [this.scale/this.baseScale, this.transX, this.transY]);
   },
@@ -712,15 +715,18 @@ jvm.Map.prototype = {
         region,
         map = this;
 
+    this.regionLabelsGroup = this.regionLabelsGroup || this.canvas.addGroup();
+
     for (key in this.mapData.paths) {
       region = new jvm.Region({
         path: this.mapData.paths[key].path,
         code: key,
         style: jvm.$.extend(true, {}, this.params.regionStyle),
-        canvas: this.canvas
+        canvas: this.canvas,
+        labelsGroup: this.regionLabelsGroup
       });
 
-      jvm.$(region.element).bind('selected', function(e, isSelected){
+      jvm.$(region.shape).bind('selected', function(e, isSelected){
         map.container.trigger('regionSelected.jvectormap', [jvm.$(this.node).attr('data-code'), isSelected, map.getSelectedRegions()]);
       });
       this.regions[key] = {
@@ -741,6 +747,7 @@ jvm.Map.prototype = {
         map = this;
 
     this.markersGroup = this.markersGroup || this.canvas.addGroup();
+    this.markerLabelsGroup = this.markerLabelsGroup || this.canvas.addGroup();
 
     if (jvm.$.isArray(markers)) {
       markersArray = markers.slice();
@@ -761,10 +768,11 @@ jvm.Map.prototype = {
           cx: point.x,
           cy: point.y,
           group: this.markersGroup,
-          canvas: this.canvas
+          canvas: this.canvas,
+          labelsGroup: this.markerLabelsGroup
         });
 
-        jvm.$(marker.element).bind('selected', function(e, isSelected){
+        jvm.$(marker.shape).bind('selected', function(e, isSelected){
           map.container.trigger('markerSelected.jvectormap', [jvm.$(this.node).attr('data-index'), isSelected, map.getSelectedMarkers()]);
         });
         if (this.markers[i]) {
@@ -784,6 +792,18 @@ jvm.Map.prototype = {
       if (point !== false) {
         this.markers[i].element.setStyle({cx: point.x, cy: point.y});
       }
+    }
+  },
+
+  repositionLabels: function() {
+    var key;
+
+    for (key in this.regions) {
+      this.regions[key].element.updateLabelPosition(this.transX, this.transY, this.scale);
+    }
+
+    for (key in this.markers) {
+      this.markers[key].element.updateLabelPosition(this.transX, this.transY, this.scale);
     }
   },
 
