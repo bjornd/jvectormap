@@ -723,7 +723,8 @@ jvm.Map.prototype = {
         code: key,
         style: jvm.$.extend(true, {}, this.params.regionStyle),
         canvas: this.canvas,
-        labelsGroup: this.regionLabelsGroup
+        labelsGroup: this.regionLabelsGroup,
+        label: this.params.labels.regions
       });
 
       jvm.$(region.shape).bind('selected', function(e, isSelected){
@@ -769,7 +770,8 @@ jvm.Map.prototype = {
           cy: point.y,
           group: this.markersGroup,
           canvas: this.canvas,
-          labelsGroup: this.markerLabelsGroup
+          labelsGroup: this.markerLabelsGroup,
+          label: this.params.labels.markers
         });
 
         jvm.$(marker.shape).bind('selected', function(e, isSelected){

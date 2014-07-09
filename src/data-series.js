@@ -125,7 +125,7 @@ jvm.DataSeries.prototype = {
 
     for (key in this.values) {
       if (this.elements[key]) {
-        attrs[key] = this.elements[key].element.style.initial[this.params.attribute];
+        attrs[key] = this.elements[key].element.shape.style.initial[this.params.attribute];
       }
     }
     this.setAttributes(attrs);

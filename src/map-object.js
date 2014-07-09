@@ -1,5 +1,17 @@
 jvm.MapObject = function(config){};
 
+jvm.MapObject.prototype.getLabelText = function(key){
+  var text;
+
+  this.config.label = this.config.label || {};
+  if (typeof this.config.label.render === 'function') {
+    text = this.config.label.render(key);
+  } else {
+    text = key;
+  }
+  return text;
+}
+
 /**
  * Set hovered state to the element. Hovered state means mouse cursor is over element. Styles will be updates respectively.
  * @param {Boolean} isHovered <code>true</code> to make element hovered, <code>false</code> otherwise.
