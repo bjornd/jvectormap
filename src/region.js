@@ -41,4 +41,4 @@ jvm.Region.prototype.updateLabelPosition = function(transX, transY, scale){
       y: this.labelY * scale + transY * scale
     });
   }
-}
+};

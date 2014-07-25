@@ -42,4 +42,4 @@ jvm.SVGImageElement.prototype.applyAttr = function(attr, value){
 };
 
 jvm.SVGImageElement.imageCounter = 1;
-jvm.SVGImageElement.images = {}
+jvm.SVGImageElement.images = {};

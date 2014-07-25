@@ -46,4 +46,4 @@ jvm.SVGShapeElement.prototype.applyAttr = function(attr, value){
 };
 
 jvm.SVGShapeElement.imageCounter = 1;
-jvm.SVGShapeElement.images = {}
+jvm.SVGShapeElement.images = {};
