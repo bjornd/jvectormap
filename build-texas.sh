@@ -8,5 +8,5 @@ python converter/converter.py \
 --language en \
 --simplify_tolerance 150 \
 --longitude0 -100 \
-/Users/kirilllebedev/Downloads/countyp010_nt00795/countyp010.shp \
+/Users/kirilllebedev/Downloads/countyp010g.shp_nt00934/countyp010g.shp \
 tests/assets/jquery-jvectormap-data-us-tx-lcc-en.js

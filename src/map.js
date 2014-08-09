@@ -577,7 +577,7 @@ jvm.Map.prototype = {
       }
       for (i = 0; i < codes.length; i++) {
         if (this.regions[codes[i]]) {
-          itemBbox = this.regions[codes[i]].element.getBBox();
+          itemBbox = this.regions[codes[i]].element.shape.getBBox();
           if (itemBbox) {
             if (typeof bbox == 'undefined') {
               bbox = itemBbox;
@@ -724,7 +724,7 @@ jvm.Map.prototype = {
         style: jvm.$.extend(true, {}, this.params.regionStyle),
         canvas: this.canvas,
         labelsGroup: this.regionLabelsGroup,
-        label: this.params.labels.regions
+        label: this.params.labels && this.params.labels.regions
       });
 
       jvm.$(region.shape).bind('selected', function(e, isSelected){

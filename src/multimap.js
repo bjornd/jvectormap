@@ -32,7 +32,7 @@ jvm.MultiMap.prototype = {
     this.maps[name] = new jvm.Map(jvm.$.extend(config, {container: cnt}));
     this.maps[name].container.on('regionClick.jvectormap', {scope: this}, function(e, code){
       var multimap = e.data.scope,
-          mapName = 'us_tx_lcc_en';
+          mapName = code.toLowerCase()+'_lcc_en';
 
       multimap.drillDown(mapName, code);
     })

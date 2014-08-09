@@ -3,11 +3,14 @@ jvm.MapObject = function(config){};
 jvm.MapObject.prototype.getLabelText = function(key){
   var text;
 
-  this.config.label = this.config.label || {};
-  if (typeof this.config.label.render === 'function') {
-    text = this.config.label.render(key);
+  if (this.config.label) {
+    if (typeof this.config.label.render === 'function') {
+      text = this.config.label.render(key);
+    } else {
+      text = key;
+    }
   } else {
-    text = key;
+    text = null;
   }
   return text;
 }

@@ -12,6 +12,7 @@ import json
 import shapely.geometry
 import shapely.wkb
 import codecs
+import copy
 
 class Map:
   def __init__(self, name, language):
@@ -31,7 +32,18 @@ class Map:
 
 
 class Converter:
-  def __init__(self, args):
+  def __init__(self, config):
+    args = {
+      'buffer_distance': -0.4,
+      'longitude0': '0',
+      'projection': 'mill',
+      'name': 'world',
+      'language': 'en',
+      'precision': 2,
+      'insets': []
+    }
+    args.update(config)
+
     self.map = Map(args['name'], args.get('language'))
 
     if args.get('sources'):
@@ -41,16 +53,16 @@ class Converter:
         'input_file': args.get('input_file'),
         'where': args.get('where'),
         'codes_file': args.get('codes_file'),
-        'country_name_index': args.get('country_name_index'),
-        'country_code_index': args.get('country_code_index'),
+        'name_field': args.get('name_field'),
+        'code_field': args.get('code_field'),
         'input_file_encoding': args.get('input_file_encoding')
       }]
 
     default_source = {
       'where': '',
       'codes_file': '',
-      'country_name_index': '0',
-      'country_code_index': '1',
+      'name_field': 0,
+      'code_field': 1,
       'input_file_encoding': 'iso-8859-1'
     }
 
@@ -67,19 +79,19 @@ class Converter:
     self.precision = args.get('precision')
     self.buffer_distance = args.get('buffer_distance')
     self.simplify_tolerance = args.get('simplify_tolerance')
+    self.for_each = args.get('for_each')
     if args.get('viewport'):
       self.viewport = map(lambda s: float(s), args.get('viewport').split(' '))
     else:
       self.viewport = False
 
-
     # spatial reference to convert to
     self.spatialRef = osr.SpatialReference()
-    self.spatialRef.ImportFromProj4('+proj='+self.projection+' +a=6381372 +b=6381372 +lat_0=0 +lon_0='+str(self.longitude0))
+    self.spatialRef.ImportFromProj4('+proj='+str(self.projection)+' +a=6381372 +b=6381372 +lat_0=0 +lon_0='+str(self.longitude0))
 
     # handle map insets
     if args.get('insets'):
-      self.insets = json.loads(args.get('insets'))
+      self.insets = args.get('insets')
     else:
       self.insets = []
 
@@ -111,11 +123,11 @@ class Converter:
     else:
       nextCode = 0
       for feature in layer:
-        code = feature.GetFieldAsString(sourceConfig.get('country_code_index'))
+        code = feature.GetFieldAsString(str(sourceConfig.get('code_field')))
         if code == '-99':
           code = '_'+str(nextCode)
           nextCode += 1
-        name = feature.GetFieldAsString(sourceConfig.get('country_name_index')).decode(sourceConfig.get('input_file_encoding'))
+        name = feature.GetFieldAsString(str(sourceConfig.get('name_field'))).decode(sourceConfig.get('input_file_encoding'))
         codes[name] = code
       layer.ResetReading()
 
@@ -132,7 +144,7 @@ class Converter:
           shapelyGeometry = shapelyGeometry.buffer(0, 1)
         shapelyGeometry = self.applyFilters(shapelyGeometry)
         if shapelyGeometry:
-          name = feature.GetFieldAsString(sourceConfig.get('country_name_index')).decode(sourceConfig.get('input_file_encoding'))
+          name = feature.GetFieldAsString(str(sourceConfig.get('name_field'))).decode(sourceConfig.get('input_file_encoding'))
           code = codes[name]
           self.features[code] = {"geometry": shapelyGeometry, "name": name, "code": code}
       else:
@@ -140,6 +152,8 @@ class Converter:
 
 
   def convert(self, outputFile):
+    print 'Generating '+outputFile
+
     self.loadData()
 
     codes = self.features.keys()
@@ -182,6 +196,13 @@ class Converter:
 
     open(outputFile, 'w').write( self.map.getJSCode() )
 
+    if self.for_each is not None:
+      for code in codes:
+        childConfig = copy.deepcopy(self.for_each)
+        for param in ('input_file', 'output_file', 'where', 'name'):
+          childConfig[param] = childConfig[param].replace('{{code}}', code.lower())
+        converter = Converter(childConfig)
+        converter.convert(childConfig['output_file'])
 
   def renderMapInset(self, codes, left, top, width):
     envelope = []
@@ -255,41 +276,9 @@ class Converter:
 
 parser = argparse.ArgumentParser(conflict_handler='resolve')
 parser.add_argument('input_file')
-parser.add_argument('output_file')
-parser.add_argument('--country_code_index', type=int)
-parser.add_argument('--country_name_index', type=int)
-parser.add_argument('--codes_file', type=str)
-parser.add_argument('--where', type=str)
-parser.add_argument('--width', type=float)
-parser.add_argument('--insets', type=str)
-parser.add_argument('--minimal_area', type=float)
-parser.add_argument('--buffer_distance', type=float)
-parser.add_argument('--simplify_tolerance', type=float)
-parser.add_argument('--viewport', type=str)
-parser.add_argument('--longitude0', type=str)
-parser.add_argument('--projection', type=str)
-parser.add_argument('--name', type=str)
-parser.add_argument('--language', type=str)
-parser.add_argument('--input_file_encoding', type=str)
-parser.add_argument('--precision', type=int)
 args = vars(parser.parse_args())
 
-default_args = {
-  'buffer_distance': -0.4,
-  'longitude0': '0',
-  'projection': 'mill',
-  'name': 'world',
-  'language': 'en',
-  'precision': 2,
-  'insets': ''
-}
-
-if args['input_file'][-4:] == 'json':
-  args.update( json.loads( open(args['input_file'], 'r').read() ) )
-
-for key in default_args:
-  if default_args.get(key) and args.get(key) is None:
-    args[key] = default_args[key]
+args.update( json.loads( open(args['input_file'], 'r').read() ) )
 
 converter = Converter(args)
 converter.convert(args['output_file'])
