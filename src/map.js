@@ -286,10 +286,10 @@ jvm.Map.prototype = {
       return false;
     });
 
-    this.onMouseup = function(){
+    this.onContainerMouseUp = function(){
       mouseDown = false;
     };
-    jvm.$('body').mouseup(this.onMouseup);
+    jvm.$('body').mouseup(this.onContainerMouseUp);
 
     if (this.params.zoomOnScroll) {
       this.container.mousewheel(function(event, delta, deltaX, deltaY) {
@@ -995,7 +995,7 @@ jvm.Map.prototype = {
     this.tip.remove();
     this.container.remove();
     jvm.$(window).unbind('resize', this.onResize);
-    jvm.$('body').unbind('mouseup', this.onMouseup);
+    jvm.$('body').unbind('mouseup', this.onContainerMouseUp);
   }
 };
 
