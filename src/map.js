@@ -268,28 +268,30 @@ jvm.Map.prototype = {
         oldPageY,
         map = this;
 
-    this.container.mousemove(function(e){
-      if (mouseDown && map.params.panOnDrag) {
-        map.transX -= (oldPageX - e.pageX) / map.scale;
-        map.transY -= (oldPageY - e.pageY) / map.scale;
+    if (this.params.panOnDrag) {
+      this.container.mousemove(function(e){
+        if (mouseDown) {
+          map.transX -= (oldPageX - e.pageX) / map.scale;
+          map.transY -= (oldPageY - e.pageY) / map.scale;
 
-        map.applyTransform();
+          map.applyTransform();
 
+          oldPageX = e.pageX;
+          oldPageY = e.pageY;
+        }
+        return false;
+      }).mousedown(function(e){
+        mouseDown = true;
         oldPageX = e.pageX;
         oldPageY = e.pageY;
-      }
-      return false;
-    }).mousedown(function(e){
-      mouseDown = true;
-      oldPageX = e.pageX;
-      oldPageY = e.pageY;
-      return false;
-    });
+        return false;
+      });
 
-    this.onContainerMouseUp = function(){
-      mouseDown = false;
-    };
-    jvm.$('body').mouseup(this.onContainerMouseUp);
+      this.onContainerMouseUp = function(){
+        mouseDown = false;
+      };
+      jvm.$('body').mouseup(this.onContainerMouseUp);
+    }
 
     if (this.params.zoomOnScroll) {
       this.container.mousewheel(function(event, delta, deltaX, deltaY) {
