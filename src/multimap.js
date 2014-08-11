@@ -9,8 +9,10 @@ jvm.MultiMap = function(params) {
   var that = this;
 
   this.maps = {};
-  this.params = params;
+  this.params = $.extend(true, {}, jvm.MultiMap.defaultParams, params);
   this.history = [ this.addMap(params.main.map, params.main) ];
+  this.defaultProjection = this.history[0].mapData.projection.type;
+  this.mapsLoaded = {};
 
   this.params.container.css({position: 'relative'});
   this.backButton = jvm.$('<div/>').addClass('jvectormap-goback').text('back').appendTo(this.params.container);
@@ -32,7 +34,7 @@ jvm.MultiMap.prototype = {
     this.maps[name] = new jvm.Map(jvm.$.extend(config, {container: cnt}));
     this.maps[name].container.on('regionClick.jvectormap', {scope: this}, function(e, code){
       var multimap = e.data.scope,
-          mapName = code.toLowerCase()+'_lcc_en';
+          mapName = multimap.params.mapNameByCode(code, multimap);
 
       multimap.drillDown(mapName, code);
     })
@@ -40,11 +42,28 @@ jvm.MultiMap.prototype = {
     return this.maps[name];
   },
 
+  downloadMap: function(code){
+    var that = this,
+        deferred = $.Deferred();
+
+    if (!this.mapsLoaded[code]) {
+      $.get(this.params.mapUrlByCode(code, this)).then(function(){
+        that.mapsLoaded[code] = true;
+        deferred.resolve();
+      }, function(){
+        deferred.reject();
+      });
+    } else {
+      deferred.resolve();
+    }
+    return deferred;
+  },
+
   drillDown: function(name, code){
     var currentMap = this.history[this.history.length - 1],
         that = this;
 
-    currentMap.setFocus(code, true).then(function(){
+    $.when(this.downloadMap(code), currentMap.setFocus(code, true)).then(function(){
       currentMap.params.container.hide();
       if (!that.maps[name]) {
         that.addMap(name, {map: name});
@@ -74,5 +93,10 @@ jvm.MultiMap.prototype = {
 };
 
 jvm.MultiMap.defaultParams = {
-
-};
+  mapNameByCode: function(code, multiMap){
+    return code.toLowerCase()+'_'+multiMap.defaultProjection+'_en';
+  },
+  mapUrlByCode: function(code, multiMap){
+    return 'assets/us/jquery-jvectormap-data-'+code.toLowerCase()+'-'+multiMap.defaultProjection+'-en.js';
+  }
+}

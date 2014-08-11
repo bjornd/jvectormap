@@ -157,6 +157,7 @@ class Converter:
     self.loadData()
 
     codes = self.features.keys()
+    main_codes = copy.copy(codes)
     self.map.insets = []
     envelope = []
     for inset in self.insets:
@@ -175,9 +176,9 @@ class Converter:
         )
       )
       for code in inset['codes']:
-        codes.remove(code)
+        main_codes.remove(code)
 
-    insetBbox = self.renderMapInset(codes, 0, 0, self.width)
+    insetBbox = self.renderMapInset(main_codes, 0, 0, self.width)
     insetHeight = (insetBbox[3] - insetBbox[1]) * (self.width / (insetBbox[2] - insetBbox[0]))
 
     envelope.append( shapely.geometry.box( 0, 0, self.width, insetHeight ) )
