@@ -1038,7 +1038,8 @@ jvm.Map.defaultParams = {
       "stroke-opacity": 1
     },
     hover: {
-      "fill-opacity": 0.8
+      "fill-opacity": 0.8,
+      cursor: 'pointer'
     },
     selected: {
       fill: 'yellow'
@@ -1057,7 +1058,8 @@ jvm.Map.defaultParams = {
     },
     hover: {
       stroke: 'black',
-      "stroke-width": 2
+      "stroke-width": 2,
+      cursor: 'pointer'
     },
     selected: {
       fill: 'blue'
