@@ -132,11 +132,12 @@ jvm.Map = function(params) {
   this.updateSize();
 
   if (this.params.focusOn) {
-    if (this.params.focusOn.region || this.params.focusOn.regions) {
-      this.setFocus.call(this, this.params.focusOn.region || this.params.focusOn.regions, this.params.focusOn.animate);
-    } else {
-      this.setFocus.call(this, this.params.focusOn.scale, this.params.focusOn.x, this.params.focusOn.y, this.params.focusOn.animate);
+    if (typeof this.params.focusOn === 'string') {
+      this.params.focusOn = {region: this.params.focusOn};
+    } else if (jvm.$.isArray(this.params.focusOn)) {
+      this.params.focusOn = {regions: this.params.focusOn};
     }
+    this.setFocus(this.params.focusOn);
   }
 
   if (this.params.selectedRegions) {
@@ -146,8 +147,8 @@ jvm.Map = function(params) {
     this.setSelectedMarkers(this.params.selectedMarkers);
   }
 
-  this.legendCntHorizontal = $('<div/>').addClass('jvectormap-legend-cnt jvectormap-legend-cnt-h');
-  this.legendCntVertical = $('<div/>').addClass('jvectormap-legend-cnt jvectormap-legend-cnt-v');
+  this.legendCntHorizontal = jvm.$('<div/>').addClass('jvectormap-legend-cnt jvectormap-legend-cnt-h');
+  this.legendCntVertical = jvm.$('<div/>').addClass('jvectormap-legend-cnt jvectormap-legend-cnt-v');
   this.container.append(this.legendCntHorizontal);
   this.container.append(this.legendCntVertical);
 
@@ -564,19 +565,24 @@ jvm.Map.prototype = {
    * @param {Number} centerY Number from 0 to 1 specifying the vertical coordinate of the central point of the viewport.
    * @param {Boolean} animate Indicates whether or not to animate the scale change and transition.
    */
-  setFocus: function(scale, centerX, centerY, animate){
+  setFocus: function(config){
     var bbox,
         itemBbox,
         newBbox,
         codes,
-        i;
+        i,
+        animate,
+        point;
 
-    if (jvm.$.isArray(scale) || this.regions[scale]) {
-      if (jvm.$.isArray(scale)) {
-        codes = scale;
-      } else {
-        codes = [scale]
-      }
+    config = config || {};
+
+    if (config.region) {
+      codes = [config.region];
+    } else if (config.regions) {
+      codes = config.regions;
+    }
+
+    if (codes) {
       for (i = 0; i < codes.length; i++) {
         if (this.regions[codes[i]]) {
           itemBbox = this.regions[codes[i]].element.shape.getBBox();
@@ -600,11 +606,19 @@ jvm.Map.prototype = {
         - (bbox.x + bbox.width / 2),
         - (bbox.y + bbox.height / 2),
         true,
-        centerX
+        config.animate
       );
     } else {
-      scale = scale * this.baseScale;
-      return this.setScale(scale, - centerX * this.defaultWidth, - centerY * this.defaultHeight, true, animate);
+      if (config.lat && config.lng) {
+        point = this.latLngToPoint(config.lat, config.lng);
+        config.x = this.transX - point.x / this.scale;
+        config.y = this.transY - point.y / this.scale;
+        console.log(config.x, config.y);
+      } else if (config.x && config.y) {
+        config.x *= -this.defaultWidth;
+        config.y *= -this.defaultHeight;
+      }
+      return this.setScale(config.scale * this.baseScale, config.x, config.y, true, config.animate);
     }
   },
 
@@ -773,7 +787,7 @@ jvm.Map.prototype = {
           group: this.markersGroup,
           canvas: this.canvas,
           labelsGroup: this.markerLabelsGroup,
-          label: this.canvas.mode != 'vml' ? this.params.labels.markers : null
+          label: this.canvas.mode != 'vml' ? (this.params.labels && this.params.labels.markers) : null
         });
 
         jvm.$(marker.shape).bind('selected', function(e, isSelected){

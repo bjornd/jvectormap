@@ -19,6 +19,8 @@
   <script src="../src/svg-shape-element.js"></script>
   <script src="../src/svg-path-element.js"></script>
   <script src="../src/svg-circle-element.js"></script>
+  <script src="../src/svg-image-element.js"></script>
+  <script src="../src/svg-text-element.js"></script>
 
   <script src="../src/vml-element.js"></script>
   <script src="../src/vml-group-element.js"></script>
@@ -26,12 +28,18 @@
   <script src="../src/vml-shape-element.js"></script>
   <script src="../src/vml-path-element.js"></script>
   <script src="../src/vml-circle-element.js"></script>
+  <script src="../src/vml-image-element.js"></script>
+
+  <script src="../src/map-object.js"></script>
+  <script src="../src/region.js"></script>
+  <script src="../src/marker.js"></script>
 
   <script src="../src/vector-canvas.js"></script>
   <script src="../src/simple-scale.js"></script>
-  <script src="../src/numeric-scale.js"></script>
   <script src="../src/ordinal-scale.js"></script>
+  <script src="../src/numeric-scale.js"></script>
   <script src="../src/color-scale.js"></script>
+  <script src="../src/legend.js"></script>
   <script src="../src/data-series.js"></script>
   <script src="../src/proj.js"></script>
   <script src="../src/map.js"></script>
@@ -43,13 +51,16 @@
       var $ = jQuery;
 
       $('#focus-single').click(function(){
-        $('#map1').vectorMap('set', 'focus', 'AU', true);
+        $('#map1').vectorMap('set', 'focus', {region: 'AU', animate: true});
       });
       $('#focus-multiple').click(function(){
-        $('#map1').vectorMap('set', 'focus', ['AU', 'JP'], true);
+        $('#map1').vectorMap('set', 'focus', {regions: ['AU', 'JP'], animate: true});
+      });
+      $('#focus-coords').click(function(){
+        $('#map1').vectorMap('set', 'focus', {scale: 7, lat: 35, lng: 33, animate: true});
       });
       $('#focus-init').click(function(){
-        $('#map1').vectorMap('set', 'focus', 1, 0.5, 0.5, true);
+        $('#map1').vectorMap('set', 'focus', {scale: 1, x: 0.5, y: 0.5, animate: true});
       });
       $('#map1').vectorMap({
         map: 'world_mill_en',
@@ -259,6 +270,7 @@
   <div id="map1" style="width: 600px; height: 400px"></div>
   <button id="focus-single">Focus on Australia</button>
   <button id="focus-multiple">Focus on Australia and Japan</button>
+  <button id="focus-coords">Focus on Cyprus</button>
   <button id="focus-init">Return to the initial state</button>
 </body>
 </html>

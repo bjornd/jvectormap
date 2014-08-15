@@ -9,7 +9,7 @@ jvm.MultiMap = function(params) {
   var that = this;
 
   this.maps = {};
-  this.params = $.extend(true, {}, jvm.MultiMap.defaultParams, params);
+  this.params = jvm.$.extend(true, {}, jvm.MultiMap.defaultParams, params);
   this.history = [ this.addMap(params.main.map, params.main) ];
   this.defaultProjection = this.history[0].mapData.projection.type;
   this.mapsLoaded = {};
@@ -24,7 +24,7 @@ jvm.MultiMap = function(params) {
 
 jvm.MultiMap.prototype = {
   addMap: function(name, config){
-    var cnt = $('<div/>').css({
+    var cnt = jvm.$('<div/>').css({
       width: '100%',
       height: '100%'
     });
@@ -44,10 +44,10 @@ jvm.MultiMap.prototype = {
 
   downloadMap: function(code){
     var that = this,
-        deferred = $.Deferred();
+        deferred = jvm.$.Deferred();
 
     if (!this.mapsLoaded[code]) {
-      $.get(this.params.mapUrlByCode(code, this)).then(function(){
+      jvm.$.get(this.params.mapUrlByCode(code, this)).then(function(){
         that.mapsLoaded[code] = true;
         deferred.resolve();
       }, function(){
@@ -63,7 +63,7 @@ jvm.MultiMap.prototype = {
     var currentMap = this.history[this.history.length - 1],
         that = this;
 
-    $.when(this.downloadMap(code), currentMap.setFocus(code, true)).then(function(){
+    jvm.$.when(this.downloadMap(code), currentMap.setFocus({region: code, animated: true})).then(function(){
       currentMap.params.container.hide();
       if (!that.maps[name]) {
         that.addMap(name, {map: name});
@@ -80,14 +80,14 @@ jvm.MultiMap.prototype = {
         prevMap = this.history[this.history.length - 1],
         that = this;
 
-    currentMap.setFocus(1, 0.5, 0.5, true, true).then(function(){
+    currentMap.setFocus({scale: 1, x: 0.5, y: 0.5, animate: true}).then(function(){
       currentMap.params.container.hide();
       prevMap.params.container.show();
       prevMap.updateSize();
       if (that.history.length === 1) {
         that.backButton.hide();
       }
-      prevMap.setFocus(1, 0.5, 0.5, true, true);
+      prevMap.setFocus({scale: 1, x: 0.5, y: 0.5, animate: true});
     });
   }
 };

@@ -97,7 +97,7 @@ var jvm = {
 
   whenImageLoaded: function(url){
     var deferred = new jvm.$.Deferred(),
-        img = $('<img/>');
+        img = jvm.$('<img/>');
 
     img.error(function(){
       deferred.reject();
