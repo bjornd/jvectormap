@@ -726,7 +726,7 @@ jvm.Map.prototype = {
         style: jvm.$.extend(true, {}, this.params.regionStyle),
         canvas: this.canvas,
         labelsGroup: this.regionLabelsGroup,
-        label: this.params.labels && this.params.labels.regions
+        label: this.canvas.mode != 'vml' ? (this.params.labels && this.params.labels.regions) : null
       });
 
       jvm.$(region.shape).bind('selected', function(e, isSelected){
@@ -773,7 +773,7 @@ jvm.Map.prototype = {
           group: this.markersGroup,
           canvas: this.canvas,
           labelsGroup: this.markerLabelsGroup,
-          label: this.params.labels.markers
+          label: this.canvas.mode != 'vml' ? this.params.labels.markers : null
         });
 
         jvm.$(marker.shape).bind('selected', function(e, isSelected){

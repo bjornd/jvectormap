@@ -95,20 +95,18 @@
     color: white;
 }
 
-.jvectormap-legend-cnt-v .jvectormap-legend-tick {
-
-}
-
 .jvectormap-legend-cnt-v .jvectormap-legend-tick-sample {
     height: 20px;
     width: 20px;
-    float: left;
+    display: inline-block;
+    vertical-align: middle;
 }
 
 .jvectormap-legend-cnt-v .jvectormap-legend-tick-text {
     color: white;
     font-size: 12px;
-    float: left;
+    display: inline-block;
+    vertical-align: middle;
     line-height: 20px;
     padding-left: 3px;
 }

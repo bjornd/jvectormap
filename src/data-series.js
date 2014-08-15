@@ -97,12 +97,15 @@ jvm.DataSeries.prototype = {
         this.scale.setMax(this.params.max);
       }
 
+
       for (cc in values) {
-        val = parseFloat(values[cc]);
-        if (!isNaN(val)) {
-          attrs[cc] = this.scale.getValue(val);
-        } else {
-          attrs[cc] = this.elements[cc].element.style.initial[this.params.attribute];
+        if (cc != 'indexOf') {
+          val = parseFloat(values[cc]);
+          if (!isNaN(val)) {
+            attrs[cc] = this.scale.getValue(val);
+          } else {
+            attrs[cc] = this.elements[cc].element.style.initial[this.params.attribute];
+          }
         }
       }
     } else {

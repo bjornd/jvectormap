@@ -97,6 +97,7 @@ jvm.VMLElement.prototype.applyAttr = function( attr, value ){
  */
 jvm.VMLElement.prototype.getBBox = function(){
   var node = jvm.$(this.node);
+
   return {
     x: node.position().left / this.canvas.scale,
     y: node.position().top / this.canvas.scale,
