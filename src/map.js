@@ -738,6 +738,7 @@ jvm.Map.prototype = {
         path: this.mapData.paths[key].path,
         code: key,
         style: jvm.$.extend(true, {}, this.params.regionStyle),
+        labelStyle: jvm.$.extend(true, {}, this.params.regionLabelStyle),
         canvas: this.canvas,
         labelsGroup: this.regionLabelsGroup,
         label: this.canvas.mode != 'vml' ? (this.params.labels && this.params.labels.regions) : null
@@ -781,6 +782,7 @@ jvm.Map.prototype = {
       if (point !== false) {
         marker = new jvm.Marker({
           style: jvm.$.extend(true, {}, this.params.markerStyle, {initial: markerConfig.style || {}}),
+          labelStyle: jvm.$.extend(true, {}, this.params.markerLabelStyle),
           index: i,
           cx: point.x,
           cy: point.y,
@@ -1047,6 +1049,18 @@ jvm.Map.defaultParams = {
     selectedHover: {
     }
   },
+  regionLabelStyle: {
+    initial: {
+      'font-family': 'Verdana',
+      'font-size': '12',
+      'font-weight': 'bold',
+      cursor: 'default',
+      fill: 'black'
+    },
+    hover: {
+      cursor: 'pointer'
+    }
+  },
   markerStyle: {
     initial: {
       fill: 'grey',
@@ -1065,6 +1079,18 @@ jvm.Map.defaultParams = {
       fill: 'blue'
     },
     selectedHover: {
+    }
+  },
+  markerLabelStyle: {
+    initial: {
+      'font-family': 'Verdana',
+      'font-size': '12',
+      'font-weight': 'bold',
+      cursor: 'default',
+      fill: 'black'
+    },
+    hover: {
+      cursor: 'pointer'
     }
   }
 };

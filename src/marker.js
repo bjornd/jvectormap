@@ -27,14 +27,10 @@ jvm.Marker = function(config){
     this.label = config.canvas.addText({
       text: text,
       'data-index': config.index,
-      'font-family': 'Verdana',
-      'font-size': '12',
-      'font-weight': 'bold',
-      cursor: 'default',
       'alignment-baseline': 'central',
       x: this.labelX,
       y: this.labelY
-    }, {}, config.labelsGroup);
+    }, config.labelStyle, config.labelsGroup);
 
     this.label.addClass('jvectormap-marker jvectormap-element');
   }

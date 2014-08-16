@@ -18,16 +18,12 @@ jvm.Region = function(config){
     this.labelY = bbox.y + bbox.height / 2;
     this.label = config.canvas.addText({
       text: text,
-      'font-family': 'Verdana',
-      'font-size': '12',
-      'font-weight': 'bold',
-      cursor: 'default',
       'text-anchor': 'middle',
       'alignment-baseline': 'central',
       x: this.labelX,
       y: this.labelY,
       'data-code': config.code
-    }, {}, config.labelsGroup);
+    }, config.labelStyle, config.labelsGroup);
     this.label.addClass('jvectormap-region jvectormap-element');
   }
 };
