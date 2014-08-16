@@ -5,8 +5,8 @@ jvm.NumericScale = function(scale, normalizeFunction, minValue, maxValue) {
 
   if (scale) this.setScale(scale);
   if (normalizeFunction) this.setNormalizeFunction(normalizeFunction);
-  if (typeof this.minValue !== 'undefined' ) this.setMin(minValue);
-  if (typeof this.maxValue !== 'undefined' ) this.setMin(maxValue);
+  if (typeof minValue !== 'undefined' ) this.setMin(minValue);
+  if (typeof maxValue !== 'undefined' ) this.setMin(maxValue);
 };
 
 jvm.NumericScale.prototype = {
@@ -25,12 +25,13 @@ jvm.NumericScale.prototype = {
       this.maxValue = this.normalize(max);
     } else {
       this.maxValue = max;
-    } 
+    }
   },
 
   setScale: function(scale) {
     var i;
 
+    this.scale = [];
     for (i = 0; i < scale.length; i++) {
       this.scale[i] = [scale[i]];
     }
