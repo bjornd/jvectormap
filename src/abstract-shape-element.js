@@ -7,7 +7,7 @@
  */
 jvm.AbstractShapeElement = function(name, config, style){
   this.style = style || {};
-  this.style.current = {};
+  this.style.current = this.style.current || {};
   this.isHovered = false;
   this.isSelected = false;
   this.updateStyle();

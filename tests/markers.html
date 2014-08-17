@@ -60,8 +60,8 @@
             [21.18, -157.49],
             {latLng: [40.66, -73.56], name: 'New York City', style: {r: 8, fill: 'yellow'}},
             {latLng: [41.52, -87.37], style: {fill: 'red', r: 10}},
-            {latLng: [35.22, -80.84], style: {image: 'assets/icon-bank.png'}},
-            {latLng: [31.52, -87.37], style: {image: 'assets/icon-factory.png'}}
+            {latLng: [35.22, -80.84]},
+            {latLng: [31.52, -87.37]}
           ],
           values1 = [408, 512, 550, 781],
           values2 = [1, 2, 3, 4];
@@ -100,6 +100,16 @@
             scale: [5, 20],
             normalizeFunction: 'polynomial',
             values: values2
+          },{
+            attribute: 'image',
+            scale: {
+              bank: 'assets/icon-bank.png',
+              factory: 'assets/icon-factory.png'
+            },
+            values: {
+              '4': 'bank',
+              '5': 'factory'
+            }
           }],
           regions: [{
             scale: {
@@ -122,9 +132,13 @@
             },
             attribute: 'fill'
           },{
+            scale: {
+              redGreen: 'assets/bg-red-green.png',
+              yellowBlue: 'assets/bg-yellow-blue.png'
+            },
             values: {
-              "US-TX": 'assets/bg-red-green.png',
-              "US-CA": 'assets/bg-yellow-blue.png'
+              "US-TX": 'redGreen',
+              "US-CA": 'yellowBlue'
             },
             attribute: 'fill'
           }]

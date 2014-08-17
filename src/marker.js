@@ -1,24 +1,10 @@
 jvm.Marker = function(config){
-  var addMethod = config.style.initial['image'] ? 'addImage' : 'addCircle',
-      text,
-      that = this;
+  var text;
 
   this.config = config;
-  this.isImage = !!config.style.initial['image'];
 
-  this.shape = config.canvas[addMethod]({
-    "data-index": config.index,
-    cx: config.cx,
-    cy: config.cy
-  }, config.style, config.group);
-
-  this.shape.addClass('jvectormap-marker jvectormap-element');
-
-  if (this.isImage) {
-    jvm.$(this.shape.node).on('imageloaded', function(){
-      that.updateLabelPosition();
-    });
-  }
+  this.isImage = !!this.config.style.initial.image;
+  this.createShape();
 
   text = this.getLabelText(config.index);
   if (this.config.label && text) {
@@ -38,6 +24,27 @@ jvm.Marker = function(config){
 
 jvm.inherits(jvm.Marker, jvm.MapObject);
 
+jvm.Marker.prototype.createShape = function(){
+  var that = this;
+
+  if (this.shape) {
+    this.shape.remove();
+  }
+  this.shape = this.config.canvas[this.isImage ? 'addImage' : 'addCircle']({
+    "data-index": this.config.index,
+    cx: this.config.cx,
+    cy: this.config.cy
+  }, this.config.style, this.config.group);
+
+  this.shape.addClass('jvectormap-marker jvectormap-element');
+
+  if (this.isImage) {
+    jvm.$(this.shape.node).on('imageloaded', function(){
+      that.updateLabelPosition();
+    });
+  }
+}
+
 jvm.Marker.prototype.updateLabelPosition = function(transX, transY, scale){
   if (this.label) {
     if (typeof transX === 'undefined') {
@@ -56,10 +63,19 @@ jvm.Marker.prototype.updateLabelPosition = function(transX, transY, scale){
   }
 }
 
-jvm.Marker.prototype.setStyle = function(name){
+jvm.Marker.prototype.setStyle = function(property, value){
+  var isImage;
+
   jvm.Marker.parentClass.prototype.setStyle.apply(this, arguments);
 
-  if (name === 'r') {
+  if (property === 'r') {
     this.updateLabelPosition();
+  }
+
+  isImage = !!this.shape.get('image');
+  if (isImage != this.isImage) {
+    this.isImage = isImage;
+    this.config.style = jvm.$.extend(true, {}, this.shape.style);
+    this.createShape();
   }
 }
