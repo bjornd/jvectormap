@@ -11,7 +11,7 @@ jvm.SVGShapeElement.prototype.applyAttr = function(attr, value){
       imageEl,
       that = this;
 
-  if (attr === 'fill' && /\.\w{3,4}$/.test(value)) {
+  if (attr === 'fill' && jvm.isImageUrl(value)) {
     if (!jvm.SVGShapeElement.images[value]) {
       jvm.whenImageLoaded(value).then(function(img){
         imageEl = new jvm.SVGElement('image');

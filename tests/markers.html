@@ -9,6 +9,19 @@
       padding: 0;
       list-style: none;
     }
+
+    .jvectormap-legend .jvectormap-legend-tick-sample {
+      height: 26px;
+    }
+
+    .jvectormap-legend-icons {
+      background: white;
+      border: black 1px solid;
+    }
+
+    .jvectormap-legend-icons {
+      color: black;
+    }
   </style>
 
   <script src="assets/jquery-1.8.2.js"></script>
@@ -109,6 +122,11 @@
             values: {
               '4': 'bank',
               '5': 'factory'
+            },
+            legend: {
+              horizontal: true,
+              cssClass: 'jvectormap-legend-icons',
+              title: 'Business type'
             }
           }],
           regions: [{
@@ -117,14 +135,16 @@
               green: '#00ff00'
             },
             attribute: 'fill',
-            normalizeFunction: 'polynomial',
             values: {
               "US-KS": 'red',
               "US-MO": 'red',
               "US-IA": 'green',
               "US-NE": 'green'
             },
-            legend: true
+            legend: {
+              horizontal: true,
+              title: 'Color'
+            }
           },{
             values: {
               "US-NY": 'blue',
@@ -140,7 +160,18 @@
               "US-TX": 'redGreen',
               "US-CA": 'yellowBlue'
             },
-            attribute: 'fill'
+            attribute: 'fill',
+            legend: {
+              horizontal: true,
+              cssClass: 'jvectormap-legend-bg',
+              title: 'Pattern',
+              labelRender: function(v){
+                return {
+                  redGreen: 'Low',
+                  yellowBlue: 'High'
+                }[v];
+              }
+            }
           }]
         },
         regionsSelectable: true,

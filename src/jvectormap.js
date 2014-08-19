@@ -107,6 +107,10 @@ var jvm = {
     img.attr('src', url);
 
     return deferred;
+  },
+
+  isImageUrl: function(s){
+    return /\.\w{3,4}$/.test(s);
   }
 };
 
