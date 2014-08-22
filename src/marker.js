@@ -43,7 +43,7 @@ jvm.Marker.prototype.createShape = function(){
       that.updateLabelPosition();
     });
   }
-}
+};
 
 jvm.Marker.prototype.updateLabelPosition = function(transX, transY, scale){
   if (this.label) {
@@ -61,7 +61,7 @@ jvm.Marker.prototype.updateLabelPosition = function(transX, transY, scale){
       y: this.labelY * scale + transY * scale
     });
   }
-}
+};
 
 jvm.Marker.prototype.setStyle = function(property, value){
   var isImage;
@@ -78,4 +78,4 @@ jvm.Marker.prototype.setStyle = function(property, value){
     this.config.style = jvm.$.extend(true, {}, this.shape.style);
     this.createShape();
   }
-}
+};

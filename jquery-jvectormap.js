@@ -26,7 +26,6 @@
   $.fn.vectorMap = function(options) {
     var map,
         methodName,
-        event,
         map = this.children('.jvectormap-container').data('mapObject');
 
     if (options === 'addMap') {

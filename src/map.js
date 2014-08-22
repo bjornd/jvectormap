@@ -396,8 +396,7 @@ jvm.Map.prototype = {
     /* Can not use common class selectors here because of the bug in jQuery
        SVG handling, use with caution. */
     this.container.delegate("[class~='jvectormap-element']", 'mouseover mouseout', function(e){
-      var path = this,
-          baseVal = jvm.$(this).attr('class').baseVal || jvm.$(this).attr('class'),
+      var baseVal = jvm.$(this).attr('class').baseVal || jvm.$(this).attr('class'),
           type = baseVal.indexOf('jvectormap-region') === -1 ? 'marker' : 'region',
           code = type == 'region' ? jvm.$(this).attr('data-code') : jvm.$(this).attr('data-index'),
           element = type == 'region' ? map.regions[code].element : map.markers[code].element,
@@ -427,15 +426,14 @@ jvm.Map.prototype = {
 
     /* Can not use common class selectors here because of the bug in jQuery
        SVG handling, use with caution. */
-    this.container.delegate("[class~='jvectormap-element']", 'mousedown', function(e){
+    this.container.delegate("[class~='jvectormap-element']", 'mousedown', function(){
       mouseMoved = false;
     });
 
     /* Can not use common class selectors here because of the bug in jQuery
        SVG handling, use with caution. */
-    this.container.delegate("[class~='jvectormap-element']", 'mouseup', function(e){
-      var path = this,
-          baseVal = jvm.$(this).attr('class').baseVal ? jvm.$(this).attr('class').baseVal : jvm.$(this).attr('class'),
+    this.container.delegate("[class~='jvectormap-element']", 'mouseup', function(){
+      var baseVal = jvm.$(this).attr('class').baseVal ? jvm.$(this).attr('class').baseVal : jvm.$(this).attr('class'),
           type = baseVal.indexOf('jvectormap-region') === -1 ? 'marker' : 'region',
           code = type == 'region' ? jvm.$(this).attr('data-code') : jvm.$(this).attr('data-index'),
           clickEvent = jvm.$.Event(type+'Click.jvectormap'),
@@ -571,7 +569,6 @@ jvm.Map.prototype = {
         newBbox,
         codes,
         i,
-        animate,
         point;
 
     config = config || {};
@@ -760,8 +757,6 @@ jvm.Map.prototype = {
         point,
         markerConfig,
         markersArray,
-        addMethod,
-        markerStyle,
         map = this;
 
     this.markersGroup = this.markersGroup || this.canvas.addGroup();
@@ -912,11 +907,8 @@ jvm.Map.prototype = {
     var point,
         proj = jvm.Map.maps[this.params.map].projection,
         centralMeridian = proj.centralMeridian,
-        width = this.width - this.baseTransX * 2 * this.baseScale,
-        height = this.height - this.baseTransY * 2 * this.baseScale,
         inset,
-        bbox,
-        scaleFactor = this.scale / this.baseScale;
+        bbox;
 
     if (lng < (-180 + centralMeridian)) {
       lng += 360;

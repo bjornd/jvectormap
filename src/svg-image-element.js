@@ -5,9 +5,7 @@ jvm.SVGImageElement = function(config, style){
 jvm.inherits(jvm.SVGImageElement, jvm.SVGShapeElement);
 
 jvm.SVGImageElement.prototype.applyAttr = function(attr, value){
-  var patternEl,
-      imageEl,
-      that = this;
+  var that = this;
 
   if (attr == 'image') {
     if (!jvm.SVGImageElement.images[value]) {
@@ -42,4 +40,4 @@ jvm.SVGImageElement.prototype.applyAttr = function(attr, value){
 };
 
 jvm.SVGImageElement.imageCounter = 1;
-jvm.SVGImageElement.images = {}
+jvm.SVGImageElement.images = {};

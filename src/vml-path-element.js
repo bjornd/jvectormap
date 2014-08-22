@@ -23,8 +23,7 @@ jvm.VMLPathElement.prototype.applyAttr = function(attr, value){
 };
 
 jvm.VMLPathElement.pathSvgToVml = function(path) {
-  var result = '',
-      cx = 0, cy = 0, ctrlx, ctrly;
+  var cx = 0, cy = 0, ctrlx, ctrly;
 
   path = path.replace(/(-?\d+)e(-?\d+)/g, '0');
   return path.replace(/([MmLlHhVvCcSs])\s*((?:-?\d*(?:\.\d+)?\s*,?\s*)+)/g, function(segment, letter, coords, index){
@@ -41,52 +40,42 @@ jvm.VMLPathElement.pathSvgToVml = function(path) {
         cx += coords[0];
         cy += coords[1];
         return 't'+coords.join(',');
-      break;
       case 'M':
         cx = coords[0];
         cy = coords[1];
         return 'm'+coords.join(',');
-      break;
       case 'l':
         cx += coords[0];
         cy += coords[1];
         return 'r'+coords.join(',');
-      break;
       case 'L':
         cx = coords[0];
         cy = coords[1];
         return 'l'+coords.join(',');
-      break;
       case 'h':
         cx += coords[0];
         return 'r'+coords[0]+',0';
-      break;
       case 'H':
         cx = coords[0];
         return 'l'+cx+','+cy;
-      break;
       case 'v':
         cy += coords[0];
         return 'r0,'+coords[0];
-      break;
       case 'V':
         cy = coords[0];
         return 'l'+cx+','+cy;
-      break;
       case 'c':
         ctrlx = cx + coords[coords.length-4];
         ctrly = cy + coords[coords.length-3];
         cx += coords[coords.length-2];
         cy += coords[coords.length-1];
         return 'v'+coords.join(',');
-      break;
       case 'C':
         ctrlx = coords[coords.length-4];
         ctrly = coords[coords.length-3];
         cx = coords[coords.length-2];
         cy = coords[coords.length-1];
         return 'c'+coords.join(',');
-      break;
       case 's':
         coords.unshift(cy-ctrly);
         coords.unshift(cx-ctrlx);
@@ -95,7 +84,6 @@ jvm.VMLPathElement.pathSvgToVml = function(path) {
         cx += coords[coords.length-2];
         cy += coords[coords.length-1];
         return 'v'+coords.join(',');
-      break;
       case 'S':
         coords.unshift(cy+cy-ctrly);
         coords.unshift(cx+cx-ctrlx);
@@ -104,7 +92,6 @@ jvm.VMLPathElement.pathSvgToVml = function(path) {
         cx = coords[coords.length-2];
         cy = coords[coords.length-1];
         return 'c'+coords.join(',');
-      break;
     }
     return '';
   }).replace(/z/g, 'e');

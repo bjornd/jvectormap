@@ -163,7 +163,6 @@ if (!Array.prototype.indexOf) {
 
     // 9. Repeat, while k < len
     while (k < len) {
-      var kValue;
       // a. Let Pk be ToString(k).
       //   This is implicit for LHS operands of the in operator
       // b. Let kPresent be the result of calling the

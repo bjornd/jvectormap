@@ -20,7 +20,6 @@ jvm.Legend = function(params) {
 jvm.Legend.prototype.render = function(){
   var ticks = this.series.scale.getTicks(),
       i,
-      sampleValue,
       inner = jvm.$('<div/>').addClass('jvectormap-legend-inner'),
       tick,
       sample,
