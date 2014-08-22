@@ -24,8 +24,10 @@ jvm.MapObject.prototype.setHovered = function(isHovered){
     this.isHovered = isHovered;
     this.shape.isHovered = isHovered;
     this.shape.updateStyle();
-    this.label.isHovered = isHovered;
-    this.label.updateStyle();
+    if (this.label) {
+      this.label.isHovered = isHovered;
+      this.label.updateStyle();
+    }
   }
 };
 
@@ -38,8 +40,10 @@ jvm.MapObject.prototype.setSelected = function(isSelected){
     this.isSelected = isSelected;
     this.shape.isSelected = isSelected;
     this.shape.updateStyle();
-    this.label.isSelected = isSelected;
-    this.label.updateStyle();
+    if (this.label) {
+      this.label.isSelected = isSelected;
+      this.label.updateStyle();
+    }
     jvm.$(this.shape).trigger('selected', [isSelected]);
   }
 };
