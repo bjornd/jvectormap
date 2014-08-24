@@ -11,6 +11,7 @@ from osgeo import osr
 import json
 import shapely.geometry
 import shapely.wkb
+import shapely.affinity
 import codecs
 import copy
 
@@ -80,6 +81,10 @@ class Converter:
     self.buffer_distance = args.get('buffer_distance')
     self.simplify_tolerance = args.get('simplify_tolerance')
     self.for_each = args.get('for_each')
+    self.emulate_longitude0 = args.get('emulate_longitude0')
+    if args.get('emulate_longitude0') is None and (self.projection == 'merc' or self.projection =='mill'):
+      self.emulate_longitude0 = True
+
     if args.get('viewport'):
       self.viewport = map(lambda s: float(s), args.get('viewport').split(' '))
     else:
@@ -87,7 +92,10 @@ class Converter:
 
     # spatial reference to convert to
     self.spatialRef = osr.SpatialReference()
-    self.spatialRef.ImportFromProj4('+proj='+str(self.projection)+' +a=6381372 +b=6381372 +lat_0=0 +lon_0='+str(self.longitude0))
+    projString = '+proj='+str(self.projection)+' +a=6381372 +b=6381372 +lat_0=0'
+    if not self.emulate_longitude0:
+      projString += ' +lon_0='+str(self.longitude0)
+    self.spatialRef.ImportFromProj4(projString)
 
     # handle map insets
     if args.get('insets'):
@@ -105,9 +113,9 @@ class Converter:
     layer.SetAttributeFilter( sourceConfig['where'].encode('ascii') )
     self.viewportRect = False
 
+    transformation = osr.CoordinateTransformation( layer.GetSpatialRef(), self.spatialRef )
     if self.viewport:
       layer.SetSpatialFilterRect( *sourceConfig.get('viewport') )
-      transformation = osr.CoordinateTransformation( layer.GetSpatialRef(), self.spatialRef )
       point1 = transformation.TransformPoint(self.viewport[0], self.viewport[1])
       point2 = transformation.TransformPoint(self.viewport[2], self.viewport[3])
       self.viewportRect = shapely.geometry.box(point1[0], point1[1], point2[0], point2[1])
@@ -131,6 +139,15 @@ class Converter:
         codes[name] = code
       layer.ResetReading()
 
+    if self.emulate_longitude0:
+      meridian = -180 + self.longitude0
+      p1 = transformation.TransformPoint(-180, 90)
+      p2 = transformation.TransformPoint(meridian, -90)
+      left = shapely.geometry.box(p1[0], p1[1], p2[0], p2[1])
+      p3 = transformation.TransformPoint(meridian, 90)
+      p4 = transformation.TransformPoint(180, -90)
+      right = shapely.geometry.box(p3[0], p3[1], p4[0], p4[1])
+
     # load features
     for feature in layer:
       geometry = feature.GetGeometryRef()
@@ -139,6 +156,12 @@ class Converter:
       if geometryType == ogr.wkbPolygon or geometryType == ogr.wkbMultiPolygon:
         geometry.TransformTo( self.spatialRef )
         shapelyGeometry = shapely.wkb.loads( geometry.ExportToWkb() )
+
+        if self.emulate_longitude0:
+          leftPart = shapely.affinity.translate(shapelyGeometry.intersection(left), p4[0] - p3[0])
+          rightPart = shapely.affinity.translate(shapelyGeometry.intersection(right), p1[0] - p2[0])
+          shapelyGeometry = leftPart.union(rightPart)
+
         if not shapelyGeometry.is_valid:
           #buffer to fix selfcrosses
           shapelyGeometry = shapelyGeometry.buffer(0, 1)
