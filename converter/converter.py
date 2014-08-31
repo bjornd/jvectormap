@@ -4,7 +4,6 @@
 # Copyright 2011-2013, Kirill Lebedev
 #
 
-import argparse
 import sys
 from osgeo import ogr
 from osgeo import osr
@@ -298,11 +297,12 @@ class Converter:
     return shapely.geometry.multipolygon.MultiPolygon(polygons)
 
 
-parser = argparse.ArgumentParser(conflict_handler='resolve')
-parser.add_argument('input_file')
-args = vars(parser.parse_args())
+args = {}
+if len(sys.argv) > 1:
+  paramsJson = open(sys.argv[1], 'r').read()
+else:
+  paramsJson = sys.stdin.read()
+paramsJson = json.loads(paramsJson)
 
-args.update( json.loads( open(args['input_file'], 'r').read() ) )
-
-converter = Converter(args)
-converter.convert(args['output_file'])
+converter = Converter(paramsJson)
+converter.convert(paramsJson['output_file'])

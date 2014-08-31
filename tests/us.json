@@ -1,5 +1,5 @@
 {
-	"input_file": "/Users/kirilllebedev/Maps/ne_10m_admin_1_states_provinces_lakes_shp/ne_10m_admin_1_states_provinces_lakes_shp.shp",
+	"input_file": "/Users/kirilllebedev/Maps/ne_10m_admin_1_states_provinces_lakes/ne_10m_admin_1_states_provinces_lakes.shp",
 	"output_file": "tests/assets/jquery-jvectormap-data-us-lcc-en.js",
 	"width": 900,
 	"name_field": "name",
