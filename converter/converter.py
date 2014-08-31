@@ -35,7 +35,7 @@ class Converter:
   def __init__(self, config):
     args = {
       'buffer_distance': -0.4,
-      'longitude0': '0',
+      'longitude0': 0,
       'projection': 'mill',
       'name': 'world',
       'language': 'en',
@@ -74,7 +74,7 @@ class Converter:
     self.features = {}
     self.width = args.get('width')
     self.minimal_area = args.get('minimal_area')
-    self.longitude0 = args.get('longitude0')
+    self.longitude0 = float(args.get('longitude0'))
     self.projection = args.get('projection')
     self.precision = args.get('precision')
     self.buffer_distance = args.get('buffer_distance')
