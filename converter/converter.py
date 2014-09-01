@@ -114,7 +114,7 @@ class Converter:
 
     transformation = osr.CoordinateTransformation( layer.GetSpatialRef(), self.spatialRef )
     if self.viewport:
-      layer.SetSpatialFilterRect( *sourceConfig.get('viewport') )
+      layer.SetSpatialFilterRect( *self.viewport )
       point1 = transformation.TransformPoint(self.viewport[0], self.viewport[1])
       point2 = transformation.TransformPoint(self.viewport[2], self.viewport[3])
       self.viewportRect = shapely.geometry.box(point1[0], point1[1], point2[0], point2[1])
