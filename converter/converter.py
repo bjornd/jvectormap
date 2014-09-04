@@ -35,6 +35,7 @@ class Converter:
   def __init__(self, config):
     args = {
       'buffer_distance': -0.4,
+      'simplify_tolerance': 0.2,
       'longitude0': 0,
       'projection': 'mill',
       'name': 'world',
@@ -245,7 +246,7 @@ class Converter:
       if geometry.is_empty:
         continue
       if self.simplify_tolerance:
-        geometry = geometry.simplify(self.simplify_tolerance, preserve_topology=True)
+        geometry = geometry.simplify(self.simplify_tolerance*scale, preserve_topology=True)
       if isinstance(geometry, shapely.geometry.multipolygon.MultiPolygon):
         polygons = geometry.geoms
       else:
