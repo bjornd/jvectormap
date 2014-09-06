@@ -39,6 +39,7 @@ class Converter:
       'longitude0': 0,
       'projection': 'mill',
       'name': 'world',
+      'width': 900,
       'language': 'en',
       'precision': 2,
       'insets': []
