@@ -142,11 +142,11 @@ class Converter:
 
     if self.emulate_longitude0:
       meridian = -180 + self.longitude0
-      p1 = transformation.TransformPoint(-180, 90)
-      p2 = transformation.TransformPoint(meridian, -90)
+      p1 = transformation.TransformPoint(-180, 89)
+      p2 = transformation.TransformPoint(meridian, -89)
       left = shapely.geometry.box(p1[0], p1[1], p2[0], p2[1])
-      p3 = transformation.TransformPoint(meridian, 90)
-      p4 = transformation.TransformPoint(180, -90)
+      p3 = transformation.TransformPoint(meridian, 89)
+      p4 = transformation.TransformPoint(180, -89)
       right = shapely.geometry.box(p3[0], p3[1], p4[0], p4[1])
 
     # load features
