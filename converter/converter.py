@@ -54,7 +54,6 @@ class Converter:
       self.sources = [{
         'input_file': args.get('input_file'),
         'where': args.get('where'),
-        'codes_file': args.get('codes_file'),
         'name_field': args.get('name_field'),
         'code_field': args.get('code_field'),
         'input_file_encoding': args.get('input_file_encoding')
@@ -62,7 +61,6 @@ class Converter:
 
     default_source = {
       'where': '',
-      'codes_file': '',
       'name_field': 0,
       'code_field': 1,
       'input_file_encoding': 'iso-8859-1'
@@ -123,22 +121,7 @@ class Converter:
 
     layer.ResetReading()
 
-    # load codes from external tsv file if present or geodata file otherwise
     codes = {}
-    if sourceConfig.get('codes_file'):
-      for line in codecs.open(sourceConfig.get('codes_file'), 'r', "utf-8"):
-        row = map(lambda s: s.strip(), line.split('\t'))
-        codes[row[1]] = row[0]
-    else:
-      nextCode = 0
-      for feature in layer:
-        code = feature.GetFieldAsString(str(sourceConfig.get('code_field')))
-        if code == '-99':
-          code = '_'+str(nextCode)
-          nextCode += 1
-        name = feature.GetFieldAsString(str(sourceConfig.get('name_field'))).decode(sourceConfig.get('input_file_encoding'))
-        codes[name] = code
-      layer.ResetReading()
 
     if self.emulate_longitude0:
       meridian = -180 + self.longitude0
@@ -150,6 +133,7 @@ class Converter:
       right = shapely.geometry.box(p3[0], p3[1], p4[0], p4[1])
 
     # load features
+    nextCode = 0
     for feature in layer:
       geometry = feature.GetGeometryRef()
       geometryType = geometry.GetGeometryType()
@@ -169,7 +153,11 @@ class Converter:
         shapelyGeometry = self.applyFilters(shapelyGeometry)
         if shapelyGeometry:
           name = feature.GetFieldAsString(str(sourceConfig.get('name_field'))).decode(sourceConfig.get('input_file_encoding'))
-          code = codes[name]
+          code = feature.GetFieldAsString(str(sourceConfig.get('code_field'))).decode(sourceConfig.get('input_file_encoding'))
+          if code in codes:
+            code = '_' + str(nextCode)
+            nextCode += 1
+          codes[code] = name
           self.features[code] = {"geometry": shapelyGeometry, "name": name, "code": code}
       else:
         raise Exception, "Wrong geometry type: "+geometryType
