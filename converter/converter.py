@@ -83,7 +83,7 @@ class Converter:
     self.simplify_tolerance = args.get('simplify_tolerance')
     self.for_each = args.get('for_each')
     self.emulate_longitude0 = args.get('emulate_longitude0')
-    if args.get('emulate_longitude0') is None and (self.projection == 'merc' or self.projection =='mill'):
+    if args.get('emulate_longitude0') is None and (self.projection == 'merc' or self.projection =='mill') and self.longitude0 != 0:
       self.emulate_longitude0 = True
 
     if args.get('viewport'):
