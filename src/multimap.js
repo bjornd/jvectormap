@@ -63,7 +63,7 @@ jvm.MultiMap.prototype = {
     var currentMap = this.history[this.history.length - 1],
         that = this;
 
-    jvm.$.when(this.downloadMap(code), currentMap.setFocus({region: code, animated: true})).then(function(){
+    jvm.$.when(this.downloadMap(code), currentMap.setFocus({region: code, animate: true})).then(function(){
       currentMap.params.container.hide();
       if (!that.maps[name]) {
         that.addMap(name, {map: name});
