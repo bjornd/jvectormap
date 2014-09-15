@@ -1,12 +1,10 @@
 {
 	"input_file": "/Users/kirilllebedev/Maps/ne_10m_admin_1_states_provinces_lakes/ne_10m_admin_1_states_provinces_lakes.shp",
 	"output_file": "tests/assets/jquery-jvectormap-data-us-lcc-en.js",
-	"width": 900,
 	"name_field": "name",
 	"code_field": "iso_3166_2",
 	"projection": "lcc",
 	"name": "us",
-	"simplify_tolerance": 150,
 	"longitude0": -100,
 	"where": "iso_a2 = 'US'",
 	"minimal_area": 4000000,
@@ -30,7 +28,6 @@
 		"where": "STATE = SUBSTR('{{code}}', 4)",
 		"projection": "lcc",
 		"name": "{{code}}",
-		"simplify_tolerance": 150,
 		"longitude0": -100
 	}
 }
