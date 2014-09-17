@@ -1,5 +1,6 @@
 jvm.Marker = function(config){
-  var text;
+  var text,
+      offsets;
 
   this.config = config;
 
@@ -8,8 +9,9 @@ jvm.Marker = function(config){
 
   text = this.getLabelText(config.index);
   if (this.config.label && text) {
-    this.labelX = config.cx;
-    this.labelY = config.cy;
+    offsets = this.getLabelOffsets(config.code);
+    this.labelX = config.cx + offsets[0];
+    this.labelY = config.cy + offsets[1];
     this.label = config.canvas.addText({
       text: text,
       'data-index': config.index,

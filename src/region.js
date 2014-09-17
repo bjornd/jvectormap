@@ -1,6 +1,9 @@
 jvm.Region = function(config){
   var bbox,
-      text;
+      text,
+      offsets,
+      labelDx,
+      labelDy;
 
   this.config = config;
 
@@ -14,8 +17,9 @@ jvm.Region = function(config){
 
   text = this.getLabelText(config.code);
   if (this.config.label && text) {
-    this.labelX = bbox.x + bbox.width / 2;
-    this.labelY = bbox.y + bbox.height / 2;
+    offsets = this.getLabelOffsets(config.code);
+    this.labelX = bbox.x + bbox.width / 2 + offsets[0];
+    this.labelY = bbox.y + bbox.height / 2 + offsets[1];
     this.label = config.canvas.addText({
       text: text,
       'text-anchor': 'middle',
