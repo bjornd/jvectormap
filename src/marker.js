@@ -15,7 +15,7 @@ jvm.Marker = function(config){
     this.label = config.canvas.addText({
       text: text,
       'data-index': config.index,
-      'alignment-baseline': 'central',
+      dy: "0.6ex",
       x: this.labelX,
       y: this.labelY
     }, config.labelStyle, config.labelsGroup);
