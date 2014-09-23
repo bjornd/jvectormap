@@ -6,6 +6,7 @@ jvm.Region = function(config){
       labelDy;
 
   this.config = config;
+  this.map = this.config.map;
 
   this.shape = config.canvas.addPath({
     d: config.path,
@@ -34,11 +35,11 @@ jvm.Region = function(config){
 
 jvm.inherits(jvm.Region, jvm.MapObject);
 
-jvm.Region.prototype.updateLabelPosition = function(transX, transY, scale){
+jvm.Region.prototype.updateLabelPosition = function(){
   if (this.label) {
     this.label.set({
-      x: this.labelX * scale + transX * scale,
-      y: this.labelY * scale + transY * scale
+      x: this.labelX * this.map.scale + this.map.transX * this.map.scale,
+      y: this.labelY * this.map.scale + this.map.transY * this.map.scale
     });
   }
 };

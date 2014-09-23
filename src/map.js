@@ -732,6 +732,7 @@ jvm.Map.prototype = {
 
     for (key in this.mapData.paths) {
       region = new jvm.Region({
+        map: this,
         path: this.mapData.paths[key].path,
         code: key,
         style: jvm.$.extend(true, {}, this.params.regionStyle),
@@ -776,6 +777,7 @@ jvm.Map.prototype = {
 
       if (point !== false) {
         marker = new jvm.Marker({
+          map: this,
           style: jvm.$.extend(true, {}, this.params.markerStyle, {initial: markerConfig.style || {}}),
           labelStyle: jvm.$.extend(true, {}, this.params.markerLabelStyle),
           index: i,
@@ -814,11 +816,11 @@ jvm.Map.prototype = {
     var key;
 
     for (key in this.regions) {
-      this.regions[key].element.updateLabelPosition(this.transX, this.transY, this.scale);
+      this.regions[key].element.updateLabelPosition();
     }
 
     for (key in this.markers) {
-      this.markers[key].element.updateLabelPosition(this.transX, this.transY, this.scale);
+      this.markers[key].element.updateLabelPosition();
     }
   },
 

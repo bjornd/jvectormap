@@ -66,5 +66,8 @@ jvm.MapObject.prototype.setStyle = function(){
 };
 
 jvm.MapObject.prototype.remove = function(){
-  this.element.remove();
+  this.shape.remove();
+  if (this.label) {
+    this.label.remove();
+  }
 };

@@ -66,7 +66,7 @@ jvm.MultiMap.prototype = {
     jvm.$.when(this.downloadMap(code), currentMap.setFocus({region: code, animate: true})).then(function(){
       currentMap.params.container.hide();
       if (!that.maps[name]) {
-        that.addMap(name, {map: name, level: });
+        that.addMap(name, {map: name, level: 1});
       } else {
         that.maps[name].params.container.show();
       }

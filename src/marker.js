@@ -3,6 +3,7 @@ jvm.Marker = function(config){
       offsets;
 
   this.config = config;
+  this.map = this.config.map;
 
   this.isImage = !!this.config.style.initial.image;
   this.createShape();
@@ -47,20 +48,12 @@ jvm.Marker.prototype.createShape = function(){
   }
 };
 
-jvm.Marker.prototype.updateLabelPosition = function(transX, transY, scale){
+jvm.Marker.prototype.updateLabelPosition = function(){
   if (this.label) {
-    if (typeof transX === 'undefined') {
-      transX = this.transX;
-      transY = this.transY;
-      scale = this.scale;
-    } else {
-      this.transX = transX;
-      this.transY = transY;
-      this.scale = scale;
-    }
     this.label.set({
-      x: this.labelX * scale + transX * scale + 5 + (this.isImage ? (this.shape.width || 0) / 2 : this.shape.properties.r),
-      y: this.labelY * scale + transY * scale
+      x: this.labelX * this.map.scale +
+         this.map.transX * this.map.scale + 5 + (this.isImage ? (this.shape.width || 0) / 2 : this.shape.properties.r),
+      y: this.labelY * this.map.scale + this.map.transY * this.map.scale
     });
   }
 };
