@@ -10,6 +10,7 @@ jvm.MultiMap = function(params) {
 
   this.maps = {};
   this.params = jvm.$.extend(true, {}, jvm.MultiMap.defaultParams, params);
+  this.params.maxLevel = this.params.maxLevel || Number.MAX_VALUE;
   this.params.main = this.params.main || {};
   this.params.main.multiMapLevel = 0;
   this.history = [ this.addMap(this.params.main.map, this.params.main) ];
