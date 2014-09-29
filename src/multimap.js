@@ -10,7 +10,9 @@ jvm.MultiMap = function(params) {
 
   this.maps = {};
   this.params = jvm.$.extend(true, {}, jvm.MultiMap.defaultParams, params);
-  this.history = [ this.addMap(params.main.map, params.main) ];
+  this.params.main = this.params.main || {};
+  this.params.main.multiMapLevel = 0;
+  this.history = [ this.addMap(this.params.main.map, this.params.main) ];
   this.defaultProjection = this.history[0].mapData.projection.type;
   this.mapsLoaded = {};
 
@@ -32,12 +34,15 @@ jvm.MultiMap.prototype = {
     this.params.container.append(cnt);
 
     this.maps[name] = new jvm.Map(jvm.$.extend(config, {container: cnt}));
-    this.maps[name].container.on('regionClick.jvectormap', {scope: this}, function(e, code){
-      var multimap = e.data.scope,
-          mapName = multimap.params.mapNameByCode(code, multimap);
+    if (this.params.maxLevel > config.multiMapLevel) {
+      this.maps[name].container.on('regionClick.jvectormap', {scope: this}, function(e, code){
+        var multimap = e.data.scope,
+            mapName = multimap.params.mapNameByCode(code, multimap);
 
-      multimap.drillDown(mapName, code);
-    })
+        multimap.drillDown(mapName, code);
+      });
+    }
+
 
     return this.maps[name];
   },
@@ -66,7 +71,7 @@ jvm.MultiMap.prototype = {
     jvm.$.when(this.downloadMap(code), currentMap.setFocus({region: code, animate: true})).then(function(){
       currentMap.params.container.hide();
       if (!that.maps[name]) {
-        that.addMap(name, {map: name, level: 1});
+        that.addMap(name, {map: name, multiMapLevel: currentMap.params.multiMapLevel + 1});
       } else {
         that.maps[name].params.container.show();
       }
