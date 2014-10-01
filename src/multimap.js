@@ -23,6 +23,9 @@ jvm.MultiMap = function(params) {
   this.backButton.click(function(){
     that.goBack();
   });
+
+  this.spinner = jvm.$('<div/>').addClass('jvectormap-spinner').appendTo(this.params.container);
+  this.spinner.hide();
 };
 
 jvm.MultiMap.prototype = {
@@ -67,9 +70,19 @@ jvm.MultiMap.prototype = {
 
   drillDown: function(name, code){
     var currentMap = this.history[this.history.length - 1],
-        that = this;
+        that = this,
+        focusPromise = currentMap.setFocus({region: code, animate: true}),
+        downloadPromise = this.downloadMap(code);
 
-    jvm.$.when(this.downloadMap(code), currentMap.setFocus({region: code, animate: true})).then(function(){
+    focusPromise.then(function(){
+      if (downloadPromise.state() === 'pending') {
+        that.spinner.show();
+      }
+    });
+    downloadPromise.always(function(){
+      that.spinner.hide();
+    });
+    jvm.$.when(downloadPromise, focusPromise).then(function(){
       currentMap.params.container.hide();
       if (!that.maps[name]) {
         that.addMap(name, {map: name, multiMapLevel: currentMap.params.multiMapLevel + 1});
