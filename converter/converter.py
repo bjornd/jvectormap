@@ -1,5 +1,5 @@
 #
-# jVectorMap version 1.2.2
+# jVectorMap version 2.0.0
 #
 # Copyright 2011-2013, Kirill Lebedev
 #
