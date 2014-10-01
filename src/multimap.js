@@ -18,7 +18,7 @@ jvm.MultiMap = function(params) {
   this.mapsLoaded = {};
 
   this.params.container.css({position: 'relative'});
-  this.backButton = jvm.$('<div/>').addClass('jvectormap-goback').text('back').appendTo(this.params.container);
+  this.backButton = jvm.$('<div/>').addClass('jvectormap-goback').text('Back').appendTo(this.params.container);
   this.backButton.hide();
   this.backButton.click(function(){
     that.goBack();

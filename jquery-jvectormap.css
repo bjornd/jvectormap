@@ -45,6 +45,7 @@
 .jvectormap-goback {
     bottom: 10px;
     z-index: 1000;
+    padding: 6px;
 }
 
 .jvectormap-spinner {
