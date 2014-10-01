@@ -19,6 +19,8 @@
   <script src="../src/svg-shape-element.js"></script>
   <script src="../src/svg-path-element.js"></script>
   <script src="../src/svg-circle-element.js"></script>
+  <script src="../src/svg-image-element.js"></script>
+  <script src="../src/svg-text-element.js"></script>
 
   <script src="../src/vml-element.js"></script>
   <script src="../src/vml-group-element.js"></script>
@@ -39,21 +41,25 @@
   <script src="../src/data-series.js"></script>
   <script src="../src/proj.js"></script>
   <script src="../src/map.js"></script>
+  <script src="../src/multimap.js"></script>
 
-  <script src="assets/jquery-jvectormap-map.js"></script>
+  <script src="assets/jquery-jvectormap-data-us-lcc-en.js"></script>
   <script>
     $(function(){
-      var map = $('#map1').vectorMap({
-        map: 'map',
-        markers: [
-            {coords: [100, 100], name: 'Marker 1', style: {fill: 'yellow'}},
-            {coords: [200, 200], name: 'Marker 2', style: {fill: 'yellow'}},
-        ]
+      var map1,
+          map2;
+
+      new jvm.MultiMap({
+        container: $('#map1'),
+        maxLevel: 1,
+        main: {
+          map: 'us_lcc_en'
+        }
       });
-    })
+    });
   </script>
 </head>
 <body>
-  <div id="map1" style="width: 600px; height: 600px"></div>
+  <div id="map1" style="width: 900px; height: 600px"></div>
 </body>
 </html>
