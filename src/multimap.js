@@ -43,7 +43,9 @@ jvm.MultiMap.prototype = {
         var multimap = e.data.scope,
             mapName = multimap.params.mapNameByCode(code, multimap);
 
-        multimap.drillDown(mapName, code);
+        if (!multimap.drillDownPromise || multimap.drillDownPromise.state() !== 'pending') {
+          multimap.drillDown(mapName, code);
+        }
       });
     }
 
@@ -82,7 +84,8 @@ jvm.MultiMap.prototype = {
     downloadPromise.always(function(){
       that.spinner.hide();
     });
-    jvm.$.when(downloadPromise, focusPromise).then(function(){
+    this.drillDownPromise = jvm.$.when(downloadPromise, focusPromise);
+    this.drillDownPromise.then(function(){
       currentMap.params.container.hide();
       if (!that.maps[name]) {
         that.addMap(name, {map: name, multiMapLevel: currentMap.params.multiMapLevel + 1});
