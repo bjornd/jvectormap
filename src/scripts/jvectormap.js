@@ -127,7 +127,7 @@ if (!Array.prototype.indexOf) {
 
     // 1. Let O be the result of calling ToObject passing
     //    the this value as the argument.
-    if (this == null) {
+    if (this === null) {
       throw new TypeError('"this" is null or not defined');
     }
 

@@ -1,6 +1,6 @@
 jvm.SVGTextElement = function(config, style){
   jvm.SVGTextElement.parentClass.call(this, 'text', config, style);
-}
+};
 
 jvm.inherits(jvm.SVGTextElement, jvm.SVGShapeElement);
 

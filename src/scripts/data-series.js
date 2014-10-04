@@ -39,7 +39,7 @@ jvm.DataSeries = function(params, elements, map) {
     this.legend = new jvm.Legend($.extend({
       map: this.map,
       series: this
-    }, this.params.legend))
+    }, this.params.legend));
   }
 };
 
