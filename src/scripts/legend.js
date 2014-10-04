@@ -1,4 +1,4 @@
-jvm.Legend = function(params) {
+jvm.Legend = function (params) {
   this.params = params || {};
   this.map = this.params.map;
   this.series = this.params.series;
@@ -9,21 +9,21 @@ jvm.Legend = function(params) {
   }
 
   if (params.vertical) {
-    this.map.legendCntVertical.append( this.body );
+    this.map.legendCntVertical.append(this.body);
   } else {
-    this.map.legendCntHorizontal.append( this.body );
+    this.map.legendCntHorizontal.append(this.body);
   }
 
   this.render();
-}
+};
 
-jvm.Legend.prototype.render = function(){
+jvm.Legend.prototype.render = function () {
   var ticks = this.series.scale.getTicks(),
-      i,
-      inner = jvm.$('<div/>').addClass('jvectormap-legend-inner'),
-      tick,
-      sample,
-      label;
+    i,
+    inner = jvm.$('<div/>').addClass('jvectormap-legend-inner'),
+    tick,
+    sample,
+    label;
 
   this.body.html('');
   if (this.params.title) {
@@ -40,7 +40,7 @@ jvm.Legend.prototype.render = function(){
     switch (this.series.params.attribute) {
       case 'fill':
         if (jvm.isImageUrl(ticks[i].value)) {
-          sample.css('background', 'url('+ticks[i].value+')');
+          sample.css('background', 'url(' + ticks[i].value + ')');
         } else {
           sample.css('background', ticks[i].value);
         }
@@ -49,26 +49,26 @@ jvm.Legend.prototype.render = function(){
         sample.css('background', ticks[i].value);
         break;
       case 'image':
-        sample.css('background', 'url('+ticks[i].value+') no-repeat center center');
+        sample.css('background', 'url(' + ticks[i].value + ') no-repeat center center');
         break;
       case 'r':
         jvm.$('<div/>').css({
           'border-radius': ticks[i].value,
-          border: this.map.params.markerStyle.initial['stroke-width']+'px '+
-                  this.map.params.markerStyle.initial['stroke']+' solid',
+          border: this.map.params.markerStyle.initial['stroke-width'] + 'px ' +
+            this.map.params.markerStyle.initial.stroke + ' solid',
           width: ticks[i].value * 2 + 'px',
           height: ticks[i].value * 2 + 'px',
-          background: this.map.params.markerStyle.initial['fill']
+          background: this.map.params.markerStyle.initial.fill
         }).appendTo(sample);
         break;
     }
-    tick.append( sample );
+    tick.append(sample);
     label = ticks[i].label;
     if (this.params.labelRender) {
       label = this.params.labelRender(label);
     }
-    tick.append( jvm.$('<div>'+label+' </div>').addClass('jvectormap-legend-tick-text') );
+    tick.append(jvm.$('<div>' + label + ' </div>').addClass('jvectormap-legend-tick-text'));
     inner.append(tick);
   }
-  inner.append( jvm.$('<div/>').css('clear', 'both') );
-}
+  inner.append(jvm.$('<div/>').css('clear', 'both'));
+};

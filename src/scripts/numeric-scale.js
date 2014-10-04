@@ -41,7 +41,7 @@ jvm.NumericScale.prototype = {
     if (f === 'polynomial') {
       this.normalize = function(value) {
         return Math.pow(value, 0.2);
-      }
+      };
     } else if (f === 'linear') {
       delete this.normalize;
     } else {
@@ -80,7 +80,7 @@ jvm.NumericScale.prototype = {
     }
 
     if (i == this.scale.length - 1) {
-      value = this.vectorToNum(this.scale[i])
+      value = this.vectorToNum(this.scale[i]);
     } else {
       value = (
         this.vectorToNum(
@@ -157,9 +157,9 @@ jvm.NumericScale.prototype = {
         tick,
         v;
 
-    if (err <= .15) step *= 10;
-    else if (err <= .35) step *= 5;
-    else if (err <= .75) step *= 2;
+    if (err <= 0.15) step *= 10;
+    else if (err <= 0.35) step *= 5;
+    else if (err <= 0.75) step *= 2;
 
     extent[0] = Math.floor(extent[0] / step) * step;
     extent[1] = Math.ceil(extent[1] / step) * step;

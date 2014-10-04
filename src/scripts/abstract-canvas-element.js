@@ -11,7 +11,7 @@ jvm.AbstractCanvasElement = function(container, width, height){
   this.rootElement = new jvm[this.classPrefix+'GroupElement']();
   this.node.appendChild( this.rootElement.node );
   this.container.appendChild(this.node);
-}
+};
 
 /**
  * Add element to the certain group inside of the canvas.
@@ -22,7 +22,7 @@ jvm.AbstractCanvasElement.prototype.add = function(element, group){
   group = group || this.rootElement;
   group.add(element);
   element.canvas = this;
-}
+};
 
 /**
  * Create path and add it to the canvas.
