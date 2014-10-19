@@ -24,12 +24,26 @@
     "stroke-opacity": 1
   },
   hover: {
-    "fill-opacity": 0.8
+    "fill-opacity": 0.8,
+    cursor: 'pointer'
   },
   selected: {
     fill: 'yellow'
   },
   selectedHover: {
+  }
+}</pre>
+* @param {Object} params.regionLabelStyle Set the styles for the regions' labels. Each region or marker has four states: <code>initial</code> (default state), <code>hover</code> (when the mouse cursor is over the region or marker), <code>selected</code> (when region or marker is selected), <code>selectedHover</code> (when the mouse cursor is over the region or marker and it's selected simultaneously). Styles could be set for each of this states. Default value for that parameter is:
+<pre>{
+  initial: {
+    'font-family': 'Verdana',
+    'font-size': '12',
+    'font-weight': 'bold',
+    cursor: 'default',
+    fill: 'black'
+  },
+  hover: {
+    cursor: 'pointer'
   }
 }</pre>
  * @param {Object} params.markerStyle Set the styles for the map's markers. Any parameter suitable for <code>regionStyle</code> could be used as well as numeric parameter <code>r</code> to set the marker's radius. Default value for that parameter is:
@@ -44,12 +58,26 @@
   },
   hover: {
     stroke: 'black',
-    "stroke-width": 2
+    "stroke-width": 2,
+    cursor: 'pointer'
   },
   selected: {
     fill: 'blue'
   },
   selectedHover: {
+  }
+}</pre>
+ * @param {Object} params.markerLabelStyle Set the styles for the markers' labels. Default value for that parameter is:
+<pre>{
+  initial: {
+    'font-family': 'Verdana',
+    'font-size': '12',
+    'font-weight': 'bold',
+    cursor: 'default',
+    fill: 'black'
+  },
+  hover: {
+    cursor: 'pointer'
   }
 }</pre>
  * @param {Object|Array} params.markers Set of markers to add to the map during initialization. In case of array is provided, codes of markers will be set as string representations of array indexes. Each marker is represented by <code>latLng</code> (array of two numeric values), <code>name</code> (string which will be show on marker's tip) and any marker styles.
@@ -60,6 +88,11 @@
   y: 0.5,
   scale: 2
 }</pre>
+ * @param {Object} params.labels Defines parameters for rendering static labels. Object could contain two keys: <code>regions</code> and <code>markers</code>. Each key value defines configuration object with the following possible options:
+<ul>
+  <li><code>render {Function}</code> - defines method for converting region code or marker index to actual label value.</li>
+  <li><code>offsets {Object|Function}</code> - defines method or object which could be used to define label offset by region code or marker index.</li>
+</ul>
  * @param {Array|Object|String} params.selectedRegions Set initially selected regions.
  * @param {Array|Object|String} params.selectedMarkers Set initially selected markers.
  * @param {Function} params.onRegionTipShow <code>(Event e, Object tip, String code)</code> Will be called right before the region tip is going to be shown.
