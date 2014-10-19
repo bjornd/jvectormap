@@ -91,7 +91,7 @@
  * @param {Object} params.labels Defines parameters for rendering static labels. Object could contain two keys: <code>regions</code> and <code>markers</code>. Each key value defines configuration object with the following possible options:
 <ul>
   <li><code>render {Function}</code> - defines method for converting region code or marker index to actual label value.</li>
-  <li><code>offsets {Object|Function}</code> - defines method or object which could be used to define label offset by region code or marker index.</li>
+  <li><code>offsets {Object|Function}</code> - provides method or object which could be used to define label offset by region code or marker index.</li>
 </ul>
  * @param {Array|Object|String} params.selectedRegions Set initially selected regions.
  * @param {Array|Object|String} params.selectedMarkers Set initially selected markers.
