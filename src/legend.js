@@ -1,5 +1,5 @@
 /**
- * Creates map, draws paths, binds events.
+ * Represents map legend.
  * @constructor
  * @param {Object} params Configuration parameters.
  * @param {String} params.cssClass Additional CSS class to apply to legend element.
