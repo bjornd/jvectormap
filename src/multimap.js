@@ -11,9 +11,11 @@ function(code, multiMap) {
 }
 </pre>
  * @param {Function} params.mapUrlByCode Function to generate map url by region code. Default value is:
+<pre>
 function(code, multiMap){
   return 'jquery-jvectormap-data-'+code.toLowerCase()+'-'+multiMap.defaultProjection+'-en.js';
 }
+</pre>
  */
 jvm.MultiMap = function(params) {
   var that = this;
