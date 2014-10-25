@@ -7,13 +7,16 @@
  * @param {Function} params.mapNameByCode Function go generate map name by region code. Default value is:
 <pre>
 function(code, multiMap) {
-  return code.toLowerCase()+'_'+multiMap.defaultProjection+'_en';
+  return code.toLowerCase()+'_'+
+         multiMap.defaultProjection+'_en';
 }
 </pre>
  * @param {Function} params.mapUrlByCode Function to generate map url by region code. Default value is:
 <pre>
 function(code, multiMap){
-  return 'jquery-jvectormap-data-'+code.toLowerCase()+'-'+multiMap.defaultProjection+'-en.js';
+  return 'jquery-jvectormap-data-'+
+         code.toLowerCase()+'-'+
+         multiMap.defaultProjection+'-en.js';
 }
 </pre>
  */
