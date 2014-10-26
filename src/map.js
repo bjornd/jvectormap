@@ -93,6 +93,7 @@
   <li><code>render {Function}</code> - defines method for converting region code or marker index to actual label value.</li>
   <li><code>offsets {Object|Function}</code> - provides method or object which could be used to define label offset by region code or marker index.</li>
 </ul>
+<b>Plase note: static labels feature is not supported in Internet Explorer 8 and below.</b>
  * @param {Array|Object|String} params.selectedRegions Set initially selected regions.
  * @param {Array|Object|String} params.selectedMarkers Set initially selected markers.
  * @param {Function} params.onRegionTipShow <code>(Event e, Object tip, String code)</code> Will be called right before the region tip is going to be shown.
