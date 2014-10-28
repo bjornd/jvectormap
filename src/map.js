@@ -82,12 +82,7 @@
 }</pre>
  * @param {Object|Array} params.markers Set of markers to add to the map during initialization. In case of array is provided, codes of markers will be set as string representations of array indexes. Each marker is represented by <code>latLng</code> (array of two numeric values), <code>name</code> (string which will be show on marker's tip) and any marker styles.
  * @param {Object} params.series Object with two keys: <code>markers</code> and <code>regions</code>. Each of which is an array of series configs to be applied to the respective map elements. See <a href="jvm.DataSeries.html">DataSeries</a> description for a list of parameters available.
- * @param {Object|String} params.focusOn This parameter sets the initial position and scale of the map viewport. It could be expressed as a string representing region which should be in focus or an object representing coordinates and scale to set. For example to focus on the center of the map at the double scale you can provide the following value:
-<pre>{
-  x: 0.5,
-  y: 0.5,
-  scale: 2
-}</pre>
+ * @param {Object|String} params.focusOn This parameter sets the initial position and scale of the map viewport. See <code>setFocus</code> docuemntation for possible parameters.
  * @param {Object} params.labels Defines parameters for rendering static labels. Object could contain two keys: <code>regions</code> and <code>markers</code>. Each key value defines configuration object with the following possible options:
 <ul>
   <li><code>render {Function}</code> - defines method for converting region code or marker index to actual label value.</li>
@@ -592,10 +587,15 @@ jvm.Map.prototype = {
 
   /**
    * Set the map's viewport to the specific point and set zoom of the map to the specific level. Point and zoom level could be defined in two ways: using the code of some region to focus on or a central point and zoom level as numbers.
-   * @param {Number|String|Array} scale|regionCode|regionCodes If the first parameter of this method is a string or array of strings and there are regions with the these codes, the viewport will be set to show all these regions. Otherwise if the first parameter is a number, the viewport will be set to show the map with provided scale.
-   * @param {Number} centerX Number from 0 to 1 specifying the horizontal coordinate of the central point of the viewport.
-   * @param {Number} centerY Number from 0 to 1 specifying the vertical coordinate of the central point of the viewport.
-   * @param {Boolean} animate Indicates whether or not to animate the scale change and transition.
+   * @param This method takes a configuration object as the single argument. The options passed to it are the following:
+   * @param {Array} params.regions Array of region codes to zoom to.
+   * @param {String} params.region Region code to zoom to.
+   * @param {Number} params.scale Map scale to set.
+   * @param {Number} params.lat Latitude to set viewport to.
+   * @param {Number} params.lng Longitude to set viewport to.
+   * @param {Number} params.x Number from 0 to 1 specifying the horizontal coordinate of the central point of the viewport.
+   * @param {Number} params.y Number from 0 to 1 specifying the vertical coordinate of the central point of the viewport.
+   * @param {Boolean} params.animate Indicates whether or not to animate the scale change and transition.
    */
   setFocus: function(config){
     var bbox,
