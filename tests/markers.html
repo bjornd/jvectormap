@@ -77,7 +77,11 @@
             {latLng: [31.52, -87.37]}
           ],
           values1 = [408, 512, 550, 781],
-          values2 = [1, 2, 3, 4];
+          values2 = [1, 2, 3, 4],
+          values3 = {
+            '4': 'bank',
+            '5': 'factory'
+          };
 
       var map = new jvm.Map({
         container: $('.map'),
@@ -133,10 +137,7 @@
               bank: 'assets/icon-bank.png',
               factory: 'assets/icon-factory.png'
             },
-            values: {
-              '4': 'bank',
-              '5': 'factory'
-            },
+            values: values3,
             legend: {
               horizontal: true,
               cssClass: 'jvectormap-legend-icons',
@@ -246,14 +247,14 @@
         var index = $(this).closest('li').attr('data-marker-index');
 
         if ($(this).prop('checked')) {
-          map.addMarker( index, markers[index], [values1[index], values2[index]] );
+          map.addMarker( index, markers[index], [values1[index], values2[index], values3[index]] );
         } else {
           map.removeMarkers( [index] );
         }
       });
       $('.button-add-all').click(function(){
         $('.list-markers :checkbox').prop('checked', true);
-        map.addMarkers(markers, [values1, values2]);
+        map.addMarkers(markers, [values1, values2, values3]);
       });
       $('.button-remove-all').click(function(){
         $('.list-markers :checkbox').prop('checked', false);
@@ -288,6 +289,8 @@
     <li data-marker-index="1"><label><input checked type="checkbox"/> Marker 2</label></li>
     <li data-marker-index="2"><label><input checked type="checkbox"/> Marker 3</label></li>
     <li data-marker-index="3"><label><input checked type="checkbox"/> Marker 4</label></li>
+    <li data-marker-index="4"><label><input checked type="checkbox"/> Marker 5</label></li>
+    <li data-marker-index="5"><label><input checked type="checkbox"/> Marker 6</label></li>
   </ul>
   <input type="button" value="Add all" class="button-add-all"/>
   <input type="button" value="Remove all" class="button-remove-all"/>

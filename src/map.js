@@ -2,7 +2,7 @@
  * Creates map, draws paths, binds events.
  * @constructor
  * @param {Object} params Parameters to initialize map with.
- * @param {String} params.map Name of the map in the format <code>territory_proj_lang</code> where <code>territory</code> is a unique code or name of the territory which the map represents (ISO 3166 alpha 2 standard is used where possible), <code>proj</code> is a name of projection used to generate representation of the map on the plane (projections are named according to the conventions of proj4 utility) and <code>lang</code> is a code of the language, used for the names of regions.
+ * @param {String} params.map Name of the map in the format <code>territory_proj_lang</code> where <code>territory</code> is a unique code or name of the territory which the map represents (ISO 3166 standard is used where possible), <code>proj</code> is a name of projection used to generate representation of the map on the plane (projections are named according to the conventions of proj4 utility) and <code>lang</code> is a code of the language, used for the names of regions.
  * @param {String} params.backgroundColor Background color of the map in CSS format.
  * @param {Boolean} params.zoomOnScroll When set to true map could be zoomed using mouse scroll. Default value is <code>true</code>.
  * @param {Boolean} params.panOnDrag When set to true, the map pans when being dragged. Default value is <code>true</code>.
@@ -24,12 +24,26 @@
     "stroke-opacity": 1
   },
   hover: {
-    "fill-opacity": 0.8
+    "fill-opacity": 0.8,
+    cursor: 'pointer'
   },
   selected: {
     fill: 'yellow'
   },
   selectedHover: {
+  }
+}</pre>
+* @param {Object} params.regionLabelStyle Set the styles for the regions' labels. Each region or marker has four states: <code>initial</code> (default state), <code>hover</code> (when the mouse cursor is over the region or marker), <code>selected</code> (when region or marker is selected), <code>selectedHover</code> (when the mouse cursor is over the region or marker and it's selected simultaneously). Styles could be set for each of this states. Default value for that parameter is:
+<pre>{
+  initial: {
+    'font-family': 'Verdana',
+    'font-size': '12',
+    'font-weight': 'bold',
+    cursor: 'default',
+    fill: 'black'
+  },
+  hover: {
+    cursor: 'pointer'
   }
 }</pre>
  * @param {Object} params.markerStyle Set the styles for the map's markers. Any parameter suitable for <code>regionStyle</code> could be used as well as numeric parameter <code>r</code> to set the marker's radius. Default value for that parameter is:
@@ -44,7 +58,8 @@
   },
   hover: {
     stroke: 'black',
-    "stroke-width": 2
+    "stroke-width": 2,
+    cursor: 'pointer'
   },
   selected: {
     fill: 'blue'
@@ -52,14 +67,28 @@
   selectedHover: {
   }
 }</pre>
+ * @param {Object} params.markerLabelStyle Set the styles for the markers' labels. Default value for that parameter is:
+<pre>{
+  initial: {
+    'font-family': 'Verdana',
+    'font-size': '12',
+    'font-weight': 'bold',
+    cursor: 'default',
+    fill: 'black'
+  },
+  hover: {
+    cursor: 'pointer'
+  }
+}</pre>
  * @param {Object|Array} params.markers Set of markers to add to the map during initialization. In case of array is provided, codes of markers will be set as string representations of array indexes. Each marker is represented by <code>latLng</code> (array of two numeric values), <code>name</code> (string which will be show on marker's tip) and any marker styles.
  * @param {Object} params.series Object with two keys: <code>markers</code> and <code>regions</code>. Each of which is an array of series configs to be applied to the respective map elements. See <a href="jvm.DataSeries.html">DataSeries</a> description for a list of parameters available.
- * @param {Object|String} params.focusOn This parameter sets the initial position and scale of the map viewport. It could be expressed as a string representing region which should be in focus or an object representing coordinates and scale to set. For example to focus on the center of the map at the double scale you can provide the following value:
-<pre>{
-  x: 0.5,
-  y: 0.5,
-  scale: 2
-}</pre>
+ * @param {Object|String} params.focusOn This parameter sets the initial position and scale of the map viewport. See <code>setFocus</code> docuemntation for possible parameters.
+ * @param {Object} params.labels Defines parameters for rendering static labels. Object could contain two keys: <code>regions</code> and <code>markers</code>. Each key value defines configuration object with the following possible options:
+<ul>
+  <li><code>render {Function}</code> - defines method for converting region code or marker index to actual label value.</li>
+  <li><code>offsets {Object|Function}</code> - provides method or object which could be used to define label offset by region code or marker index.</li>
+</ul>
+<b>Plase note: static labels feature is not supported in Internet Explorer 8 and below.</b>
  * @param {Array|Object|String} params.selectedRegions Set initially selected regions.
  * @param {Array|Object|String} params.selectedMarkers Set initially selected markers.
  * @param {Function} params.onRegionTipShow <code>(Event e, Object tip, String code)</code> Will be called right before the region tip is going to be shown.
@@ -558,10 +587,15 @@ jvm.Map.prototype = {
 
   /**
    * Set the map's viewport to the specific point and set zoom of the map to the specific level. Point and zoom level could be defined in two ways: using the code of some region to focus on or a central point and zoom level as numbers.
-   * @param {Number|String|Array} scale|regionCode|regionCodes If the first parameter of this method is a string or array of strings and there are regions with the these codes, the viewport will be set to show all these regions. Otherwise if the first parameter is a number, the viewport will be set to show the map with provided scale.
-   * @param {Number} centerX Number from 0 to 1 specifying the horizontal coordinate of the central point of the viewport.
-   * @param {Number} centerY Number from 0 to 1 specifying the vertical coordinate of the central point of the viewport.
-   * @param {Boolean} animate Indicates whether or not to animate the scale change and transition.
+   * @param This method takes a configuration object as the single argument. The options passed to it are the following:
+   * @param {Array} params.regions Array of region codes to zoom to.
+   * @param {String} params.region Region code to zoom to.
+   * @param {Number} params.scale Map scale to set.
+   * @param {Number} params.lat Latitude to set viewport to.
+   * @param {Number} params.lng Longitude to set viewport to.
+   * @param {Number} params.x Number from 0 to 1 specifying the horizontal coordinate of the central point of the viewport.
+   * @param {Number} params.y Number from 0 to 1 specifying the vertical coordinate of the central point of the viewport.
+   * @param {Boolean} params.animate Indicates whether or not to animate the scale change and transition.
    */
   setFocus: function(config){
     var bbox,
@@ -610,7 +644,6 @@ jvm.Map.prototype = {
         point = this.latLngToPoint(config.lat, config.lng);
         config.x = this.transX - point.x / this.scale;
         config.y = this.transY - point.y / this.scale;
-        console.log(config.x, config.y);
       } else if (config.x && config.y) {
         config.x *= -this.defaultWidth;
         config.y *= -this.defaultHeight;
@@ -852,7 +885,9 @@ jvm.Map.prototype = {
 
     for (i = 0; i < seriesData.length; i++) {
       values = {};
-      values[key] = seriesData[i];
+      if (typeof seriesData[i] !== 'undefined') {
+        values[key] = seriesData[i];
+      }
       data.push(values);
     }
     this.addMarkers(markers, data);

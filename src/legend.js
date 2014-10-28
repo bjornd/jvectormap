@@ -1,3 +1,12 @@
+/**
+ * Represents map legend.
+ * @constructor
+ * @param {Object} params Configuration parameters.
+ * @param {String} params.cssClass Additional CSS class to apply to legend element.
+ * @param {Boolean} params.vertical If <code>true</code> legend will be rendered as vertical.
+ * @param {String} params.title Legend title.
+ * @param {Function} params.labelRender Method to convert series values to legend labels.
+ */
 jvm.Legend = function(params) {
   this.params = params || {};
   this.map = this.params.map;

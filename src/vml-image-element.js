@@ -10,22 +10,20 @@ jvm.VMLImageElement.prototype.applyAttr = function(attr, value){
       that = this;
 
   if (attr == 'image') {
-    if (!jvm.VMLImageElement.images[value]) {
-      jvm.whenImageLoaded(value).then(function(img){
-        that.node.setAttribute('src', value);
-        that.width = img[0].width;
-        that.height = img[0].height;
-        that.applyAttr('width', that.width);
-        that.applyAttr('height', that.height);
+    jvm.whenImageLoaded(value).then(function(img){
+      that.node.setAttribute('src', value);
+      that.width = img[0].width;
+      that.height = img[0].height;
+      that.applyAttr('width', that.width);
+      that.applyAttr('height', that.height);
 
-        jvm.VMLImageElement.images[value] = jvm.VMLImageElement.imageCounter++;
+      jvm.VMLImageElement.images[value] = jvm.VMLImageElement.imageCounter++;
 
-        that.applyAttr('x', that.cx - that.width / 2);
-        that.applyAttr('y', that.cy - that.height / 2);
+      that.applyAttr('x', that.cx - that.width / 2);
+      that.applyAttr('y', that.cy - that.height / 2);
 
-        jvm.$(that.node).trigger('imageloaded', [img]);
-      });
-    }
+      jvm.$(that.node).trigger('imageloaded', [img]);
+    });
   } else if(attr == 'cx') {
     this.cx = value;
     if (this.width) {
