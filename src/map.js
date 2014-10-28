@@ -558,6 +558,7 @@ jvm.Map.prototype = {
 
   /**
    * Set the map's viewport to the specific point and set zoom of the map to the specific level. Point and zoom level could be defined in two ways: using the code of some region to focus on or a central point and zoom level as numbers.
+   * @param This method takes a configuration object as the single argument. The options passed to it can be one of the following:
    * @param {Number|String|Array} scale|regionCode|regionCodes If the first parameter of this method is a string or array of strings and there are regions with the these codes, the viewport will be set to show all these regions. Otherwise if the first parameter is a number, the viewport will be set to show the map with provided scale.
    * @param {Number} centerX Number from 0 to 1 specifying the horizontal coordinate of the central point of the viewport.
    * @param {Number} centerY Number from 0 to 1 specifying the vertical coordinate of the central point of the viewport.
