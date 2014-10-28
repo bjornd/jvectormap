@@ -10,10 +10,9 @@ jvm.Marker = function(config){
 
   text = this.getLabelText(config.index);
   if (this.config.label && text) {
-    offsets = this.getLabelOffsets(config.code);
-    this.labelX = (config.cx + offsets[0]) / this.map.scale - this.map.transX;
-    this.labelY = (config.cy + offsets[1]) / this.map.scale - this.map.transY;
-    console.log(this.labelX, this.labelY);
+    this.offsets = this.getLabelOffsets(config.index);
+    this.labelX = config.cx / this.map.scale - this.map.transX;
+    this.labelY = config.cy / this.map.scale - this.map.transY;
     this.label = config.canvas.addText({
       text: text,
       'data-index': config.index,
@@ -52,9 +51,9 @@ jvm.Marker.prototype.createShape = function(){
 jvm.Marker.prototype.updateLabelPosition = function(){
   if (this.label) {
     this.label.set({
-      x: this.labelX * this.map.scale +
+      x: this.labelX * this.map.scale + this.offsets[0] +
          this.map.transX * this.map.scale + 5 + (this.isImage ? (this.shape.width || 0) / 2 : this.shape.properties.r),
-      y: this.labelY * this.map.scale + this.map.transY * this.map.scale
+      y: this.labelY * this.map.scale + this.map.transY * this.map.scale + this.offsets[1]
     });
   }
 };

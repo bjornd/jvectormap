@@ -33,6 +33,7 @@ files=( \
   src/region.js \
   src/marker.js \
   src/map.js \
+  src/multimap.js \
 )
 
 baseDir=`dirname $0`

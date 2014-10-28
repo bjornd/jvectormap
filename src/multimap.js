@@ -4,6 +4,21 @@
  * @param {Object} params Parameters to initialize map with.
  * @param {Number} params.maxLevel Maximum number of levels user can go through
  * @param {Object} params.main Config of the main map. See <a href="./jvm-map/">jvm.Map</a> for more information.
+ * @param {Function} params.mapNameByCode Function go generate map name by region code. Default value is:
+<pre>
+function(code, multiMap) {
+  return code.toLowerCase()+'_'+
+         multiMap.defaultProjection+'_en';
+}
+</pre>
+ * @param {Function} params.mapUrlByCode Function to generate map url by region code. Default value is:
+<pre>
+function(code, multiMap){
+  return 'jquery-jvectormap-data-'+
+         code.toLowerCase()+'-'+
+         multiMap.defaultProjection+'-en.js';
+}
+</pre>
  */
 jvm.MultiMap = function(params) {
   var that = this;
@@ -119,6 +134,6 @@ jvm.MultiMap.defaultParams = {
     return code.toLowerCase()+'_'+multiMap.defaultProjection+'_en';
   },
   mapUrlByCode: function(code, multiMap){
-    return 'assets/us/jquery-jvectormap-data-'+code.toLowerCase()+'-'+multiMap.defaultProjection+'-en.js';
+    return 'jquery-jvectormap-data-'+code.toLowerCase()+'-'+multiMap.defaultProjection+'-en.js';
   }
 }

@@ -8,22 +8,18 @@ jvm.SVGImageElement.prototype.applyAttr = function(attr, value){
   var that = this;
 
   if (attr == 'image') {
-    if (!jvm.SVGImageElement.images[value]) {
-      jvm.whenImageLoaded(value).then(function(img){
-        that.node.setAttributeNS('http://www.w3.org/1999/xlink', 'href', value);
-        that.width = img[0].width;
-        that.height = img[0].height;
-        that.applyAttr('width', that.width);
-        that.applyAttr('height', that.height);
+    jvm.whenImageLoaded(value).then(function(img){
+      that.node.setAttributeNS('http://www.w3.org/1999/xlink', 'href', value);
+      that.width = img[0].width;
+      that.height = img[0].height;
+      that.applyAttr('width', that.width);
+      that.applyAttr('height', that.height);
 
-        jvm.SVGImageElement.images[value] = jvm.SVGImageElement.imageCounter++;
+      that.applyAttr('x', that.cx - that.width / 2);
+      that.applyAttr('y', that.cy - that.height / 2);
 
-        that.applyAttr('x', that.cx - that.width / 2);
-        that.applyAttr('y', that.cy - that.height / 2);
-
-        jvm.$(that.node).trigger('imageloaded', [img]);
-      });
-    }
+      jvm.$(that.node).trigger('imageloaded', [img]);
+    });
   } else if(attr == 'cx') {
     this.cx = value;
     if (this.width) {
@@ -38,6 +34,3 @@ jvm.SVGImageElement.prototype.applyAttr = function(attr, value){
     jvm.SVGImageElement.parentClass.prototype.applyAttr.apply(this, arguments);
   }
 };
-
-jvm.SVGImageElement.imageCounter = 1;
-jvm.SVGImageElement.images = {};

@@ -1,5 +1,5 @@
 #
-# jVectorMap version 2.0.0
+# jVectorMap version 2.0.1
 #
 # Copyright 2011-2013, Kirill Lebedev
 #
@@ -141,14 +141,15 @@ class Converter:
       if geometryType == ogr.wkbPolygon or geometryType == ogr.wkbMultiPolygon:
         geometry.TransformTo( self.spatialRef )
         shapelyGeometry = shapely.wkb.loads( geometry.ExportToWkb() )
+        if not shapelyGeometry.is_valid:
+          shapelyGeometry = shapelyGeometry.buffer(0, 1)
 
         if self.emulate_longitude0:
           leftPart = shapely.affinity.translate(shapelyGeometry.intersection(left), p4[0] - p3[0])
           rightPart = shapely.affinity.translate(shapelyGeometry.intersection(right), p1[0] - p2[0])
-          shapelyGeometry = leftPart.union(rightPart)
+          shapelyGeometry = leftPart.buffer(0.1, 1).union(rightPart.buffer(0.1, 1)).buffer(-0.1, 1)
 
         if not shapelyGeometry.is_valid:
-          #buffer to fix selfcrosses
           shapelyGeometry = shapelyGeometry.buffer(0, 1)
         shapelyGeometry = self.applyFilters(shapelyGeometry)
         if shapelyGeometry:

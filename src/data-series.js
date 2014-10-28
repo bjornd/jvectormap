@@ -97,7 +97,6 @@ jvm.DataSeries.prototype = {
         this.scale.setMax(this.params.max);
       }
 
-
       for (cc in values) {
         if (cc != 'indexOf') {
           val = parseFloat(values[cc]);

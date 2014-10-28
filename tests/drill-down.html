@@ -52,6 +52,9 @@
       new jvm.MultiMap({
         container: $('#map1'),
         maxLevel: 1,
+        mapUrlByCode: function(code, multiMap){
+          return 'assets/us/jquery-jvectormap-data-'+code.toLowerCase()+'-'+multiMap.defaultProjection+'-en.js';
+        },
         main: {
           map: 'us_lcc_en'
         }
