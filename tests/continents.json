@@ -4,6 +4,15 @@
     }],
     "actions": [{
         "name": "merge",
+        "fields": [{
+          "name": "code",
+          "type": 4,
+          "width": 2
+        },{
+          "name": "name",
+          "type": 4,
+          "width": 100
+        }],
         "rules": [{
             "fields": {
                 "name": "Americas",
@@ -25,12 +34,12 @@
         },{
             "fields": {
                 "name": "India and Africa",
-                "code": "AP"
+                "code": "IA"
             },
             "where": "region_wb in {'Middle East & North Africa', 'South Asia', 'Sub-Saharan Africa'}"
         }]
     }],
     "output": {
-        "file_name": "/Users/kirilllebedev/Maps/continents_wb"
+        "file_name": "/Users/kirilllebedev/Maps/continents_wb/continents_wb.shp"
     }
 }

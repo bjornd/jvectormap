@@ -70,6 +70,23 @@ class DataSource:
 
     self.layer.ResetReading()
 
+    self.create_grammar()
+
+  def create_grammar(self):
+    root_table = SymbolTable("root",
+      map( lambda f: Bind(f['name'], GeometryProperty(f['name'])), self.fields )
+    )
+
+    tokens = {
+      'not': "not",
+      'eq': "==",
+      'ne': "!=",
+      'belongs_to': "in",
+      'is_subset': "are included in"
+    }
+    grammar = Grammar(**tokens)
+    self.parse_manager = EvaluableParseManager(root_table, grammar)
+
   def output(self, output):
     driver = ogr.GetDriverByName( 'ESRI Shapefile' )
     if os.path.exists( output['file_name'] ):
@@ -80,13 +97,14 @@ class DataSource:
                                 srs = self.layer.GetSpatialRef() )
 
     for field in self.fields:
-      fd = ogr.FieldDefn( field['name'], field['type'] )
+      fd = ogr.FieldDefn( str(field['name']), field['type'] )
       fd.SetWidth( field['width'] )
-      fd.SetPrecision( field['precision'] )
+      if 'precision' in field:
+        fd.SetPrecision( field['precision'] )
       layer.CreateField( fd )
 
     for geometry in self.geometries:
-      feature = ogr.Feature( feature_def = self.layer.GetLayerDefn() )
+      feature = ogr.Feature( feature_def = layer.GetLayerDefn() )
       for index, field in enumerate(self.fields):
         feature.SetField( index, str(geometry.properties[field['name']]) )
       feature.SetGeometryDirectly(
@@ -114,39 +132,14 @@ class Processor:
     data_source.output(self.config['output'])
 
   def merge(self, config, data_source):
-    root_table = SymbolTable("root",
-      [ Bind("region_wb", GeometryProperty('region_wb')) ]
-    )
-
-    tokens = {
-      'not': "not",
-      'eq': "==",
-      'ne': "!=",
-      'belongs_to': "in",
-      'is_subset': "are included in"
-    }
-    grammar = Grammar(**tokens)
-    parse_manager = EvaluableParseManager(root_table, grammar)
-
-    new_fields = [{
-      'name': 'code',
-      'type': 4,
-      'width': 5,
-      'precision': 0
-    },{
-      'name': 'name',
-      'type': 4,
-      'width': 254,
-      'precision': 0
-    }]
     new_geometries = []
     for rule in config['rules']:
-      expression = parse_manager.parse( rule['where'] )
+      expression = data_source.parse_manager.parse( rule['where'] )
       geometries = filter(lambda g: expression(g.properties), data_source.geometries)
       geometries = map(lambda g: g.geom, geometries)
       new_geometries.append( Geometry(shapely.ops.cascaded_union( geometries ), rule['fields']) )
 
-    data_source.fields = new_fields
+    data_source.fields = config['fields']
     data_source.geometries = new_geometries
 
 
