@@ -512,12 +512,10 @@ jvm.Map.prototype = {
         top = e.pageY + 15;
       }
 
-      if (map.tip.is(':visible')) {
-        map.tip.css({
-          left: left,
-          top: top
-        })
-      }
+      map.tip.css({
+        left: left,
+        top: top
+      });
     });
   },
 
