@@ -27,6 +27,7 @@
     cursor: pointer;
     line-height: 10px;
     text-align: center;
+    box-sizing: content-box;
 }
 
 .jvectormap-zoomin, .jvectormap-zoomout {
