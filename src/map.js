@@ -328,7 +328,7 @@ jvm.Map.prototype = {
         var offset = jvm.$(map.container).offset(),
             centerX = event.pageX - offset.left,
             centerY = event.pageY - offset.top,
-            zoomStep = Math.pow(1.003, event.deltaY);
+            zoomStep = Math.pow(1.001, event.deltaFactor * event.deltaY);
 
         map.tip.hide();
 
