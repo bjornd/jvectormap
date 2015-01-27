@@ -24,7 +24,7 @@ jvm.Legend = function(params) {
   }
 
   this.render();
-}
+};
 
 jvm.Legend.prototype.render = function(){
   var ticks = this.series.scale.getTicks(),
@@ -80,4 +80,4 @@ jvm.Legend.prototype.render = function(){
     inner.append(tick);
   }
   inner.append( jvm.$('<div/>').css('clear', 'both') );
-}
+};
