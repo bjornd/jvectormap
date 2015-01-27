@@ -8,7 +8,7 @@
 
 jvm.SVGElement = function(name, config){
   jvm.SVGElement.parentClass.apply(this, arguments);
-}
+};
 
 jvm.inherits(jvm.SVGElement, jvm.AbstractElement);
 

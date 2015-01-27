@@ -1,6 +1,6 @@
 jvm.ColorScale = function(colors, normalizeFunction, minValue, maxValue) {
   jvm.ColorScale.parentClass.apply(this, arguments);
-}
+};
 
 jvm.inherits(jvm.ColorScale, jvm.NumericScale);
 

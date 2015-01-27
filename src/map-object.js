@@ -13,7 +13,7 @@ jvm.MapObject.prototype.getLabelText = function(key){
     text = null;
   }
   return text;
-}
+};
 
 jvm.MapObject.prototype.getLabelOffsets = function(key){
   var offsets;
@@ -26,7 +26,7 @@ jvm.MapObject.prototype.getLabelOffsets = function(key){
     }
   }
   return offsets || [0, 0];
-}
+};
 
 /**
  * Set hovered state to the element. Hovered state means mouse cursor is over element. Styles will be updates respectively.

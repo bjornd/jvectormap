@@ -6,7 +6,7 @@ jvm.SVGCanvasElement = function(container, width, height){
   this.node.appendChild( this.defsElement.node );
 
   jvm.AbstractCanvasElement.apply(this, arguments);
-}
+};
 
 jvm.inherits(jvm.SVGCanvasElement, jvm.SVGElement);
 jvm.mixin(jvm.SVGCanvasElement, jvm.AbstractCanvasElement);

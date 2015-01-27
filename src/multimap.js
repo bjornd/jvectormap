@@ -136,4 +136,4 @@ jvm.MultiMap.defaultParams = {
   mapUrlByCode: function(code, multiMap){
     return 'jquery-jvectormap-data-'+code.toLowerCase()+'-'+multiMap.defaultProjection+'-en.js';
   }
-}
+};

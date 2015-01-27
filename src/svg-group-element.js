@@ -1,6 +1,6 @@
 jvm.SVGGroupElement = function(){
   jvm.SVGGroupElement.parentClass.call(this, 'g');
-}
+};
 
 jvm.inherits(jvm.SVGGroupElement, jvm.SVGElement);
 
