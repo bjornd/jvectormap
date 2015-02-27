@@ -46,7 +46,8 @@ done
 
 if [ -z "$1" ]
   then
-    minified=jquery.jvectormap.min.js
+    concat=dist/jquery.jvectormap.js
+    minified=dist/jquery.jvectormap.min.js
   else
     minified=$1
 fi
@@ -56,6 +57,8 @@ if [ -a $minified ]
     rm $minified
 fi
 
-cat ${files[*]} >> $minified
+mkdir -p dist/
 
-uglifyjs $minified -o $minified -c
+cat ${files[*]} >> $concat
+
+uglifyjs $concat -o $minified -c
