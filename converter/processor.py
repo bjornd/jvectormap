@@ -1,3 +1,4 @@
+import sys
 import json
 import shapely.wkb
 import shapely.geometry
@@ -7,75 +8,147 @@ import os
 import inspect
 from osgeo import ogr
 from osgeo import osr
+from booleano.parser import Grammar, EvaluableParseManager, SymbolTable, Bind
+from booleano.operations import Variable
 
-infile = "/Users/kirilllebedev/Maps/ne_110m_admin_0_map_units/ne_110m_admin_0_map_units.shp"
-outfile = "/Users/kirilllebedev/Maps/continents_wb/continents_wb.shp"
 
-regions = [{
-  'name': 'Americas',
-  'code': 'AM',
-  'where': 'region_wb = "Latin America & Caribbean" OR region_wb = "North America"'
-},{
-  'name': 'Europe',
-  'code': 'EU',
-  'where': 'region_wb = "Europe & Central Asia"'
-},{
-  'name': 'Asia Pacific and MEIA',
-  'code': 'AP',
-  'where': 'region_wb = "East Asia & Pacific"'
-},{
-  'name': ' India and Africa',
-  'code': 'AF',
-  'where': 'region_wb = "Middle East & North Africa" OR region_wb = "South Asia" OR region_wb = "Sub-Saharan Africa"'
-}]
+class Geometry:
+  def __init__(self, geometry, properties):
+    self.geom = geometry
+    self.properties = properties
 
-in_ds = ogr.Open( infile, update = 0 )
-in_layer = in_ds.GetLayer( 0 )
-in_defn = in_layer.GetLayerDefn()
 
-shp_driver = ogr.GetDriverByName( 'ESRI Shapefile' )
-if os.path.exists( outfile ):
-  shp_driver.DeleteDataSource( outfile )
-shp_ds = shp_driver.CreateDataSource( outfile )
-shp_layer = shp_ds.CreateLayer( in_defn.GetName(),
-                                geom_type = in_defn.GetGeomType(),
-                                srs = in_layer.GetSpatialRef() )
+class GeometryProperty(Variable):
+  operations = set(["equality", "membership"])
 
-fd = ogr.FieldDefn( 'code', 4 )
-fd.SetWidth( 5 )
-shp_layer.CreateField( fd )
+  def __init__(self, name):
+    self.name = name
 
-fd = ogr.FieldDefn( 'name', 4 )
-fd.SetWidth( 254 )
-shp_layer.CreateField( fd )
+  def equals(self, value, context):
+    return context[self.name] == value
 
-for region in regions:
-  in_layer.SetAttributeFilter( region['where'] )
-  geometries = []
-  for feature in in_layer:
-    geometry = feature.GetGeometryRef()
-    if geometry.GetGeometryType() == ogr.wkbPolygon or geometry.GetGeometryType() == ogr.wkbMultiPolygon:
+  def belongs_to(self, value, context):
+    return value in context[self.name]
+
+  def is_subset(self, value, context):
+    return set(value).issubset(set(context[self.name]))
+
+  def to_python(self, value):
+    return unicode(value[self.name])
+
+
+class DataSource:
+  def __init__(self, config):
+    self.config = config
+
+  def load_data(self):
+    self.source = ogr.Open( self.config['file_name'], update = 0 )
+    self.layer = self.source.GetLayer(0)
+    self.layer_dfn = self.layer.GetLayerDefn()
+
+    self.fields = []
+    field_count = self.layer_dfn.GetFieldCount()
+    for field_index in range(field_count):
+      field = self.layer_dfn.GetFieldDefn( field_index )
+      self.fields.append({
+        'name': field.GetName(),
+        'type': field.GetType(),
+        'width': field.GetWidth(),
+        'precision': field.GetPrecision()
+      })
+
+    self.geometries = []
+
+    for feature in self.layer:
+      geometry = feature.GetGeometryRef()
+      feature.GetFieldAsString
       geometry = shapely.wkb.loads( geometry.ExportToWkb() )
-      geometry = geometry.buffer(0.000000001, 1)
-      geometries.append( geometry )
-  region['geometry'] = shapely.ops.cascaded_union( geometries )
-  region['geometry'] = region['geometry'].buffer(-0.000000001, 1)
-  in_layer.ResetReading()
+      properties = {}
+      for field in self.fields:
+        properties[field['name']] = feature.GetFieldAsString(field['name'])
+      self.geometries.append( Geometry(geometry, properties) )
 
-for region in regions:
-  out_feat = ogr.Feature( feature_def = shp_layer.GetLayerDefn() )
-  out_feat.SetField(0, region['code'])
-  out_feat.SetField(1, region['name'])
-  out_feat.SetGeometryDirectly(
-    ogr.CreateGeometryFromWkb(
-      shapely.wkb.dumps(
-        region['geometry']
-      )
+    self.layer.ResetReading()
+
+    self.create_grammar()
+
+  def create_grammar(self):
+    root_table = SymbolTable("root",
+      map( lambda f: Bind(f['name'], GeometryProperty(f['name'])), self.fields )
     )
-  )
-  shp_layer.CreateFeature( out_feat )
-  out_feat.Destroy()
 
-# Cleanup
-shp_ds.Destroy()
-in_ds.Destroy()
+    tokens = {
+      'not': "not",
+      'eq': "==",
+      'ne': "!=",
+      'belongs_to': "in",
+      'is_subset': "are included in"
+    }
+    grammar = Grammar(**tokens)
+    self.parse_manager = EvaluableParseManager(root_table, grammar)
+
+  def output(self, output):
+    driver = ogr.GetDriverByName( 'ESRI Shapefile' )
+    if os.path.exists( output['file_name'] ):
+      driver.DeleteDataSource( output['file_name'] )
+    source = driver.CreateDataSource( output['file_name'] )
+    layer = source.CreateLayer( self.layer_dfn.GetName(),
+                                geom_type = self.layer_dfn.GetGeomType(),
+                                srs = self.layer.GetSpatialRef() )
+
+    for field in self.fields:
+      fd = ogr.FieldDefn( str(field['name']), field['type'] )
+      fd.SetWidth( field['width'] )
+      if 'precision' in field:
+        fd.SetPrecision( field['precision'] )
+      layer.CreateField( fd )
+
+    for geometry in self.geometries:
+      feature = ogr.Feature( feature_def = layer.GetLayerDefn() )
+      for index, field in enumerate(self.fields):
+        feature.SetField( index, str(geometry.properties[field['name']]) )
+      feature.SetGeometryDirectly(
+        ogr.CreateGeometryFromWkb(
+          shapely.wkb.dumps(
+            geometry.geom
+          )
+        )
+      )
+      layer.CreateFeature( feature )
+      feature.Destroy()
+
+    source.Destroy()
+
+
+class Processor:
+  def __init__(self, config):
+    self.config = config
+
+  def process(self):
+    data_source = DataSource(self.config['sources'][0])
+    data_source.load_data()
+    for action in self.config['actions']:
+      getattr(self, action['name'])( action, data_source )
+    data_source.output(self.config['output'])
+
+  def merge(self, config, data_source):
+    new_geometries = []
+    for rule in config['rules']:
+      expression = data_source.parse_manager.parse( rule['where'] )
+      geometries = filter(lambda g: expression(g.properties), data_source.geometries)
+      geometries = map(lambda g: g.geom, geometries)
+      new_geometries.append( Geometry(shapely.ops.cascaded_union( geometries ), rule['fields']) )
+
+    data_source.fields = config['fields']
+    data_source.geometries = new_geometries
+
+
+args = {}
+if len(sys.argv) > 1:
+  paramsJson = open(sys.argv[1], 'r').read()
+else:
+  paramsJson = sys.stdin.read()
+paramsJson = json.loads(paramsJson)
+
+processor = Processor(paramsJson)
+processor.process()
