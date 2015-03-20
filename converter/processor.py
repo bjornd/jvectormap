@@ -1,5 +1,6 @@
 import sys
 import json
+import csv
 import shapely.wkb
 import shapely.geometry
 import shapely.ops
@@ -131,6 +132,21 @@ class Processor:
       getattr(self, action['name'])( action, data_source )
     data_source.output(self.config['output'])
 
+  def union(self, config, data_source):
+    groups = {}
+    geometries = []
+    for geometry in data_source.geometries:
+      if geometry.properties[config['by']] in groups:
+        groups[geometry.properties[config['by']]]['geoms'].append(geometry.geom)
+      else:
+        groups[geometry.properties[config['by']]] = {
+          'geoms': [geometry.geom],
+          'properties': geometry.properties
+        }
+    for key in groups:
+      geometries.append( Geometry(shapely.ops.cascaded_union( groups[key]['geoms'] ), groups[key]['properties']) )
+    data_source.geometries = geometries
+
   def merge(self, config, data_source):
     new_geometries = []
     for rule in config['rules']:
@@ -138,9 +154,26 @@ class Processor:
       geometries = filter(lambda g: expression(g.properties), data_source.geometries)
       geometries = map(lambda g: g.geom, geometries)
       new_geometries.append( Geometry(shapely.ops.cascaded_union( geometries ), rule['fields']) )
-
     data_source.fields = config['fields']
     data_source.geometries = new_geometries
+
+  def join_data(self, config, data_source):
+    field_names = [f['name'] for f in config['fields']]
+    data_file = open(config['file_name'], 'rb')
+    data_reader = csv.reader(data_file, delimiter='\t', quotechar='"')
+    data = {}
+    for row in data_reader:
+      row_dict = dict(zip(field_names, row))
+      data[row_dict.pop(config['on'])] = row_dict
+    for geometry in data_source.geometries:
+      geometry.properties.update( data[geometry.properties[config['on']]] )
+    data_source.fields = data_source.fields + filter(lambda f: f['name'] != config['on'], config['fields'])
+
+  def remove_fields(self, config, data_source):
+    data_source.fields = filter(lambda f: f.name not in config['fields'], data_source.fields)
+
+  def remove_other_fields(self, config, data_source):
+    data_source.fields = filter(lambda f: f['name'] in config['fields'], data_source.fields)
 
 
 args = {}

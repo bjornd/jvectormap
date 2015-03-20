@@ -3,15 +3,30 @@
         "file_name": "/Users/kirilllebedev/Maps/ne_110m_admin_0_map_units/ne_110m_admin_0_map_units.shp"
     }],
     "actions": [{
+        "name": "join_data",
+        "data": {
+
+        },
+        "fields": [{
+            "name": "region_wb",
+            "type": 4,
+            "width": 100
+        },{
+            "name": "r_wb_code",
+            "type": 4,
+            "width": 4
+        }],
+        "on": "region_wb"
+    },{
         "name": "merge",
         "fields": [{
-          "name": "code",
-          "type": 4,
-          "width": 2
+            "name": "code",
+            "type": 4,
+            "width": 2
         },{
-          "name": "name",
-          "type": 4,
-          "width": 100
+            "name": "name",
+            "type": 4,
+            "width": 100
         }],
         "rules": [{
             "fields": {
@@ -40,6 +55,6 @@
         }]
     }],
     "output": {
-        "file_name": "/Users/kirilllebedev/Maps/continents_wb/continents_wb.shp"
+        "file_name": "/Users/kirilllebedev/Maps/continents/continents.shp"
     }
 }
