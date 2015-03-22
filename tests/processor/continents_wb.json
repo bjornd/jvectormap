@@ -3,6 +3,10 @@
         "file_name": "/Users/kirilllebedev/Maps/ne_110m_admin_0_map_units/ne_110m_admin_0_map_units.shp"
     }],
     "actions": [{
+        "name": "buffer",
+        "distance": 0.0000001,
+        "resolution": 1
+    },{
         "name": "join_data",
         "file_name": "/Users/kirilllebedev/Maps/continents_wb_codes.tsv",
         "fields": [{
