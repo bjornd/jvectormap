@@ -13,6 +13,23 @@ from booleano.parser import Grammar, EvaluableParseManager, SymbolTable, Bind
 from booleano.operations import Variable
 
 
+def multipolygon_reduce_accuracy(self, accuracy):
+  return shapely.geometry.MultiPolygon( map(lambda p: p.reduce_accuracy(accuracy), self.geoms) )
+shapely.geometry.MultiPolygon.reduce_accuracy = multipolygon_reduce_accuracy
+
+
+def polygon_reduce_accuracy(self, accuracy):
+  exterior = self.exterior.reduce_accuracy(accuracy)
+  interiors = map(lambda r: r.reduce_accuracy(accuracy), self.interiors)
+  return shapely.geometry.polygon.Polygon(exterior, interiors)
+shapely.geometry.polygon.Polygon.reduce_accuracy = polygon_reduce_accuracy
+
+
+def linear_ring_reduce_accuracy(self, accuracy):
+  return shapely.geometry.polygon.LinearRing( map(lambda c: (round(c[0], accuracy), round(c[1], accuracy)), self.coords) )
+shapely.geometry.polygon.LinearRing.reduce_accuracy = linear_ring_reduce_accuracy
+
+
 class Geometry:
   def __init__(self, geometry, properties):
     self.geom = geometry
@@ -174,6 +191,14 @@ class Processor:
 
   def remove_other_fields(self, config, data_source):
     data_source.fields = filter(lambda f: f['name'] in config['fields'], data_source.fields)
+
+  def reduce_accuracy(self, config, data_source):
+    for geometry in data_source.geometries:
+      geometry.geom = geometry.geom.reduce_accuracy(config['accuracy'])
+
+  def buffer(self, config, data_source):
+    for geometry in data_source.geometries:
+      geometry.geom = geometry.geom.buffer(config['distance'], config['resolution'])
 
 
 args = {}
