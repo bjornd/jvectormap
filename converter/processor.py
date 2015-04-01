@@ -96,11 +96,13 @@ class DataSource:
     )
 
     tokens = {
-      'not': "not",
-      'eq': "==",
-      'ne': "!=",
-      'belongs_to': "in",
-      'is_subset': "are included in"
+      'not': 'not',
+      'eq': '==',
+      'ne': '!=',
+      'belongs_to': 'in',
+      'is_subset': 'are included in',
+      'or': "or",
+      'and': 'and'
     }
     grammar = Grammar(**tokens)
     self.parse_manager = EvaluableParseManager(root_table, grammar)
@@ -176,15 +178,24 @@ class Processor:
 
   def join_data(self, config, data_source):
     field_names = [f['name'] for f in config['fields']]
-    data_file = open(config['file_name'], 'rb')
-    data_reader = csv.reader(data_file, delimiter='\t', quotechar='"')
+    if 'data' in config:
+      data_col = config['data']
+    else:
+      data_file = open(config['file_name'], 'rb')
+      data_col = csv.reader(data_file, delimiter='\t', quotechar='"')
     data = {}
-    for row in data_reader:
+    for row in data_col:
       row_dict = dict(zip(field_names, row))
       data[row_dict.pop(config['on'])] = row_dict
     for geometry in data_source.geometries:
-      geometry.properties.update( data[geometry.properties[config['on']]] )
-    data_source.fields = data_source.fields + filter(lambda f: f['name'] != config['on'], config['fields'])
+      if geometry.properties[config['on']] in data:
+        geometry.properties.update( data[geometry.properties[config['on']]] )
+    field_names = map(lambda f: f['name'], data_source.fields)
+    data_source.fields = data_source.fields + filter(lambda f: f['name'] not in field_names, config['fields'])
+
+  def remove(self, config, data_source):
+    expression = data_source.parse_manager.parse( config['where'] )
+    data_source.geometries = filter(lambda g: not expression(g.properties), data_source.geometries)
 
   def remove_fields(self, config, data_source):
     data_source.fields = filter(lambda f: f.name not in config['fields'], data_source.fields)
