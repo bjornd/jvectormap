@@ -8,7 +8,16 @@
         "resolution": 1
     },{
         "name": "join_data",
-        "file_name": "/Users/kirilllebedev/Maps/continents_wb_codes.tsv",
+        "data": [
+            ["Antarctica", "ANT"],
+            ["East Asia & Pacific", "EAP"],
+            ["Europe & Central Asia", "ECA"],
+            ["Latin America & Caribbean", "LAC"],
+            ["Middle East & North Africa", "MENA"],
+            ["North America", "NA"],
+            ["South Asia", "SA"],
+            ["Sub-Saharan Africa", "SSA"]
+        ],
         "fields": [{
             "name": "region_wb",
             "type": 4,
