@@ -7,27 +7,194 @@ import shapely.ops
 import codecs
 import os
 import inspect
+import copy
 from osgeo import ogr
 from osgeo import osr
 from booleano.parser import Grammar, EvaluableParseManager, SymbolTable, Bind
 from booleano.operations import Variable
 
 
-def multipolygon_reduce_accuracy(self, accuracy):
-  return shapely.geometry.MultiPolygon( map(lambda p: p.reduce_accuracy(accuracy), self.geoms) )
-shapely.geometry.MultiPolygon.reduce_accuracy = multipolygon_reduce_accuracy
+class Map:
+  def __init__(self, name, language):
+    self.paths = {}
+    self.name = name
+    self.language = language
+    self.width = 0
+    self.height = 0
+    self.bbox = []
+
+  def addPath(self, path, code, name):
+    self.paths[code] = {"path": path, "name": name}
+
+  def getJSCode(self):
+    print self.projection['type']
+    map = {"paths": self.paths, "width": self.width, "height": self.height, "insets": self.insets, "projection": self.projection}
+    return "jQuery.fn.vectorMap('addMap', '"+self.name+"_"+self.projection['type']+"',"+json.dumps(map)+');'
 
 
-def polygon_reduce_accuracy(self, accuracy):
-  exterior = self.exterior.reduce_accuracy(accuracy)
-  interiors = map(lambda r: r.reduce_accuracy(accuracy), self.interiors)
-  return shapely.geometry.polygon.Polygon(exterior, interiors)
-shapely.geometry.polygon.Polygon.reduce_accuracy = polygon_reduce_accuracy
+class Converter:
+  def __init__(self, config):
+    args = {
+      'buffer_distance': -0.4,
+      'simplify_tolerance': 0.2,
+      'longitude0': 0,
+      'projection': 'mill',
+      'name': 'world',
+      'width': 900,
+      'language': 'en',
+      'precision': 2,
+      'insets': []
+    }
+    args.update(config)
+
+    self.config = args
+
+    self.map = Map(args['name'], args.get('language'))
+
+    if args.get('sources'):
+      self.sources = args['sources']
+    else:
+      self.sources = [{
+        'input_file': args.get('input_file'),
+        'where': args.get('where'),
+        'name_field': args.get('name_field'),
+        'code_field': args.get('code_field'),
+        'input_file_encoding': args.get('input_file_encoding')
+      }]
+
+    default_source = {
+      'where': '',
+      'name_field': 0,
+      'code_field': 1,
+      'input_file_encoding': 'iso-8859-1'
+    }
+
+    for index in range(len(self.sources)):
+      for key in default_source:
+        if self.sources[index].get(key) is None:
+          self.sources[index][key] = default_source[key]
+
+    self.features = {}
+    self.width = args.get('width')
+    self.minimal_area = args.get('minimal_area')
+    self.longitude0 = float(args.get('longitude0'))
+    self.projection = args.get('projection')
+    self.precision = args.get('precision')
+    self.buffer_distance = args.get('buffer_distance')
+    self.simplify_tolerance = args.get('simplify_tolerance')
+    self.for_each = args.get('for_each')
+    self.emulate_longitude0 = args.get('emulate_longitude0')
+    if args.get('emulate_longitude0') is None and (self.projection == 'merc' or self.projection =='mill') and self.longitude0 != 0:
+      self.emulate_longitude0 = True
+
+    if args.get('viewport'):
+      self.viewport = map(lambda s: float(s), args.get('viewport').split(' '))
+    else:
+      self.viewport = False
+
+    # spatial reference to convert to
+    self.spatialRef = osr.SpatialReference()
+    projString = '+proj='+str(self.projection)+' +a=6381372 +b=6381372 +lat_0=0'
+    if not self.emulate_longitude0:
+      projString += ' +lon_0='+str(self.longitude0)
+    self.spatialRef.ImportFromProj4(projString)
+
+    # handle map insets
+    if args.get('insets'):
+      self.insets = args.get('insets')
+    else:
+      self.insets = []
 
 
-def linear_ring_reduce_accuracy(self, accuracy):
-  return shapely.geometry.polygon.LinearRing( map(lambda c: (round(c[0], accuracy), round(c[1], accuracy)), self.coords) )
-shapely.geometry.polygon.LinearRing.reduce_accuracy = linear_ring_reduce_accuracy
+  def convert(self, data_source, output_file):
+    codes = map(lambda g: g.properties[self.config['code_field']], data_source.geometries)
+    main_codes = copy.copy(codes)
+    self.map.insets = []
+    envelope = []
+    for inset in self.insets:
+      insetBbox = self.renderMapInset(data_source, inset['codes'], inset['left'], inset['top'], inset['width'])
+      insetHeight = (insetBbox[3] - insetBbox[1]) * (inset['width'] / (insetBbox[2] - insetBbox[0]))
+      self.map.insets.append({
+        "bbox": [{"x": insetBbox[0], "y": -insetBbox[3]}, {"x": insetBbox[2], "y": -insetBbox[1]}],
+        "left": inset['left'],
+        "top": inset['top'],
+        "width": inset['width'],
+        "height": insetHeight
+      })
+      envelope.append(
+        shapely.geometry.box(
+          inset['left'], inset['top'], inset['left'] + inset['width'], inset['top'] + insetHeight
+        )
+      )
+      for code in inset['codes']:
+        main_codes.remove(code)
+
+    insetBbox = self.renderMapInset(data_source, main_codes, 0, 0, self.width)
+    insetHeight = (insetBbox[3] - insetBbox[1]) * (self.width / (insetBbox[2] - insetBbox[0]))
+    envelope.append( shapely.geometry.box( 0, 0, self.width, insetHeight ) )
+    mapBbox = shapely.geometry.MultiPolygon( envelope ).bounds
+
+    self.map.width = mapBbox[2] - mapBbox[0]
+    self.map.height = mapBbox[3] - mapBbox[1]
+    self.map.insets.append({
+      "bbox": [{"x": insetBbox[0], "y": -insetBbox[3]}, {"x": insetBbox[2], "y": -insetBbox[1]}],
+      "left": 0,
+      "top": 0,
+      "width": self.width,
+      "height": insetHeight
+    })
+    self.map.projection = {"type": self.projection, "centralMeridian": float(self.longitude0)}
+
+    open(output_file, 'w').write( self.map.getJSCode() )
+
+    if self.for_each is not None:
+      for code in codes:
+        childConfig = copy.deepcopy(self.for_each)
+        for param in ('input_file', 'output_file', 'where', 'name'):
+          childConfig[param] = childConfig[param].replace('{{code}}', code.lower())
+        converter = Converter(childConfig)
+        converter.convert(childConfig['output_file'])
+
+  def renderMapInset(self, data_source, codes, left, top, width):
+    envelope = []
+    geometries = filter(lambda g: g.properties[self.config['code_field']] in codes, data_source.geometries)
+    for geometry in geometries:
+      envelope.append( geometry.geom.envelope )
+
+    bbox = shapely.geometry.MultiPolygon( envelope ).bounds
+
+    scale = (bbox[2]-bbox[0]) / width
+
+    # generate SVG paths
+    for geometry in geometries:
+      geom = geometry.geom
+      if self.buffer_distance:
+        geom = geom.buffer(self.buffer_distance*scale, 1)
+      if geom.is_empty:
+        continue
+      if self.simplify_tolerance:
+        geom = geom.simplify(self.simplify_tolerance*scale, preserve_topology=True)
+      if isinstance(geom, shapely.geometry.multipolygon.MultiPolygon):
+        polygons = geom.geoms
+      else:
+        polygons = [geom]
+      path = ''
+      for polygon in polygons:
+        rings = []
+        rings.append(polygon.exterior)
+        rings.extend(polygon.interiors)
+        for ring in rings:
+          for pointIndex in range( len(ring.coords) ):
+            point = ring.coords[pointIndex]
+            if pointIndex == 0:
+              path += 'M'+str( round( (point[0]-bbox[0]) / scale + left, self.precision) )
+              path += ','+str( round( (bbox[3] - point[1]) / scale + top, self.precision) )
+            else:
+              path += 'l' + str( round(point[0]/scale - ring.coords[pointIndex-1][0]/scale, self.precision) )
+              path += ',' + str( round(ring.coords[pointIndex-1][1]/scale - point[1]/scale, self.precision) )
+          path += 'Z'
+      self.map.addPath(path, geometry.properties[self.config['code_field']], geometry.properties[self.config['name_field']])
+    return bbox
 
 
 class Geometry:
@@ -57,11 +224,24 @@ class GeometryProperty(Variable):
 
 class DataSource:
   def __init__(self, config):
-    self.config = config
+    default_config = {
+      "projection": "merc",
+      "longitude0": 0
+    }
+    default_config.update(config)
+    self.config = default_config
+
+    self.spatialRef = osr.SpatialReference()
+    projString = '+proj='+str(self.config['projection'])+' +a=6381372 +b=6381372 +lat_0=0'
+    #if 'emulate_longitude0' in self.config and not self.config['emulate_longitude0']:
+    projString += ' +lon_0='+str(self.config['longitude0'])
+    self.spatialRef.ImportFromProj4(projString)
 
   def load_data(self):
     self.source = ogr.Open( self.config['file_name'], update = 0 )
     self.layer = self.source.GetLayer(0)
+    if 'filter' in self.config and self.config['filter'] is not None:
+      self.layer.SetAttributeFilter( self.config['filter'].encode('ascii') )
     self.layer_dfn = self.layer.GetLayerDefn()
 
     self.fields = []
@@ -79,11 +259,13 @@ class DataSource:
 
     for feature in self.layer:
       geometry = feature.GetGeometryRef()
-      feature.GetFieldAsString
+      geometry.TransformTo( self.spatialRef )
       geometry = shapely.wkb.loads( geometry.ExportToWkb() )
+      if not geometry.is_valid:
+        geometry = geometry.buffer(0)
       properties = {}
       for field in self.fields:
-        properties[field['name']] = feature.GetFieldAsString(field['name'])
+        properties[field['name']] = feature.GetFieldAsString(field['name']).decode('utf-8')
       self.geometries.append( Geometry(geometry, properties) )
 
     self.layer.ResetReading()
@@ -108,6 +290,12 @@ class DataSource:
     self.parse_manager = EvaluableParseManager(root_table, grammar)
 
   def output(self, output):
+    if output.get('format') == 'jvectormap':
+      self.output_jvm(output)
+    else:
+      self.output_ogr(output)
+
+  def output_ogr(self, output):
     driver = ogr.GetDriverByName( 'ESRI Shapefile' )
     if os.path.exists( output['file_name'] ):
       driver.DeleteDataSource( output['file_name'] )
@@ -124,20 +312,155 @@ class DataSource:
       layer.CreateField( fd )
 
     for geometry in self.geometries:
-      feature = ogr.Feature( feature_def = layer.GetLayerDefn() )
-      for index, field in enumerate(self.fields):
-        feature.SetField( index, str(geometry.properties[field['name']]) )
-      feature.SetGeometryDirectly(
-        ogr.CreateGeometryFromWkb(
-          shapely.wkb.dumps(
-            geometry.geom
+      if geometry.geom is not None:
+        feature = ogr.Feature( feature_def = layer.GetLayerDefn() )
+        for index, field in enumerate(self.fields):
+          if field['name'] in geometry.properties:
+            feature.SetField( index, geometry.properties[field['name']].encode('utf-8') )
+          else:
+            feature.SetField( index, '' )
+        feature.SetGeometryDirectly(
+          ogr.CreateGeometryFromWkb(
+            shapely.wkb.dumps(
+              geometry.geom
+            )
           )
         )
-      )
-      layer.CreateFeature( feature )
-      feature.Destroy()
+        layer.CreateFeature( feature )
+        feature.Destroy()
 
     source.Destroy()
+
+  def output_jvm(self, output):
+    params = copy.deepcopy(output['params'])
+    params.update({
+      "projection": self.config["projection"],
+      "longitude0": self.config["longitude0"]
+    })
+    converter = Converter(params)
+    converter.convert(self, output['file_name'])
+
+class PolygonSimplifier:
+  def __init__(self, geometries):
+    self.format = '%.8f %.8f'
+    self.tolerance = 0.05
+    self.geometries = geometries
+
+    connections = {}
+    counter = 0
+    for geom in geometries:
+      counter += 1
+      polygons = []
+
+      if isinstance(geom, shapely.geometry.Polygon):
+        polygons.append(geom)
+      else:
+        for polygon in geom:
+          polygons.append(polygon)
+
+      for polygon in polygons:
+        if polygon.area > 0:
+          lines = []
+          lines.append(polygon.exterior)
+          for line in polygon.interiors:
+            lines.append(line)
+
+          for line in lines:
+            for i in range(len(line.coords)-1):
+              indexFrom = i
+              indexTo = i+1
+              pointFrom = self.format % line.coords[indexFrom]
+              pointTo = self.format % line.coords[indexTo]
+              if pointFrom == pointTo:
+                continue
+              if not (pointFrom in connections):
+                connections[pointFrom] = {}
+              connections[pointFrom][pointTo] = 1
+              if not (pointTo in connections):
+                connections[pointTo] = {}
+              connections[pointTo][pointFrom] = 1
+    self.connections = connections
+    self.simplifiedLines = {}
+    self.pivotPoints = {}
+
+  def simplifyRing(self, ring):
+    coords = list(ring.coords)[0:-1]
+    simpleCoords = []
+
+    isPivot = False
+    pointIndex = 0
+    while not isPivot and pointIndex < len(coords):
+      pointStr = self.format % coords[pointIndex]
+      pointIndex += 1
+      isPivot = ((len(self.connections[pointStr]) > 2) or (pointStr in self.pivotPoints))
+    pointIndex = pointIndex - 1
+
+    if not isPivot:
+      simpleRing = shapely.geometry.LineString(coords).simplify(self.tolerance)
+      if len(simpleRing.coords) <= 2:
+        return None
+      else:
+        self.pivotPoints[self.format % coords[0]] = True
+        self.pivotPoints[self.format % coords[-1]] = True
+        simpleLineKey = self.format % coords[0]+':'+self.format % coords[1]+':'+self.format % coords[-1]
+        self.simplifiedLines[simpleLineKey] = simpleRing.coords
+        return simpleRing
+    else:
+      points = coords[pointIndex:len(coords)]
+      points.extend(coords[0:pointIndex+1])
+      iFrom = 0
+      for i in range(1, len(points)):
+        pointStr = self.format % points[i]
+        if ((len(self.connections[pointStr]) > 2) or (pointStr in self.pivotPoints)):
+          line = points[iFrom:i+1]
+          lineKey = self.format % line[-1]+':'+self.format % line[-2]+':'+self.format % line[0]
+          if lineKey in self.simplifiedLines:
+            simpleLine = self.simplifiedLines[lineKey]
+            simpleLine = list(reversed(simpleLine))
+          else:
+            simpleLine = shapely.geometry.LineString(line).simplify(self.tolerance).coords
+            lineKey = self.format % line[0]+':'+self.format % line[1]+':'+self.format % line[-1]
+            self.simplifiedLines[lineKey] = simpleLine
+          simpleCoords.extend( simpleLine[0:-1] )
+          iFrom = i
+      if len(simpleCoords) <= 2:
+        return None
+      else:
+        return shapely.geometry.LineString(simpleCoords)
+
+  def simplifyPolygon(self, polygon):
+    simpleExtRing = self.simplifyRing(polygon.exterior)
+    if simpleExtRing is None:
+      return None
+    simpleIntRings = []
+    for ring in polygon.interiors:
+      simpleIntRing = self.simplifyRing(ring)
+      if simpleIntRing is not None:
+        simpleIntRings.append(simpleIntRing)
+    return shapely.geometry.Polygon(simpleExtRing, simpleIntRings)
+
+  def simplify(self):
+    results = []
+    for geom in self.geometries:
+      polygons = []
+      simplePolygons = []
+
+      if isinstance(geom, shapely.geometry.Polygon):
+        polygons.append(geom)
+      else:
+        for polygon in geom:
+          polygons.append(polygon)
+
+      for polygon in polygons:
+        simplePolygon = self.simplifyPolygon(polygon)
+        if not (simplePolygon is None or simplePolygon._geom is None):
+          simplePolygons.append(simplePolygon)
+
+      if len(simplePolygons) > 0:
+        results.append(shapely.geometry.MultiPolygon(simplePolygons))
+      else:
+        results.append(None)
+    return results
 
 
 class Processor:
@@ -145,11 +468,16 @@ class Processor:
     self.config = config
 
   def process(self):
-    data_source = DataSource(self.config['sources'][0])
-    data_source.load_data()
-    for action in self.config['actions']:
-      getattr(self, action['name'])( action, data_source )
-    data_source.output(self.config['output'])
+    self.data_sources = {}
+    for action in self.config:
+      getattr(self, action['name'])( action, self.data_sources.get(".") )
+
+  def read_data(self, config, data_source):
+    self.data_sources["."] = DataSource( config )
+    self.data_sources["."].load_data()
+
+  def write_data(self, config, data_source):
+    data_source.output( config )
 
   def union(self, config, data_source):
     groups = {}
@@ -203,13 +531,22 @@ class Processor:
   def remove_other_fields(self, config, data_source):
     data_source.fields = filter(lambda f: f['name'] in config['fields'], data_source.fields)
 
-  def reduce_accuracy(self, config, data_source):
-    for geometry in data_source.geometries:
-      geometry.geom = geometry.geom.reduce_accuracy(config['accuracy'])
-
   def buffer(self, config, data_source):
     for geometry in data_source.geometries:
       geometry.geom = geometry.geom.buffer(config['distance'], config['resolution'])
+
+  def simplify_adjancent_polygons(self, config, data_source):
+    simple_geometries = PolygonSimplifier( map( lambda g: g.geom, data_source.geometries ) ).simplify()
+    for i in range(len(data_source.geometries)):
+      data_source.geometries[i].geom = simple_geometries[i]
+
+  def intersect_rect(self, config, data_source):
+    transform = osr.CoordinateTransformation( data_source.layer.GetSpatialRef(), data_source.spatialRef )
+    point1 = transform.TransformPoint(config['rect'][0], config['rect'][1])
+    point2 = transform.TransformPoint(config['rect'][2], config['rect'][3])
+    rect = shapely.geometry.box(point1[0], point1[1], point2[0], point2[1])
+    for geometry in data_source.geometries:
+      geometry.geom = geometry.geom.intersection(rect)
 
 
 args = {}
