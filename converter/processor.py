@@ -27,7 +27,6 @@ class Map:
     self.paths[code] = {"path": path, "name": name}
 
   def getJSCode(self):
-    print self.projection['type']
     map = {"paths": self.paths, "width": self.width, "height": self.height, "insets": self.insets, "projection": self.projection}
     return "jQuery.fn.vectorMap('addMap', '"+self.name+"_"+self.projection['type']+"',"+json.dumps(map)+');'
 
