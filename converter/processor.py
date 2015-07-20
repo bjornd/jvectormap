@@ -40,6 +40,8 @@ class Converter:
       'projection': 'mill',
       'name': 'world',
       'width': 900,
+      'left': 0,
+      'top': 0,
       'language': 'en',
       'precision': 2,
       'insets': []
@@ -75,6 +77,8 @@ class Converter:
 
     self.features = {}
     self.width = args.get('width')
+    self.left = args.get('left')
+    self.top = args.get('top')
     self.minimal_area = args.get('minimal_area')
     self.longitude0 = float(args.get('longitude0'))
     self.projection = args.get('projection')
@@ -128,17 +132,17 @@ class Converter:
       for code in inset['codes']:
         main_codes.remove(code)
 
-    insetBbox = self.renderMapInset(data_source, main_codes, 0, 0, self.width)
+    insetBbox = self.renderMapInset(data_source, main_codes, self.left, self.top, self.width)
     insetHeight = (insetBbox[3] - insetBbox[1]) * (self.width / (insetBbox[2] - insetBbox[0]))
-    envelope.append( shapely.geometry.box( 0, 0, self.width, insetHeight ) )
+    envelope.append( shapely.geometry.box( self.left, self.top, self.left + self.width, self.top + insetHeight ) )
     mapBbox = shapely.geometry.MultiPolygon( envelope ).bounds
 
-    self.map.width = mapBbox[2] - mapBbox[0]
-    self.map.height = mapBbox[3] - mapBbox[1]
+    self.map.width = mapBbox[2] + mapBbox[0]
+    self.map.height = mapBbox[3] + mapBbox[1]
     self.map.insets.append({
       "bbox": [{"x": insetBbox[0], "y": -insetBbox[3]}, {"x": insetBbox[2], "y": -insetBbox[1]}],
-      "left": 0,
-      "top": 0,
+      "left": self.left,
+      "top": self.top,
       "width": self.width,
       "height": insetHeight
     })
