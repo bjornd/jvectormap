@@ -551,6 +551,16 @@ class Processor:
     for geometry in data_source.geometries:
       geometry.geom = geometry.geom.intersection(rect)
 
+  def remove_small_polygons(self, config, data_source):
+    for geometry in data_source.geometries:
+      if isinstance(geometry.geom, shapely.geometry.multipolygon.MultiPolygon):
+        polygons = geometry.geom.geoms
+      else:
+        polygons = [geometry.geom]
+      polygons = filter(lambda p: p.area > config['minimal_area'], polygons)
+      if len(polygons) > 0:
+        geometry.geom = shapely.geometry.multipolygon.MultiPolygon(polygons)
+
 
 args = {}
 if len(sys.argv) > 1:
