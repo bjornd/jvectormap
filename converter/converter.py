@@ -5,12 +5,12 @@
 #
 
 import sys
-from osgeo import ogr
-from osgeo import osr
-import json
 import shapely.geometry
 import shapely.wkb
 import shapely.affinity
+from osgeo import ogr
+from osgeo import osr
+import json
 import codecs
 import copy
 
