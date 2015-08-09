@@ -144,9 +144,11 @@ jvm.Map = function(params) {
 
   this.canvas = new jvm.VectorCanvas(this.container[0], this.width, this.height);
 
-  if ( ('ontouchstart' in window) || (window.DocumentTouch && document instanceof DocumentTouch) ) {
-    if (this.params.bindTouchEvents) {
+  if (this.params.bindTouchEvents) {
+    if (('ontouchstart' in window) || (window.DocumentTouch && document instanceof DocumentTouch)) {
       this.bindContainerTouchEvents();
+    } else if (window.PointerEvent) {
+      this.bindContainerPointerEvents();
     }
   }
   this.bindContainerEvents();
@@ -415,12 +417,56 @@ jvm.Map.prototype = {
     jvm.$(this.container).bind('touchmove', handleTouchEvent);
   },
 
+  bindContainerPointerEvents: function(){
+    var map = this,
+        gesture = new MSGesture(),
+        element = this.container[0],
+        handlePointerDownEvent = function(e){
+          gesture.addPointer(e.pointerId);
+        },
+        handleGestureEvent = function(e){
+          var offset,
+              scale,
+              transXOld,
+              transYOld;
+
+          if (e.translationX != 0 || e.translationY != 0) {
+            transXOld = map.transX;
+            transYOld = map.transY;
+            map.transX += e.translationX / map.scale;
+            map.transY += e.translationY / map.scale;
+            map.applyTransform();
+            map.tip.hide();
+            if (transXOld != map.transX || transYOld != map.transY) {
+              e.preventDefault();
+            }
+          }
+          if (e.scale != 1) {
+            map.setScale(
+              map.scale * e.scale,
+              e.offsetX,
+              e.offsetY
+            )
+            map.tip.hide();
+            e.preventDefault();
+          }
+        };
+
+    gesture.target = element;
+    element.addEventListener("MSGestureChange", handleGestureEvent, false);
+    element.addEventListener("pointerdown", handlePointerDownEvent, false);
+  },
+
   bindElementEvents: function(){
     var map = this,
+        pageX,
+        pageY,
         mouseMoved;
 
-    this.container.mousemove(function(){
-      mouseMoved = true;
+    this.container.mousemove(function(e){
+      if (Math.abs(pageX - e.pageX) + Math.abs(pageY - e.pageY) > 2) {
+        mouseMoved = true;
+      }
     });
 
     /* Can not use common class selectors here because of the bug in jQuery
@@ -456,7 +502,9 @@ jvm.Map.prototype = {
 
     /* Can not use common class selectors here because of the bug in jQuery
        SVG handling, use with caution. */
-    this.container.delegate("[class~='jvectormap-element']", 'mousedown', function(){
+    this.container.delegate("[class~='jvectormap-element']", 'mousedown', function(e){
+      pageX = e.pageX;
+      pageY = e.pageY;
       mouseMoved = false;
     });
 

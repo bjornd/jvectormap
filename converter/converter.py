@@ -1,16 +1,16 @@
 #
-# jVectorMap version 2.0.2
+# jVectorMap version 2.0.3
 #
 # Copyright 2011-2013, Kirill Lebedev
 #
 
 import sys
-from osgeo import ogr
-from osgeo import osr
-import json
 import shapely.geometry
 import shapely.wkb
 import shapely.affinity
+from osgeo import ogr
+from osgeo import osr
+import json
 import codecs
 import copy
 
