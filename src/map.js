@@ -147,7 +147,7 @@ jvm.Map = function(params) {
   if (this.params.bindTouchEvents) {
     if (('ontouchstart' in window) || (window.DocumentTouch && document instanceof DocumentTouch)) {
       this.bindContainerTouchEvents();
-    } else if (window.PointerEvent) {
+    } else if (window.MSGesture) {
       this.bindContainerPointerEvents();
     }
   }
