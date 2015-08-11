@@ -851,8 +851,36 @@ jvm.Map.prototype = {
       }
     }
 
+    function hasOffset(_this, markerKey) {
+      var hasOffset = false;
+      _this.series.markers.forEach(function(marker){
+        if(marker.params.attribute == 'image') {
+          if(markerKey in marker.elements) {
+            hasOffset = true;
+          }
+        }
+      });
+      return hasOffset;
+    }
+
+    function getOffset(_this) {
+      var offsetFct;
+      _this.series.markers.forEach(function(marker){
+        if(marker.params.attribute == 'image') {
+          offsetFct = marker.params.offsets;
+        }
+      });
+      return offsetFct;
+    }
+
     for (i in markers) {
       markerConfig = markers[i] instanceof Array ? {latLng: markers[i]} : markers[i];
+
+      if (hasOffset(this, i)) {
+        markerConfig.offsets = getOffset(this);
+        markerConfig.index = i;
+      }
+
       point = this.getMarkerPosition( markerConfig );
 
       if (point !== false) {
@@ -905,14 +933,21 @@ jvm.Map.prototype = {
   },
 
   getMarkerPosition: function(markerConfig) {
+    var point;
     if (jvm.Map.maps[this.params.map].projection) {
-      return this.latLngToPoint.apply(this, markerConfig.latLng || [0, 0]);
+      point = this.latLngToPoint.apply(this, markerConfig.latLng || [0, 0]);
     } else {
-      return {
+      point = {
         x: markerConfig.coords[0]*this.scale + this.transX*this.scale,
         y: markerConfig.coords[1]*this.scale + this.transY*this.scale
       };
     }
+    if (markerConfig.offsets) {
+        offset = markerConfig.offsets(markerConfig.index);
+        point.x += offset[0];
+        point.y += offset[1];
+    }
+    return point;
   },
 
   /**
