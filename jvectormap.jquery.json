@@ -9,14 +9,14 @@
     "usa",
     "choropleth"
   ],
-  "version": "2.0.3",
+  "version": "2.0.4",
   "author": {
     "name": "Kirill Lebedev",
     "email" : "echo.bjornd@gmail.com"
   },
   "licenses": [
     {
-      "type": "GPL",
+      "type": "AGPL",
       "url": "http://www.gnu.org/copyleft/gpl.html"
     },
     {
