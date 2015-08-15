@@ -36,7 +36,7 @@ jvm.DataSeries = function(params, elements, map) {
   this.setValues(this.values);
 
   if (this.params.legend) {
-    this.legend = new jvm.Legend($.extend({
+    this.legend = new jvm.Legend(jvm.$.extend({
       map: this.map,
       series: this
     }, this.params.legend))
