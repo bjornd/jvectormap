@@ -241,7 +241,12 @@ class DataSource:
     self.spatialRef.ImportFromProj4(projString)
 
   def load_data(self):
-    self.source = ogr.Open( self.config['file_name'], update = 0 )
+    filename = self.config['file_name'];
+    if not os.path.isfile(filename):
+      raise IOError('Could not find file \'' + str(filename) + '\'') 
+    self.source = ogr.Open(filename, update = 0)
+    if self.source is None:
+      raise IOError('Could not open file ' + str(filename))
     self.layer = self.source.GetLayer(0)
     if 'filter' in self.config and self.config['filter'] is not None:
       self.layer.SetAttributeFilter( self.config['filter'].encode('ascii') )
@@ -341,6 +346,8 @@ class DataSource:
       "longitude0": self.config["longitude0"]
     })
     converter = Converter(params)
+    if not('file_name' in output): 
+      raise ValueError('Missing \'file_name\' in the \'write_data block\' of the config file.')
     converter.convert(self, output['file_name'])
 
 class PolygonSimplifier:
