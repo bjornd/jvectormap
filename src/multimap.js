@@ -59,7 +59,7 @@ jvm.MultiMap.prototype = {
             mapName = multimap.params.mapNameByCode(code, multimap);
 
         if (!multimap.drillDownPromise || multimap.drillDownPromise.state() !== 'pending') {
-          multimap.drillDown(mapName, code);
+          multimap.drillDown(mapName, code, config);
         }
       });
     }
@@ -85,7 +85,7 @@ jvm.MultiMap.prototype = {
     return deferred;
   },
 
-  drillDown: function(name, code){
+  drillDown: function(name, code, config){
     var currentMap = this.history[this.history.length - 1],
         that = this,
         focusPromise = currentMap.setFocus({region: code, animate: true}),
@@ -103,7 +103,7 @@ jvm.MultiMap.prototype = {
     this.drillDownPromise.then(function(){
       currentMap.params.container.hide();
       if (!that.maps[name]) {
-        that.addMap(name, {map: name, multiMapLevel: currentMap.params.multiMapLevel + 1});
+        that.addMap(name, jvm.$.extend(config, {map: name, multiMapLevel: currentMap.params.multiMapLevel + 1}));
       } else {
         that.maps[name].params.container.show();
       }
