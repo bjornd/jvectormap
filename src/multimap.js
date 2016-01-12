@@ -69,27 +69,21 @@ jvm.MultiMap.prototype = {
   },
 
   downloadMap: function(code){
-    var that = this,
-        deferred = jvm.$.Deferred();
-
-    if (!this.mapsLoaded[code]) {
-      jvm.$.get(this.params.mapUrlByCode(code, this)).then(function(){
-        that.mapsLoaded[code] = true;
-        deferred.resolve();
-      }, function(){
-        deferred.reject();
-      });
-    } else {
-      deferred.resolve();
-    }
-    return deferred;
+    return jvm.$.get(this.params.mapUrlByCode(code, this));
   },
 
-  drillDown: function(name, code){
+  drillDown: function(name, code, config){
+    var mapIsHereAlready = !!jvm.Map.maps[this.params.mapNameByCode(code, this)]
+    var mapCanBeDownloaded = !!this.params.mapUrlByCode(code, this)
+
+    if (!mapIsHereAlready && !mapCanBeDownloaded) {
+        return;
+    }
+
     var currentMap = this.history[this.history.length - 1],
         that = this,
         focusPromise = currentMap.setFocus({region: code, animate: true}),
-        downloadPromise = this.downloadMap(code);
+        downloadPromise = mapIsHereAlready ? jvm.$.Deferred().resolve() : this.downloadMap(code);
 
     focusPromise.then(function(){
       if (downloadPromise.state() === 'pending') {
