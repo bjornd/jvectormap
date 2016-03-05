@@ -473,11 +473,13 @@ class Processor:
   def process(self):
     self.data_sources = {}
     for action in self.config:
-      getattr(self, action['name'])( action, self.data_sources.get(".") )
+      data_source_key = action.get('data_source', '.')
+      getattr(self, action['name'])( action, self.data_sources.get(data_source_key) )
 
   def read_data(self, config, data_source):
-    self.data_sources["."] = DataSource( config )
-    self.data_sources["."].load_data()
+    data_source_key = config.get('data_source', '.')
+    self.data_sources[data_source_key] = DataSource( config )
+    self.data_sources[data_source_key].load_data()
 
   def write_data(self, config, data_source):
     data_source.output( config )
@@ -533,6 +535,21 @@ class Processor:
 
   def remove_other_fields(self, config, data_source):
     data_source.fields = filter(lambda f: f['name'] in config['fields'], data_source.fields)
+
+  def new_data_source(self, config, data_source):
+    data_source = DataSource( config.get('config') )
+    data_source.geometries = []
+    data_source.fields = []
+    for source_name, source_config in config['from'].iteritems():
+      for target_field_name, source_field_name in source_config.iteritems():
+        field = filter(lambda f: f['name'] == source_field_name, self.data_sources[source_name].fields)[0]
+        field['name'] = target_field_name
+        for geometry in self.data_sources[source_name].geometries:
+          geometry.properties[target_field_name] = geometry.properties[source_field_name]
+          del geometry.properties[source_field_name]
+        data_source.fields += field
+      data_source.geometries += self.data_sources[source_name].geometries
+    self.data_sources[config.get('data_source')] = data_source
 
   def buffer(self, config, data_source):
     for geometry in data_source.geometries:
