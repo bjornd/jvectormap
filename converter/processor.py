@@ -162,7 +162,8 @@ class Converter:
     envelope = []
     geometries = filter(lambda g: g.properties[self.config['code_field']] in codes, data_source.geometries)
     for geometry in geometries:
-      envelope.append( geometry.geom.envelope )
+      if isinstance(geometry.geom.envelope, shapely.geometry.Polygon):
+        envelope.append( geometry.geom.envelope )
 
     bbox = shapely.geometry.MultiPolygon( envelope ).bounds
 
@@ -350,9 +351,7 @@ class PolygonSimplifier:
     self.geometries = geometries
 
     connections = {}
-    counter = 0
     for geom in geometries:
-      counter += 1
       polygons = []
 
       if isinstance(geom, shapely.geometry.Polygon):
@@ -555,10 +554,22 @@ class Processor:
     for geometry in data_source.geometries:
       geometry.geom = geometry.geom.buffer(config['distance'], config['resolution'])
 
+  def border_buffer(self, config, data_source):
+    d = config['distance']
+    borders = []
+    for geometry1 in data_source.geometries:
+      for geometry2 in data_source.geometries:
+        if geometry1.geom != geometry2.geom and geometry1.geom.buffer(d, 0).intersects(geometry2.geom.buffer(d, 0)):
+          borders.append(geometry1.geom.buffer(d, 0).intersection(geometry2.geom.buffer(d, 0)))
+    borders = shapely.ops.cascaded_union( borders )
+    for geometry in data_source.geometries:
+      geometry.geom = geometry.geom.difference(borders)
+
   def simplify_adjancent_polygons(self, config, data_source):
     simple_geometries = PolygonSimplifier( map( lambda g: g.geom, data_source.geometries ) ).simplify()
     for i in range(len(data_source.geometries)):
       data_source.geometries[i].geom = simple_geometries[i]
+    data_source.geometries = filter(lambda g: g.geom is not None, data_source.geometries)
 
   def intersect_rect(self, config, data_source):
     transform = osr.CoordinateTransformation( data_source.layer.GetSpatialRef(), data_source.spatialRef )
