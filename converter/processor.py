@@ -483,6 +483,18 @@ class Processor:
   def write_data(self, config, data_source):
     data_source.output( config )
 
+  def copy_field(self, config, data_source):
+    to_field = None
+    for f in data_source.fields:
+      if f['name'] == config['from']:
+        to_field = copy.copy(f)
+        to_field['name'] = config['to']
+
+    if to_field is not None:
+      data_source.fields.append( to_field )
+      for geometry in data_source.geometries:
+        geometry.properties[config['to']] = geometry.properties[config['from']]
+
   def union(self, config, data_source):
     groups = {}
     geometries = []
