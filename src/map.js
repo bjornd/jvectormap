@@ -692,7 +692,7 @@ jvm.Map.prototype = {
         config.animate
       );
     } else {
-      if (config.lat && config.lng) {
+      if (config.lat !== undefined && config.lng !== undefined) {
         point = this.latLngToPoint(config.lat, config.lng);
         config.x = this.transX - point.x / this.scale;
         config.y = this.transY - point.y / this.scale;
