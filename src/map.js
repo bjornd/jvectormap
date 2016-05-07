@@ -68,6 +68,11 @@
   selectedHover: {
   }
 }</pre>
+You can also use <code>image</code> style attribute for markers. By default marker images are centered with the target point on map. To supply a custom offset please use the following format:
+<pre>{
+  url: 'image/url',
+  offset: [-10, 5]
+}</pre>
  * @param {Object} params.markerLabelStyle Set the styles for the markers' labels. Default value for that parameter is:
 <pre>{
   initial: {
