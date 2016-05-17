@@ -1,0 +1,10 @@
+{
+  "name": "jquery-jvectormap",
+  "version": "2.0.3",
+  "homepage": "http://jvectormap.com/",
+  "description": "jVectorMap uses only native browser technologies like JavaScript, CSS, HTML, SVG or VML. No Flash or any other proprietary browser plug-in is required. This allows jVectorMap to work in all modern mobile browsers.",
+  "main": "jquery-jvectormap.js",
+  "keywords": [
+    "jvectormap"
+  ]
+}
