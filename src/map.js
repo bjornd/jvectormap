@@ -736,11 +736,15 @@ jvm.Map.prototype = {
 
     if (jvm.$.isArray(keys)) {
       for (i = 0; i < keys.length; i++) {
-        this[type][keys[i]].element.setSelected(true);
+        if (this[type].hasOwnProperty(keys[i])) {
+          this[type][keys[i]].element.setSelected(true);
+        }
       }
     } else {
       for (i in keys) {
-        this[type][i].element.setSelected(!!keys[i]);
+        if (this[type].hasOwnProperty(i)) {
+          this[type][i].element.setSelected(!!keys[i]);
+        }
       }
     }
   },
