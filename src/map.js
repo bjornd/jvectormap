@@ -802,7 +802,14 @@ jvm.Map.prototype = {
   getRegionName: function(code){
     return this.mapData.paths[code].name;
   },
-
+  /**
+  * Return true if region is in jvectormap. Sometimes some of the regions are not in the base map so this function will return 
+  * false if a region is not in the maps
+  * @returns {boolean}
+  */
+  checkRegionName: function(code){
+    return code in this.mapData.paths;
+  },
   createRegions: function(){
     var key,
         region,
