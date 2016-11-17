@@ -97,12 +97,18 @@ var jvm = {
 
   whenImageLoaded: function(url){
     var deferred = new jvm.$.Deferred(),
-        img = jvm.$('<img/>');
+        img = jvm.$('<img style="position: aboslute; left:\'-999em;\'"/>');
 
     img.error(function(){
       deferred.reject();
     }).load(function(){
-      deferred.resolve(img);
+       // If the client is using IE width of IMG can not
+       // be retrieved when src is an SVG, so we need to
+       // add the element to the body for a short while
+       if (img[0].width === 0 && img[0].height === 0)
+           img.appendTo(document.body);
+       deferred.resolve(img);
+       img.detach();
     });
     img.attr('src', url);
 
