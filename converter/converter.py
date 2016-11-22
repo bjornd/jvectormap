@@ -140,7 +140,7 @@ class Converter:
 
       if geometryType == ogr.wkbPolygon or geometryType == ogr.wkbMultiPolygon:
         geometry.TransformTo( self.spatialRef )
-        shapelyGeometry = shapely.wkb.loads( geometry.ExportToWkb() )
+        shapelyGeometry = shapely.geometry.base.geom_from_wkb( geometry.ExportToWkb() )
         if not shapelyGeometry.is_valid:
           shapelyGeometry = shapelyGeometry.buffer(0, 1)
 
