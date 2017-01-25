@@ -23,13 +23,17 @@ jvm.DataSeries = function(params, elements, map) {
     this.setAttributes(params.attributes);
   }
 
-  if (jvm.$.isArray(params.scale)) {
-    scaleConstructor = (params.attribute === 'fill' || params.attribute === 'stroke') ? jvm.ColorScale : jvm.NumericScale;
-    this.scale = new scaleConstructor(params.scale, params.normalizeFunction, params.min, params.max);
-  } else if (params.scale) {
-    this.scale = new jvm.OrdinalScale(params.scale);
+  if (params.scaleConstructor) {
+    this.scale = new params.scaleConstructor(params);
   } else {
-    this.scale = new jvm.SimpleScale(params.scale);
+    if (jvm.$.isArray(params.scale)) {
+      scaleConstructor = (params.attribute === 'fill' || params.attribute === 'stroke') ? jvm.ColorScale : jvm.NumericScale;
+      this.scale = new scaleConstructor(params.scale, params.normalizeFunction, params.min, params.max);
+    } else if (params.scale) {
+      this.scale = new jvm.OrdinalScale(params.scale);
+    } else {
+      this.scale = new jvm.SimpleScale();
+    }
   }
 
   this.values = params.values || {};
