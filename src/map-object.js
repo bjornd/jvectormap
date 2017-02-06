@@ -28,6 +28,19 @@ jvm.MapObject.prototype.getLabelOffsets = function(key){
   return offsets || [0, 0];
 }
 
+jvm.MapObject.prototype.getLabelStyle = function(key){
+  var style;
+
+  if (this.config.label) {
+    if (typeof this.config.label.styles === 'function') {
+      style = this.config.label.styles(key);
+    } else if (typeof this.config.label.styles === 'object') {
+      style = this.config.label.styles[key];
+    }
+  }
+  return style || {};
+}
+
 /**
  * Set hovered state to the element. Hovered state means mouse cursor is over element. Styles will be updates respectively.
  * @param {Boolean} isHovered <code>true</code> to make element hovered, <code>false</code> otherwise.
