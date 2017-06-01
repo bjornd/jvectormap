@@ -1,2 +1,4 @@
 .DS_Store
 jquery.jvectormap.min.js
+node_modules
+dist
