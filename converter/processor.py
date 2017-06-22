@@ -162,7 +162,8 @@ class Converter:
     envelope = []
     geometries = filter(lambda g: g.properties[self.config['code_field']] in codes, data_source.geometries)
     for geometry in geometries:
-      envelope.append( geometry.geom.envelope )
+      if isinstance(geometry.geom.envelope, shapely.geometry.Polygon):
+        envelope.append( geometry.geom.envelope )
 
     bbox = shapely.geometry.MultiPolygon( envelope ).bounds
 
@@ -241,7 +242,12 @@ class DataSource:
     self.spatialRef.ImportFromProj4(projString)
 
   def load_data(self):
-    self.source = ogr.Open( self.config['file_name'], update = 0 )
+    filename = self.config['file_name'];
+    if not os.path.isfile(filename):
+      raise IOError('Could not find file \'' + str(filename) + '\'') 
+    self.source = ogr.Open(filename, update = 0)
+    if self.source is None:
+      raise IOError('Could not open file ' + str(filename))
     self.layer = self.source.GetLayer(0)
     if 'filter' in self.config and self.config['filter'] is not None:
       self.layer.SetAttributeFilter( self.config['filter'].encode('ascii') )
@@ -341,6 +347,8 @@ class DataSource:
       "longitude0": self.config["longitude0"]
     })
     converter = Converter(params)
+    if not('file_name' in output): 
+      raise ValueError('Missing \'file_name\' in the \'write_data block\' of the config file.')
     converter.convert(self, output['file_name'])
 
 class PolygonSimplifier:
@@ -350,9 +358,7 @@ class PolygonSimplifier:
     self.geometries = geometries
 
     connections = {}
-    counter = 0
     for geom in geometries:
-      counter += 1
       polygons = []
 
       if isinstance(geom, shapely.geometry.Polygon):
@@ -473,14 +479,28 @@ class Processor:
   def process(self):
     self.data_sources = {}
     for action in self.config:
-      getattr(self, action['name'])( action, self.data_sources.get(".") )
+      data_source_key = action.get('data_source', '.')
+      getattr(self, action['name'])( action, self.data_sources.get(data_source_key) )
 
   def read_data(self, config, data_source):
-    self.data_sources["."] = DataSource( config )
-    self.data_sources["."].load_data()
+    data_source_key = config.get('data_source', '.')
+    self.data_sources[data_source_key] = DataSource( config )
+    self.data_sources[data_source_key].load_data()
 
   def write_data(self, config, data_source):
     data_source.output( config )
+
+  def copy_field(self, config, data_source):
+    to_field = None
+    for f in data_source.fields:
+      if f['name'] == config['from']:
+        to_field = copy.copy(f)
+        to_field['name'] = config['to']
+
+    if to_field is not None:
+      data_source.fields.append( to_field )
+      for geometry in data_source.geometries:
+        geometry.properties[config['to']] = geometry.properties[config['from']]
 
   def union(self, config, data_source):
     groups = {}
@@ -534,14 +554,41 @@ class Processor:
   def remove_other_fields(self, config, data_source):
     data_source.fields = filter(lambda f: f['name'] in config['fields'], data_source.fields)
 
+  def new_data_source(self, config, data_source):
+    data_source = DataSource( config.get('config') )
+    data_source.geometries = []
+    data_source.fields = []
+    for source_name, source_config in config['from'].iteritems():
+      for target_field_name, source_field_name in source_config.iteritems():
+        field = filter(lambda f: f['name'] == source_field_name, self.data_sources[source_name].fields)[0]
+        field['name'] = target_field_name
+        for geometry in self.data_sources[source_name].geometries:
+          geometry.properties[target_field_name] = geometry.properties[source_field_name]
+          del geometry.properties[source_field_name]
+        data_source.fields += field
+      data_source.geometries += self.data_sources[source_name].geometries
+    self.data_sources[config.get('data_source')] = data_source
+
   def buffer(self, config, data_source):
     for geometry in data_source.geometries:
       geometry.geom = geometry.geom.buffer(config['distance'], config['resolution'])
+
+  def border_buffer(self, config, data_source):
+    d = config['distance']
+    borders = []
+    for geometry1 in data_source.geometries:
+      for geometry2 in data_source.geometries:
+        if geometry1.geom != geometry2.geom and geometry1.geom.buffer(d, 0).intersects(geometry2.geom.buffer(d, 0)):
+          borders.append(geometry1.geom.buffer(d, 0).intersection(geometry2.geom.buffer(d, 0)))
+    borders = shapely.ops.cascaded_union( borders )
+    for geometry in data_source.geometries:
+      geometry.geom = geometry.geom.difference(borders)
 
   def simplify_adjancent_polygons(self, config, data_source):
     simple_geometries = PolygonSimplifier( map( lambda g: g.geom, data_source.geometries ) ).simplify()
     for i in range(len(data_source.geometries)):
       data_source.geometries[i].geom = simple_geometries[i]
+    data_source.geometries = filter(lambda g: g.geom is not None, data_source.geometries)
 
   def intersect_rect(self, config, data_source):
     transform = osr.CoordinateTransformation( data_source.layer.GetSpatialRef(), data_source.spatialRef )
