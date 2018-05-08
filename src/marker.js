@@ -10,6 +10,8 @@ jvm.Marker = function(config){
 
   text = this.getLabelText(config.index);
   if (this.config.label && text) {
+    var labelStyle = this.getLabelStyle(config.index);
+    this.labelStyle = jvm.$.extend(true, {}, config.labelStyle, {initial: labelStyle || {}});
     this.offsets = this.getLabelOffsets(config.index);
     this.labelX = config.cx / this.map.scale - this.map.transX;
     this.labelY = config.cy / this.map.scale - this.map.transY;
@@ -19,7 +21,7 @@ jvm.Marker = function(config){
       dy: "0.6ex",
       x: this.labelX,
       y: this.labelY
-    }, config.labelStyle, config.labelsGroup);
+    }, this.labelStyle, config.labelsGroup);
 
     this.label.addClass('jvectormap-marker jvectormap-element');
   }
