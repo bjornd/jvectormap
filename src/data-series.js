@@ -3,11 +3,11 @@
  * @constructor
  * @param {Object} params Parameters to initialize series with.
  * @param {Array} params.values The data set to visualize.
- * @param {String} params.attribute Numberic or color attribute to use for data visualization. This could be: <code>fill</code>, <code>stroke</code>, <code>fill-opacity</code>, <code>stroke-opacity</code> for markers and regions and <code>r</code> (radius) for markers only.
- * @param {Array} params.scale Values used to map a dimension of data to a visual representation. The first value sets visualization for minimum value from the data set and the last value sets visualization for the maximum value. There also could be intermidiate values. Default value is <code>['#C8EEFF', '#0071A4']</code>
+ * @param {String} params.attribute Numeric, color or image attribute to use for data visualization. This could be: <code>fill</code>, <code>stroke</code>, <code>fill-opacity</code>, <code>stroke-opacity</code> for markers and regions and <code>r</code> (radius) or <code>image</code> for markers only.
+ * @param {Array} params.scale Values used to map a dimension of data to a visual representation. The first value sets visualization for minimum value from the data set and the last value sets visualization for the maximum value. There also could be intermidiate values. Default value is <code>['#C8EEFF', '#0071A4']</code>.
  * @param {Function|String} params.normalizeFunction The function used to map input values to the provided scale. This parameter could be provided as function or one of the strings: <code>'linear'</code> or <code>'polynomial'</code>, while <code>'linear'</code> is used by default. The function provided takes value from the data set as an input and returns corresponding value from the scale.
  * @param {Number} params.min Minimum value of the data set. Could be calculated automatically if not provided.
- * @param {Number} params.min Maximum value of the data set. Could be calculated automatically if not provided.
+ * @param {Number} params.max Maximum value of the data set. Could be calculated automatically if not provided.
  */
 jvm.DataSeries = function(params, elements, map) {
   var scaleConstructor;
@@ -36,7 +36,7 @@ jvm.DataSeries = function(params, elements, map) {
   this.setValues(this.values);
 
   if (this.params.legend) {
-    this.legend = new jvm.Legend($.extend({
+    this.legend = new jvm.Legend(jvm.$.extend({
       map: this.map,
       series: this
     }, this.params.legend))
@@ -147,7 +147,7 @@ jvm.DataSeries.prototype = {
 
   /**
    * Set normalize function of the data series.
-   * @param {Function|String} normilizeFunction.
+   * @param {Function|String} f Normalize function.
    */
   setNormalizeFunction: function(f) {
     this.scale.setNormalizeFunction(f);

@@ -5,7 +5,7 @@
  * @param {String} params.map Name of the map in the format <code>territory_proj_lang</code> where <code>territory</code> is a unique code or name of the territory which the map represents (ISO 3166 standard is used where possible), <code>proj</code> is a name of projection used to generate representation of the map on the plane (projections are named according to the conventions of proj4 utility) and <code>lang</code> is a code of the language, used for the names of regions.
  * @param {String} params.backgroundColor Background color of the map in CSS format.
  * @param {Boolean} params.zoomOnScroll When set to true map could be zoomed using mouse scroll. Default value is <code>true</code>.
- * @param {Boolean} params.zoomOnScrollSpeed Mouse scroll speed. Number from 1 to 10. Default value is <code>3</code>.
+ * @param {Number} params.zoomOnScrollSpeed Mouse scroll speed. Number from 1 to 10. Default value is <code>3</code>.
  * @param {Boolean} params.panOnDrag When set to true, the map pans when being dragged. Default value is <code>true</code>.
  * @param {Number} params.zoomMax Indicates the maximum zoom ratio which could be reached zooming the map. Default value is <code>8</code>.
  * @param {Number} params.zoomMin Indicates the minimum zoom ratio which could be reached zooming the map. Default value is <code>1</code>.
@@ -67,6 +67,11 @@
   },
   selectedHover: {
   }
+}</pre>
+You can also use <code>image</code> style attribute for markers. By default marker images are centered with the target point on map. To supply a custom offset please use the following format:
+<pre>{
+  url: 'image/url',
+  offset: [-10, 5]
 }</pre>
  * @param {Object} params.markerLabelStyle Set the styles for the markers' labels. Default value for that parameter is:
 <pre>{
@@ -687,7 +692,7 @@ jvm.Map.prototype = {
         config.animate
       );
     } else {
-      if (config.lat && config.lng) {
+      if (config.lat !== undefined && config.lng !== undefined) {
         point = this.latLngToPoint(config.lat, config.lng);
         config.x = this.transX - point.x / this.scale;
         config.y = this.transY - point.y / this.scale;

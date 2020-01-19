@@ -99,9 +99,9 @@ var jvm = {
     var deferred = new jvm.$.Deferred(),
         img = jvm.$('<img/>');
 
-    img.error(function(){
+    img.on('error', function(){
       deferred.reject();
-    }).load(function(){
+    }).on('load', function(){
       deferred.resolve(img);
     });
     img.attr('src', url);

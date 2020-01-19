@@ -58,7 +58,7 @@ jvm.Legend.prototype.render = function(){
         sample.css('background', ticks[i].value);
         break;
       case 'image':
-        sample.css('background', 'url('+ticks[i].value+') no-repeat center center');
+        sample.css('background', 'url('+(typeof ticks[i].value === 'object' ? ticks[i].value.url : ticks[i].value)+') no-repeat center center');
         break;
       case 'r':
         jvm.$('<div/>').css({
