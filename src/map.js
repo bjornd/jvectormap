@@ -642,6 +642,7 @@ jvm.Map.prototype = {
    * @param This method takes a configuration object as the single argument. The options passed to it are the following:
    * @param {Array} params.regions Array of region codes to zoom to.
    * @param {String} params.region Region code to zoom to.
+   * @param {Number} params.loose Sets the zoom to be loose for region zoom. Bigger numbers mean more zoomed out.
    * @param {Number} params.scale Map scale to set.
    * @param {Number} params.lat Latitude to set viewport to.
    * @param {Number} params.lng Longitude to set viewport to.
@@ -683,6 +684,12 @@ jvm.Map.prototype = {
             }
           }
         }
+      }
+      if (config.loose) {
+        bbox.x -= bbox.width * config.loose
+        bbox.y -= bbox.height * config.loose
+        bbox.width += bbox.width * config.loose * 2
+        bbox.height += bbox.height * config.loose * 2
       }
       return this.setScale(
         Math.min(this.width / bbox.width, this.height / bbox.height),
