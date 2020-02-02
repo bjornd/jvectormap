@@ -1,0 +1,20 @@
+{
+  "name": "jvectormap",
+  "description": "jVectorMap is a vector-based, cross-browser and cross-platform component for interactive geography-related data visualization on the web. It provides numerious features like smooth zooming and panning, fully-customizable styling, markers, labels and tooltips.",
+  "main": "jquery-jvectormap.js",
+  "authors": [
+    "Kirill Lebedev <echo.bjornd@gmail.com>"
+  ],
+  "license": "AGPL-V3",
+  "keywords": [
+    "jvectormap"
+  ],
+  "homepage": "http://jvectormap.com/",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
