@@ -21,6 +21,7 @@ jvm.Marker = function(config){
       y: this.labelY
     }, config.labelStyle, config.labelsGroup);
 
+    this.updateLabelPosition();
     this.label.addClass('jvectormap-marker jvectormap-element');
   }
 };
