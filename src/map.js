@@ -515,11 +515,11 @@ jvm.Map.prototype = {
 
     /* Can not use common class selectors here because of the bug in jQuery
        SVG handling, use with caution. */
-    this.container.delegate("[class~='jvectormap-element']", 'mouseup', function(){
+    this.container.delegate("[class~='jvectormap-element']", 'mouseup', function(event){
       var baseVal = jvm.$(this).attr('class').baseVal ? jvm.$(this).attr('class').baseVal : jvm.$(this).attr('class'),
           type = baseVal.indexOf('jvectormap-region') === -1 ? 'marker' : 'region',
           code = type == 'region' ? jvm.$(this).attr('data-code') : jvm.$(this).attr('data-index'),
-          clickEvent = jvm.$.Event(type+'Click.jvectormap'),
+          clickEvent = jvm.$.Event(type+'Click.jvectormap', {originalEvent: event}),
           element = type == 'region' ? map.regions[code].element : map.markers[code].element;
 
       if (!mouseMoved) {
