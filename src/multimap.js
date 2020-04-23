@@ -58,6 +58,10 @@ jvm.MultiMap.prototype = {
         var multimap = e.data.scope,
             mapName = multimap.params.mapNameByCode(code, multimap);
 
+        if (mapName === null) {
+            return;
+        }
+
         if (!multimap.drillDownPromise || multimap.drillDownPromise.state() !== 'pending') {
           multimap.drillDown(mapName, code);
         }
