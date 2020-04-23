@@ -30,7 +30,6 @@ jvm.MultiMap = function(params) {
   this.params.main.multiMapLevel = 0;
   this.history = [ this.addMap(this.params.main.map, this.params.main) ];
   this.defaultProjection = this.history[0].mapData.projection.type;
-  this.mapsLoaded = {};
 
   this.params.container.css({position: 'relative'});
   this.backButton = jvm.$('<div/>').addClass('jvectormap-goback').text('Back').appendTo(this.params.container);
@@ -72,9 +71,8 @@ jvm.MultiMap.prototype = {
     var that = this,
         deferred = jvm.$.Deferred();
 
-    if (!this.mapsLoaded[code]) {
+    if (!jvm.Map.maps[this.params.mapNameByCode(code, this)]) {
       jvm.$.get(this.params.mapUrlByCode(code, this)).then(function(){
-        that.mapsLoaded[code] = true;
         deferred.resolve();
       }, function(){
         deferred.reject();
