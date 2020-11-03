@@ -7,6 +7,7 @@
  * @param {Boolean} params.zoomOnScroll When set to true map could be zoomed using mouse scroll. Default value is <code>true</code>.
  * @param {Number} params.zoomOnScrollSpeed Mouse scroll speed. Number from 1 to 10. Default value is <code>3</code>.
  * @param {Boolean} params.panOnDrag When set to true, the map pans when being dragged. Default value is <code>true</code>.
+ * @param {Boolean} params.easyPan When set to true, the map can pan freely out of container. Default value is <code>false</code>.
  * @param {Number} params.zoomMax Indicates the maximum zoom ratio which could be reached zooming the map. Default value is <code>8</code>.
  * @param {Number} params.zoomMin Indicates the minimum zoom ratio which could be reached zooming the map. Default value is <code>1</code>.
  * @param {Number} params.zoomStep Indicates the multiplier used to zoom map with +/- buttons. Default value is <code>1.6</code>.
@@ -279,14 +280,14 @@ jvm.Map.prototype = {
     }
 
     if (this.transY > maxTransY) {
-      this.transY = maxTransY;
+      if (!this.params.easyPan) this.transY = maxTransY;
     } else if (this.transY < minTransY) {
-      this.transY = minTransY;
+      if (!this.params.easyPan) this.transY = minTransY;
     }
     if (this.transX > maxTransX) {
-      this.transX = maxTransX;
+      if (!this.params.easyPan) this.transX = maxTransX;
     } else if (this.transX < minTransX) {
-      this.transX = minTransX;
+      if (!this.params.easyPan) this.transX = minTransX;
     }
 
     this.canvas.applyTransformParams(this.scale, this.transX, this.transY);
